@@ -60,13 +60,18 @@ module.exports = {
       name: 'domaine-sans-infrastructure',
       severity: 'error',
       comment:
-        'La couche domaine ne dépend de rien : ni infrastructure, ni application, ' +
-        'ni librairie tierce. Les flèches pointent vers le centre.',
+        'La couche domaine ne dépend ni de son infrastructure, ni de son ' +
+        'application, ni d\'un framework. Les flèches pointent vers le centre.\n' +
+        'Seule tolérance : `zod`. Les schémas de blocs SONT le modèle de ' +
+        'domaine — ce qu\'est un bloc valide est une règle métier, pas un détail ' +
+        'de sérialisation. Zod est une librairie de valeurs pures, sans E/S ni ' +
+        'état, au même titre qu\'une bibliothèque de dates. Cette tolérance est ' +
+        'nominative : elle ne s\'étend à aucune autre dépendance.',
       // Les tests du domaine sont exclus : ils importent vitest, et c'est leur
       // rôle. C'est le code de production qui doit rester pur.
       from: { path: '^src/domaines/[^/]+/domaine/', pathNot: '\\.test\\.ts$' },
       to: {
-        pathNot: ['^src/domaines/[^/]+/domaine/', '^src/noyau/'],
+        pathNot: ['^src/domaines/[^/]+/domaine/', '^src/noyau/', '^node_modules/zod/'],
       },
     },
     {

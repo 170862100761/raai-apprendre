@@ -123,9 +123,139 @@ export async function semer(bd) {
     }
   }
 
+  await semerCours(q, competences)
+
   console.log('\n  Jeu de démonstration semé :')
   console.log('    MFR Escatalens · Bac Pro Agroéquipement · TAE 2026')
   for (const [prenom, , identifiant, code] of ELEVES) {
     console.log(`    ${prenom.padEnd(7)} ${identifiant.padEnd(20)} code ${code}`)
   }
+}
+
+/**
+ * Deux cours réels, rattachés aux capacités C7 et C8 du référentiel rénové.
+ *
+ * Le contenu est écrit, pas inventé au hasard : une démonstration qui affiche
+ * du faux-texte ne dit rien de ce que verra un enseignant.
+ */
+async function semerCours(q, competences) {
+  const M = id(200) // matière
+  const MOD = id(201)
+  const CH1 = id(202)
+  const CH2 = id(203)
+  const L1 = id(204)
+  const L2 = id(205)
+
+  await q(
+    `INSERT INTO raai_apprendre.matiere (id, etablissement_id, code, intitule)
+     VALUES ($1,$2,'AGROEQ','Agroéquipement')`,
+    [M, id(3)],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.module_formation (id, matiere_id, code, intitule, ordre)
+     VALUES ($1,$2,'MP7','Technologies des équipements',1)`,
+    [MOD, M],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.chapitre (id, module_id, titre, ordre)
+     VALUES ($1,$2,'Hydraulique des équipements',1)`,
+    [CH1, MOD],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.chapitre (id, module_id, titre, ordre)
+     VALUES ($1,$2,'Sécurité à la mise en œuvre',2)`,
+    [CH2, MOD],
+  )
+
+  const lecons = [
+    {
+      id: L1,
+      chapitre: CH1,
+      titre: 'Débit, pression et puissance hydraulique',
+      duree: 12,
+      // C7 : « Caractériser les technologies utilisées dans les équipements »
+      competence: competences[2],
+      blocs: [
+        {
+          type: 'texte',
+          texte:
+            "Un circuit hydraulique transmet de la puissance par un fluide sous pression. " +
+            "Deux grandeurs suffisent à le décrire : le débit, en litres par minute, et la " +
+            "pression, en bars.\n\n" +
+            "Le débit détermine la vitesse d'un vérin ou d'un moteur hydraulique. La pression " +
+            "détermine l'effort qu'il peut développer. Un tracteur qui relève lentement un " +
+            "outil lourd manque de débit, pas de pression.\n\n" +
+            "La puissance hydraulique se calcule ainsi : P (kW) = Q (L/min) × p (bar) / 600. " +
+            "Une pompe débitant 60 L/min sous 180 bars développe donc 18 kW.",
+        },
+        {
+          type: 'lien',
+          url: 'https://chlorofil.fr/diplomes/secondaire/bac-pro/1re-term/agroequip',
+          titre: 'Référentiel Bac Pro Agroéquipement',
+          description: 'La fiche officielle du diplôme sur ChloroFil.',
+        },
+        {
+          type: 'bibliographie',
+          references: [
+            { titre: "Mémotech — Génie des équipements agricoles", auteur: 'Casteilla', annee: 2021 },
+            { titre: 'Norme ISO 1219-1 — Symboles hydrauliques', annee: 2012 },
+          ],
+        },
+      ],
+    },
+    {
+      id: L2,
+      chapitre: CH2,
+      titre: 'Attelage en sécurité : les gestes qui évitent les accidents',
+      duree: 9,
+      // C8 : « Mettre en œuvre des équipements en sécurité »
+      competence: competences[3],
+      blocs: [
+        {
+          type: 'texte',
+          texte:
+            "L'attelage est le moment le plus accidentogène du travail avec un tracteur. " +
+            "La majorité des accidents graves surviennent entre le tracteur et l'outil, " +
+            "quand l'opérateur se place dans la zone d'écrasement.\n\n" +
+            "Trois règles, dans cet ordre : couper le moteur avant toute intervention entre " +
+            "le tracteur et l'outil ; ne jamais se placer entre les deux moteur tournant ; " +
+            "vérifier le verrouillage des crochets avant de relever.\n\n" +
+            "Le cardan est le second point critique. Un protecteur manquant ou cassé n'est " +
+            "pas un détail administratif : c'est ce qui sépare une prise de force d'un " +
+            "arrachement de membre.",
+        },
+      ],
+    },
+  ]
+
+  let n = 300
+  for (const lecon of lecons) {
+    await q(
+      `INSERT INTO raai_apprendre.lecon
+         (id, chapitre_id, etablissement_id, titre, statut, duree_estimee_min, publiee_le)
+       VALUES ($1,$2,$3,$4,'publiee',$5,now())`,
+      [lecon.id, lecon.chapitre, id(3), lecon.titre, lecon.duree],
+    )
+    await q(
+      `INSERT INTO raai_apprendre.lien_competence (id, lecon_id, competence_id)
+       VALUES ($1,$2,$3)`,
+      [id(n++), lecon.id, lecon.competence],
+    )
+    for (const [i, contenu] of lecon.blocs.entries()) {
+      await q(
+        `INSERT INTO raai_apprendre.bloc_contenu (id, lecon_id, type, contenu, ordre)
+         VALUES ($1,$2,$3,$4,$5)`,
+        [id(n++), lecon.id, contenu.type, JSON.stringify(contenu), i + 1],
+      )
+    }
+  }
+
+  // Léa a déjà lu le premier cours : le tableau de bord doit lui proposer le
+  // second, pas recommencer au début.
+  await q(
+    `INSERT INTO raai_apprendre.lecture_lecon
+       (apprenant_id, lecon_id, etablissement_id, position, terminee_le)
+     VALUES ($1,$2,$3,3,now())`,
+    [id(40), L1, id(3)],
+  )
 }

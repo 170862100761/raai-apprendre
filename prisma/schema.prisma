@@ -290,6 +290,7 @@ model Apprenant {
   acquis        AcquisCompetence[]
   tentatives    Tentative[]
   presences     PresenceJour[]
+  lectures      LectureLecon[]
   consentements Consentement[]
 
   @@index([etablissementId, actif])
@@ -600,6 +601,7 @@ model Lecon {
   etablissement Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
   blocs         BlocContenu[]
   liens         LienCompetence[]
+  lectures      LectureLecon[]
 
   @@index([chapitreId, statut, id])
   @@index([etablissementId])
@@ -875,6 +877,33 @@ enum OrigineAcquis {
   import
 
   @@map("origine_acquis")
+  @@schema("raai_apprendre")
+}
+
+/// Avancement d'un apprenant dans une leçon.
+///
+/// Volontairement grossier : ouverte, terminée, et la position de reprise.
+/// On ne trace ni les clics ni le temps par bloc — ce serait de la
+/// surveillance, et ça n'apprendrait rien à personne.
+///
+/// `position` sert à reprendre exactement là où l'élève s'est arrêté, y
+/// compris après une coupure réseau : c'est le cas d'usage réel de l'élève qui
+/// lit son cours dans le car ou en exploitation.
+model LectureLecon {
+  apprenantId     String    @map("apprenant_id") @db.Uuid
+  leconId         String    @map("lecon_id") @db.Uuid
+  etablissementId String    @map("etablissement_id") @db.Uuid
+  /// Ordre du dernier bloc atteint.
+  position        Int       @default(0)
+  ouverteLe       DateTime  @default(now()) @map("ouverte_le") @db.Timestamptz(6)
+  termineeLe      DateTime? @map("terminee_le") @db.Timestamptz(6)
+
+  apprenant Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  lecon     Lecon     @relation(fields: [leconId], references: [id], onDelete: Cascade)
+
+  @@id([apprenantId, leconId])
+  @@index([etablissementId, leconId])
+  @@map("lecture_lecon")
   @@schema("raai_apprendre")
 }
 

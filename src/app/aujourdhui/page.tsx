@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
+import { chargerParcours, depotCataloguePrisma } from '@/domaines/catalogue'
 import { peut } from '@/domaines/identite'
 import type { IdentifiantApprenant } from '@/noyau/identifiants'
 import { exigerSession } from '../_session'
@@ -45,15 +47,9 @@ export default async function PageAujourdhui() {
         </form>
       </header>
 
-      {/* Action prioritaire — le contenu pédagogique arrivera avec le module
-          `catalogue`. En attendant, on ne fabrique pas de faux cours. */}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-mine-doux">À faire maintenant</h2>
-        <BandeauDemo>
-          Ici s’affichera le cours à reprendre, avec sa durée estimée. Le module
-          de contenu n’est pas encore branché.
-        </BandeauDemo>
-      </section>
+      <Suspense fallback={<SqueletteAction />}>
+        <ActionPrioritaire apprenantId={session.sujetId as IdentifiantApprenant} />
+      </Suspense>
 
       {/* Îlot dynamique : personnel, donc jamais mis en cache CDN. Le reste de
           la page l'est. */}
@@ -61,6 +57,66 @@ export default async function PageAujourdhui() {
         <Progression apprenantId={session.sujetId as IdentifiantApprenant} />
       </Suspense>
     </main>
+  )
+}
+
+/**
+ * Une seule action mise en avant, en grand, avec sa durée.
+ *
+ * Le cahier des charges liste quatorze blocs pour cet écran. Les afficher au
+ * même niveau produirait exactement la saturation qu'on reproche à Moodle.
+ * Ils existent tous — hiérarchisés.
+ */
+async function ActionPrioritaire({ apprenantId }: { apprenantId: IdentifiantApprenant }) {
+  const parcours = await chargerParcours(apprenantId, depotCataloguePrisma(prisma))
+
+  if (parcours.lecons.length === 0) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-mine-doux">À faire maintenant</h2>
+        <BandeauDemo>
+          Aucun cours n’est encore publié pour ta classe. Tes formateurs les
+          ajoutent au fur et à mesure.
+        </BandeauDemo>
+      </section>
+    )
+  }
+
+  if (!parcours.prochaine) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-mine-doux">À faire maintenant</h2>
+        <p className="rounded-carte border border-accent/30 bg-accent-doux px-5 py-6">
+          Tu as terminé tous les cours publiés. Rien ne t’attend pour l’instant.
+        </p>
+      </section>
+    )
+  }
+
+  const { prochaine } = parcours
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-mine-doux">À faire maintenant</h2>
+
+      <Link
+        href={`/cours/${prochaine.id}`}
+        className="flex flex-col gap-2 rounded-carte border border-accent/30 bg-accent-doux
+                   px-5 py-6 transition-opacity hover:opacity-90"
+      >
+        <span className="text-sm text-mine-doux">{prochaine.chapitre}</span>
+        <span className="text-xl font-semibold">{prochaine.titre}</span>
+        <span className="text-sm text-mine-doux">
+          {prochaine.dureeEstimeeMin} min
+          {prochaine.commencee ? ' · à reprendre' : ''}
+        </span>
+      </Link>
+
+      <p className="text-sm text-mine-doux">
+        {parcours.terminees} cours terminé{parcours.terminees > 1 ? 's' : ''} sur{' '}
+        {parcours.lecons.length}
+      </p>
+    </section>
   )
 }
 
@@ -114,6 +170,15 @@ function Compteur({
       <dt className="text-sm text-mine-doux">{libelle}</dt>
       <dd className="text-2xl font-semibold tabular-nums">{valeur}</dd>
     </div>
+  )
+}
+
+function SqueletteAction() {
+  return (
+    <section className="flex flex-col gap-3" aria-busy="true">
+      <h2 className="text-sm font-medium text-mine-doux">À faire maintenant</h2>
+      <div className="h-[120px] rounded-carte border border-bordure bg-surface-2" />
+    </section>
   )
 }
 

@@ -106,3 +106,25 @@ Server Actions : six étapes dans cet ordre — authentifier, valider, autoriser
 exécuter, invalider, auditer (doc 06 §2).
 
 Identifiants : objets-valeurs typés, pas des `string` nus.
+
+## Base de développement locale
+
+```bash
+npm run bd:locale   # PGlite + migrations + jeu de démonstration, port 5433
+npm run dev
+```
+
+Aucune installation, ni Docker ni PostgreSQL : un environnement qui demande une
+mise en place préalable est un environnement où l'on ne lance pas l'application
+« juste pour vérifier ».
+
+Deux limites, propres à PGlite et absentes en production :
+
+- **Une seule connexion à la fois.** Arrêter `npm run dev` avant de lancer les
+  tests d'intégration, sinon ils échouent sur « Can't reach database server ».
+- **Requêtes préparées non conservées.** D'où `pgbouncer=true` dans
+  `DATABASE_URL` — réglage que Supabase impose de toute façon derrière son pooler.
+
+Comptes de démonstration : `lea.escatalens` / `4271`, `thomas.escatalens` /
+`8305`, `ines.escatalens` / `6194`. Trois états de progression différents, pour
+que la démonstration ne montre pas qu'un seul cas.

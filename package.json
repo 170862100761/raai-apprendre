@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:permissions": "vitest run --dir src/test/permissions",
     "architecture": "depcruise src --config .dependency-cruiser.cjs",
+    "bd:locale": "node outils/base-locale.mjs --semer",
     "bd:generer": "prisma generate",
     "bd:migrer": "prisma migrate dev",
     "bd:deployer": "prisma migrate deploy",
@@ -29,10 +30,12 @@
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.4",
+    "@electric-sql/pglite-socket": "^0.2.7",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.7",

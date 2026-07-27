@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+
+/*
+  Jetons repris de RAAI-Formation : couleurs en oklch, ombres quasi absentes
+  (une seule, pour les panneaux flottants), bordures fines partout ailleurs.
+
+  Le thème clair et le thème sombre sont tous deux traités : les salles de
+  classe sont éclairées au néon, les révisions se font le soir.
+*/
+
+@theme {
+  --color-surface: oklch(99% 0.004 95);
+  --color-surface-2: oklch(96.5% 0.006 95);
+  --color-bordure: oklch(89% 0.008 95);
+  --color-mine: oklch(28% 0.012 95);
+  --color-mine-doux: oklch(52% 0.012 95);
+
+  /* Vert agricole, désaturé : présent sans être décoratif. */
+  --color-accent: oklch(52% 0.13 145);
+  --color-accent-doux: oklch(94% 0.03 145);
+  --color-accent-contraste: oklch(99% 0.004 95);
+
+  --color-alerte: oklch(52% 0.17 27);
+  --color-alerte-douce: oklch(95% 0.03 27);
+
+  --radius-carte: 0.75rem;
+  --shadow-panneau: 0 1px 2px oklch(28% 0.012 95 / 0.06), 0 8px 24px oklch(28% 0.012 95 / 0.08);
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-surface: oklch(21% 0.012 95);
+    --color-surface-2: oklch(25% 0.012 95);
+    --color-bordure: oklch(33% 0.012 95);
+    --color-mine: oklch(95% 0.006 95);
+    --color-mine-doux: oklch(72% 0.010 95);
+    --color-accent: oklch(72% 0.14 145);
+    --color-accent-doux: oklch(30% 0.05 145);
+    --color-accent-contraste: oklch(18% 0.012 95);
+    --color-alerte: oklch(72% 0.15 27);
+    --color-alerte-douce: oklch(30% 0.06 27);
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background: var(--color-surface);
+    color: var(--color-mine);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Le focus visible n'est pas une option : une partie des élèves navigue au
+     clavier, et les salles informatiques ont des souris capricieuses. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Respecte les réglages système : certains élèves sont sujets au mal des
+     transports numérique. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

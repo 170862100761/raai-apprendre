@@ -1,0 +1,952 @@
+// raai-apprendre — schéma du socle (MVP)
+//
+// Rien ne vit dans `public` : un projet Supabase RAAI héberge plusieurs
+// applications, chacune dans son espace de noms (cf. doc 02 §3).
+//
+//   raai_apprendre        tables applicatives, cloisonnées par établissement
+//   raai_apprendre_ref    référentiels nationaux — AUCUN etablissement_id
+//   raai_apprendre_audit  journal append-only, jamais exposé à PostgREST
+//
+// Prisma est la source de vérité du schéma. Les politiques RLS, les fonctions
+// SECURITY DEFINER et les partitions vivent dans des migrations SQL versionnées
+// à côté (prisma/migrations/), dans le même commit que la table qu'elles
+// protègent — le test de couverture RLS échoue sinon.
+
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas  = ["raai_apprendre", "raai_apprendre_ref", "raai_apprendre_audit"]
+}
+
+// ===========================================================================
+// IDENTITÉ
+// ===========================================================================
+
+/// Un compte Supabase Auth. Réservé aux adultes : enseignants, responsables,
+/// administrateurs, et apprenants majeurs à l'inscription.
+/// Les apprenants mineurs n'en ont pas (cf. doc 07 §3).
+model Compte {
+  id       String  @id @db.Uuid
+  email    String  @unique
+  nom      String  @default("")
+  prenom   String  @default("")
+  actif    Boolean @default(true)
+  creeLe   DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  vuLe     DateTime? @map("vu_le") @db.Timestamptz(6)
+
+  membres       Membre[]
+  apprenant     Apprenant?
+  consentements Consentement[]
+
+  @@map("compte")
+  @@schema("raai_apprendre")
+}
+
+/// Attribution (rôle × portée). Un même compte peut en porter plusieurs :
+/// un enseignant est souvent aussi responsable pédagogique d'une formation.
+/// Les portées s'additionnent, elles ne se remplacent pas.
+model Membre {
+  id              String   @id @default(uuid()) @db.Uuid
+  compteId        String   @map("compte_id") @db.Uuid
+  etablissementId String?  @map("etablissement_id") @db.Uuid
+  academieId      String?  @map("academie_id") @db.Uuid
+  role            Role
+  /// Date de fin d'une délégation temporaire (remplaçant). L'expiration est
+  /// effective en base, pas seulement dans l'interface.
+  expireLe        DateTime? @map("expire_le") @db.Timestamptz(6)
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  compte        Compte         @relation(fields: [compteId], references: [id], onDelete: Cascade)
+  etablissement Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  academie      Academie?      @relation(fields: [academieId], references: [id], onDelete: Cascade)
+  affectations  Affectation[]
+
+  @@unique([compteId, role, etablissementId, academieId])
+  @@index([etablissementId, role])
+  @@map("membre")
+  @@schema("raai_apprendre")
+}
+
+enum Role {
+  admin_national
+  admin_academie
+  admin_etablissement
+  responsable_pedagogique
+  enseignant
+  parent
+
+  @@map("role")
+  @@schema("raai_apprendre")
+}
+
+/// Prise en charge d'une classe par un enseignant. C'est cette table qui donne
+/// son sens à la portée « ses classes » : sans affectation, un enseignant ne
+/// voit aucun élève.
+model Affectation {
+  id       String @id @default(uuid()) @db.Uuid
+  membreId String @map("membre_id") @db.Uuid
+  classeId String @map("classe_id") @db.Uuid
+  matiereId String? @map("matiere_id") @db.Uuid
+  creeLe   DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  membre  Membre   @relation(fields: [membreId], references: [id], onDelete: Cascade)
+  classe  Classe   @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  matiere Matiere? @relation(fields: [matiereId], references: [id], onDelete: SetNull)
+
+  @@unique([membreId, classeId, matiereId])
+  @@index([classeId])
+  @@map("affectation")
+  @@schema("raai_apprendre")
+}
+
+/// Consentement RGPD. Jamais supprimé : sa disparition rendrait impossible de
+/// prouver qu'il a été recueilli.
+model Consentement {
+  id       String   @id @default(uuid()) @db.Uuid
+  compteId String?  @map("compte_id") @db.Uuid
+  apprenantId String? @map("apprenant_id") @db.Uuid
+  type     String
+  versionTexte String @map("version_texte")
+  accorde  Boolean
+  /// Qui a recueilli le consentement (établissement, représentant légal…).
+  recueilliPar String @map("recueilli_par")
+  creeLe   DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  compte    Compte?    @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  apprenant Apprenant? @relation(fields: [apprenantId], references: [id], onDelete: SetNull)
+
+  @@index([apprenantId])
+  @@map("consentement")
+  @@schema("raai_apprendre")
+}
+
+// ===========================================================================
+// ORGANISATION
+// ===========================================================================
+
+model Pays {
+  id       String @id @default(uuid()) @db.Uuid
+  code     String @unique @db.VarChar(2)
+  nom      String
+
+  academies Academie[]
+
+  @@map("pays")
+  @@schema("raai_apprendre")
+}
+
+model Academie {
+  id     String @id @default(uuid()) @db.Uuid
+  paysId String @map("pays_id") @db.Uuid
+  code   String @unique
+  nom    String
+
+  pays           Pays            @relation(fields: [paysId], references: [id])
+  etablissements Etablissement[]
+  membres        Membre[]
+
+  @@map("academie")
+  @@schema("raai_apprendre")
+}
+
+model Etablissement {
+  id         String @id @default(uuid()) @db.Uuid
+  academieId String @map("academie_id") @db.Uuid
+  /// Code UAI officiel — clé de rapprochement avec les annuaires ministériels.
+  uai        String @unique @db.VarChar(8)
+  nom        String
+  type       TypeEtablissement
+  /// Décision juridique de l'établissement, pas un réglage technique (doc 07 §3).
+  modeIdentite ModeIdentite @default(minimal) @map("mode_identite")
+  fuseau     String @default("Europe/Paris")
+  actif      Boolean @default(true)
+  creeLe     DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  academie        Academie          @relation(fields: [academieId], references: [id])
+  membres         Membre[]
+  anneesScolaires AnneeScolaire[]
+  offres          OffreFormation[]
+  apprenants      Apprenant[]
+  matieres        Matiere[]
+  lecons          Lecon[]
+  ressources      Ressource[]
+  adaptationsLocales AdaptationLocale[]
+
+  @@index([academieId])
+  @@map("etablissement")
+  @@schema("raai_apprendre")
+}
+
+enum TypeEtablissement {
+  MFR
+  CFA
+  LPA
+  CFPPA
+  SUP
+
+  @@map("type_etablissement")
+  @@schema("raai_apprendre")
+}
+
+enum ModeIdentite {
+  /// Identifiant + code à 4 chiffres. Aucune donnée personnelle. Mineurs.
+  minimal
+  /// Supabase Auth. Apprenants majeurs.
+  complet
+  /// Choisi par formation.
+  mixte
+
+  @@map("mode_identite")
+  @@schema("raai_apprendre")
+}
+
+model AnneeScolaire {
+  id              String   @id @default(uuid()) @db.Uuid
+  etablissementId String   @map("etablissement_id") @db.Uuid
+  libelle         String
+  debut           DateTime @db.Date
+  fin             DateTime @db.Date
+
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  classes       Classe[]
+
+  @@unique([etablissementId, libelle])
+  @@map("annee_scolaire")
+  @@schema("raai_apprendre")
+}
+
+/// Un diplôme national instancié dans un établissement donné.
+model OffreFormation {
+  id              String @id @default(uuid()) @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  diplomeId       String @map("diplome_id") @db.Uuid
+  /// Mode d'identité pour cette formation précise, quand l'établissement est
+  /// en mode `mixte`. Le champ décisif est l'âge, pas le niveau : un élève de
+  /// BTS mineur reste en mode minimal.
+  modeIdentite    ModeIdentite? @map("mode_identite")
+  ouverteLe       DateTime @default(now()) @map("ouverte_le") @db.Timestamptz(6)
+
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  diplome       Diplome       @relation(fields: [diplomeId], references: [id])
+  classes       Classe[]
+
+  @@unique([etablissementId, diplomeId])
+  @@map("offre_formation")
+  @@schema("raai_apprendre")
+}
+
+model Classe {
+  id              String @id @default(uuid()) @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  offreId         String @map("offre_id") @db.Uuid
+  niveauId        String @map("niveau_id") @db.Uuid
+  anneeId         String @map("annee_id") @db.Uuid
+  nom             String
+  /// Code distribué aux élèves pour se rattacher (TAE-2026-4K7P).
+  codeRattachement String @unique @map("code_rattachement")
+  archivee        Boolean @default(false)
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  offre        OffreFormation @relation(fields: [offreId], references: [id], onDelete: Cascade)
+  niveau       Niveau         @relation(fields: [niveauId], references: [id])
+  annee        AnneeScolaire  @relation(fields: [anneeId], references: [id], onDelete: Cascade)
+  inscriptions Inscription[]
+  affectations Affectation[]
+
+  @@index([etablissementId, archivee])
+  @@index([anneeId])
+  @@map("classe")
+  @@schema("raai_apprendre")
+}
+
+/// Prénom et initiale uniquement en mode minimal : pas de nom complet, pas de
+/// date de naissance. La donnée qu'on ne collecte pas ne peut pas fuir.
+model Apprenant {
+  id              String  @id @default(uuid()) @db.Uuid
+  etablissementId String  @map("etablissement_id") @db.Uuid
+  prenom          String
+  initialeNom     String  @default("") @map("initiale_nom") @db.VarChar(1)
+  /// NULL en mode minimal. Aucune requête ne doit supposer son existence.
+  compteId        String? @unique @map("compte_id") @db.Uuid
+  /// Mode minimal uniquement.
+  identifiant     String? @unique
+  /// bcrypt du code à 4 chiffres. Sans limitation de débit, 10 000
+  /// combinaisons n'ont aucune valeur — cf. doc 07 §3 et table VerrouAcces.
+  codeHash        String? @map("code_hash")
+  majeurALInscription Boolean @default(false) @map("majeur_a_l_inscription")
+  actif           Boolean @default(true)
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  vuLe            DateTime? @map("vu_le") @db.Timestamptz(6)
+
+  etablissement Etablissement      @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  compte        Compte?            @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  inscriptions  Inscription[]
+  sessions      SessionApprenant[]
+  acquis        AcquisCompetence[]
+  tentatives    Tentative[]
+  presences     PresenceJour[]
+  consentements Consentement[]
+
+  @@index([etablissementId, actif])
+  @@map("apprenant")
+  @@schema("raai_apprendre")
+}
+
+/// Historisée : un redoublant, ou un changement de classe en cours d'année,
+/// produit deux lignes. La progression suit l'apprenant, pas l'inscription.
+model Inscription {
+  id          String   @id @default(uuid()) @db.Uuid
+  apprenantId String   @map("apprenant_id") @db.Uuid
+  classeId    String   @map("classe_id") @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  debut       DateTime @db.Date
+  fin         DateTime? @db.Date
+  statut      StatutInscription @default(en_attente)
+
+  apprenant Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  classe    Classe    @relation(fields: [classeId], references: [id], onDelete: Cascade)
+
+  @@index([classeId, statut])
+  @@index([apprenantId])
+  @@map("inscription")
+  @@schema("raai_apprendre")
+}
+
+enum StatutInscription {
+  /// Inscription autonome jamais automatique : sinon n'importe qui rejoint
+  /// n'importe quelle classe.
+  en_attente
+  active
+  terminee
+  abandonnee
+
+  @@map("statut_inscription")
+  @@schema("raai_apprendre")
+}
+
+/// Jeton de session apprenant en mode minimal : pas d'email, pas de compte Auth.
+model SessionApprenant {
+  jeton       String   @id @default(uuid()) @db.Uuid
+  apprenantId String   @map("apprenant_id") @db.Uuid
+  creeLe      DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  expireLe    DateTime @map("expire_le") @db.Timestamptz(6)
+  /// Révocable en un clic par l'enseignant.
+  revoqueeLe  DateTime? @map("revoquee_le") @db.Timestamptz(6)
+
+  apprenant Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+
+  @@index([apprenantId])
+  @@map("session_apprenant")
+  @@schema("raai_apprendre")
+}
+
+/// Anti-force brute sur le code à 4 chiffres. 5 essais par heure, puis
+/// verrouillage jusqu'à déblocage par l'enseignant.
+model VerrouAcces {
+  identifiant  String   @id
+  echecs       Int      @default(0)
+  dernierEchec DateTime @default(now()) @map("dernier_echec") @db.Timestamptz(6)
+  verrouilleJusqua DateTime? @map("verrouille_jusqua") @db.Timestamptz(6)
+
+  @@map("verrou_acces")
+  @@schema("raai_apprendre")
+}
+
+// ===========================================================================
+// RÉFÉRENTIEL NATIONAL — schéma raai_apprendre_ref
+//
+// AUCUNE table de cette section ne porte d'etablissement_id. C'est vérifié par
+// un test (src/test/permissions/referentiel-national.test.ts).
+// Seule exception assumée : AdaptationLocale, qui vit dans l'autre schéma.
+// ===========================================================================
+
+model Diplome {
+  id             String @id @default(uuid()) @db.Uuid
+  code           String @unique
+  intitule       String
+  ministere      Ministere
+  niveauEuropeen Int    @map("niveau_europeen")
+  filiere        String
+
+  versions VersionReferentiel[]
+  offres   OffreFormation[]
+  niveaux  Niveau[]
+
+  @@map("diplome")
+  @@schema("raai_apprendre_ref")
+}
+
+enum Ministere {
+  /// Ministère de l'Agriculture et de la Souveraineté alimentaire (DGER).
+  MASA
+  /// Éducation nationale.
+  MENJ
+
+  @@map("ministere")
+  @@schema("raai_apprendre_ref")
+}
+
+model Niveau {
+  id        String @id @default(uuid()) @db.Uuid
+  diplomeId String @map("diplome_id") @db.Uuid
+  code      String
+  intitule  String
+  ordre     Int
+
+  diplome Diplome  @relation(fields: [diplomeId], references: [id], onDelete: Cascade)
+  classes Classe[]
+
+  @@unique([diplomeId, code])
+  @@map("niveau")
+  @@schema("raai_apprendre_ref")
+}
+
+/// Une version publiée est IMMUABLE. Corriger une coquille impose une nouvelle
+/// version : les acquis passés doivent rester lisibles dans la version qui les
+/// a produits.
+model VersionReferentiel {
+  id               String   @id @default(uuid()) @db.Uuid
+  diplomeId        String   @map("diplome_id") @db.Uuid
+  /// Extraite du CONTENU du PDF, jamais de son nom de fichier : le fichier
+  /// nommé « en-vigueur » sur ChloroFil contenait l'arrêté de 2010 alors que
+  /// celui de 2023 s'appliquait (cf. doc 12 §2).
+  referenceArrete  String   @map("reference_arrete")
+  /// Empreinte du PDF source : détecte une republication par la DGER.
+  empreinteSource  String?  @map("empreinte_source") @db.VarChar(64)
+  entreeEnVigueur  DateTime @map("entree_en_vigueur") @db.Date
+  finDeValidite    DateTime? @map("fin_de_validite") @db.Date
+  statut           StatutReferentiel @default(brouillon)
+  /// Validation humaine obligatoire : un référentiel faux corrompt le suivi de
+  /// compétences de milliers d'élèves.
+  valideParCompteId String? @map("valide_par_compte_id") @db.Uuid
+  valideLe          DateTime? @map("valide_le") @db.Timestamptz(6)
+
+  diplome    Diplome     @relation(fields: [diplomeId], references: [id], onDelete: Cascade)
+  competences Competence[]
+  acquis     AcquisCompetence[]
+
+  @@unique([diplomeId, referenceArrete])
+  @@map("version_referentiel")
+  @@schema("raai_apprendre_ref")
+}
+
+enum StatutReferentiel {
+  brouillon
+  publie
+  abroge
+
+  @@map("statut_referentiel")
+  @@schema("raai_apprendre_ref")
+}
+
+/// CORRECTION issue de l'analyse du Bac Pro Agroéquipement (doc 12 §3) :
+/// bloc de compétences et capacité de rang 1 sont en relation 1–1, pas 1–n.
+/// Le référentiel le pose explicitement : « chaque capacité globale (de rang 1)
+/// correspond à un bloc de compétences ». Les deux tables prévues au document
+/// 03 ont donc fusionné ici — en garder deux aurait créé une table vide de sens.
+model Competence {
+  id        String @id @default(uuid()) @db.Uuid
+  versionId String @map("version_id") @db.Uuid
+  /// « C5 » pour une capacité de rang 1, « C5.1 » pour une sous-capacité.
+  code      String
+  /// « B5 ». NULL pour une capacité sans bloc numéroté (le MAP).
+  codeBloc  String? @map("code_bloc")
+  intitule  String
+  /// NULL au rang 1. Le rang 2 pointe sur sa capacité globale.
+  parentId  String? @map("parent_id") @db.Uuid
+  ordre     Int
+  /// Vrai pour le module d'adaptation professionnelle, dont le contenu est
+  /// défini régionalement et non par l'arrêté.
+  adaptableLocalement Boolean @default(false) @map("adaptable_localement")
+
+  version  VersionReferentiel @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  parent   Competence?  @relation("Hierarchie", fields: [parentId], references: [id], onDelete: Cascade)
+  enfants  Competence[] @relation("Hierarchie")
+  savoirs  Savoir[]
+  liens    LienCompetence[]
+  acquis   AcquisCompetence[]
+  adaptations AdaptationLocale[]
+  equivalencesSource CompetenceEquivalence[] @relation("Source")
+  equivalencesCible  CompetenceEquivalence[] @relation("Cible")
+
+  @@unique([versionId, code])
+  @@index([parentId])
+  @@map("competence")
+  @@schema("raai_apprendre_ref")
+}
+
+model Savoir {
+  id           String @id @default(uuid()) @db.Uuid
+  competenceId String @map("competence_id") @db.Uuid
+  intitule     String
+  ordre        Int
+
+  competence Competence @relation(fields: [competenceId], references: [id], onDelete: Cascade)
+
+  @@index([competenceId])
+  @@map("savoir")
+  @@schema("raai_apprendre_ref")
+}
+
+/// Report des acquis d'une version de référentiel à la suivante. Sans cette
+/// table, chaque réforme d'arrêté effacerait la progression des élèves en
+/// cours de cycle — la réforme 2023 des Bac Pro agricoles est en cours.
+model CompetenceEquivalence {
+  id       String @id @default(uuid()) @db.Uuid
+  sourceId String @map("source_id") @db.Uuid
+  cibleId  String @map("cible_id") @db.Uuid
+  /// 1.0 = équivalence totale ; en dessous, l'acquis est reporté « en cours ».
+  poids    Decimal @default(1.0) @db.Decimal(3, 2)
+
+  source Competence @relation("Source", fields: [sourceId], references: [id], onDelete: Cascade)
+  cible  Competence @relation("Cible", fields: [cibleId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, cibleId])
+  @@map("competence_equivalence")
+  @@schema("raai_apprendre_ref")
+}
+
+/// SECONDE CORRECTION du doc 12 §3 : le module d'adaptation professionnelle
+/// (C10 en Bac Pro Agroéquipement) est défini régionalement. C'est la seule
+/// exception admise à la règle « aucun etablissement_id dans le référentiel »,
+/// et elle est isolée ici, dans le schéma applicatif — le schéma
+/// raai_apprendre_ref reste pur.
+model AdaptationLocale {
+  id              String @id @default(uuid()) @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  competenceId    String @map("competence_id") @db.Uuid
+  intitule        String
+  description     String @default("")
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  competence    Competence    @relation(fields: [competenceId], references: [id], onDelete: Cascade)
+
+  @@unique([etablissementId, competenceId])
+  @@map("adaptation_locale")
+  @@schema("raai_apprendre")
+}
+
+// ===========================================================================
+// CATALOGUE PÉDAGOGIQUE
+// ===========================================================================
+
+model Matiere {
+  id              String  @id @default(uuid()) @db.Uuid
+  /// NULL = matière nationale, partagée.
+  etablissementId String? @map("etablissement_id") @db.Uuid
+  code            String
+  intitule        String
+
+  etablissement Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  modules       ModuleFormation[]
+  affectations  Affectation[]
+
+  @@unique([etablissementId, code])
+  @@map("matiere")
+  @@schema("raai_apprendre")
+}
+
+model ModuleFormation {
+  id        String @id @default(uuid()) @db.Uuid
+  matiereId String @map("matiere_id") @db.Uuid
+  /// « MP5 », « MG1 » — la nomenclature des référentiels DGER.
+  code      String
+  intitule  String
+  ordre     Int
+
+  matiere   Matiere    @relation(fields: [matiereId], references: [id], onDelete: Cascade)
+  chapitres Chapitre[]
+
+  @@index([matiereId])
+  @@map("module_formation")
+  @@schema("raai_apprendre")
+}
+
+model Chapitre {
+  id       String @id @default(uuid()) @db.Uuid
+  moduleId String @map("module_id") @db.Uuid
+  titre    String
+  ordre    Int
+
+  module      ModuleFormation @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lecons      Lecon[]
+  evaluations Evaluation[]
+
+  @@index([moduleId])
+  @@map("chapitre")
+  @@schema("raai_apprendre")
+}
+
+model Lecon {
+  id              String  @id @default(uuid()) @db.Uuid
+  chapitreId      String  @map("chapitre_id") @db.Uuid
+  /// NULL = bibliothèque nationale (V2).
+  etablissementId String? @map("etablissement_id") @db.Uuid
+  titre           String
+  statut          StatutPublication @default(brouillon)
+  dureeEstimeeMin Int     @default(0) @map("duree_estimee_min")
+  /// Une leçon publiée n'est pas éditée en place : la modification crée n+1.
+  version         Int     @default(1)
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  publieeLe       DateTime? @map("publiee_le") @db.Timestamptz(6)
+
+  chapitre      Chapitre       @relation(fields: [chapitreId], references: [id], onDelete: Cascade)
+  etablissement Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  blocs         BlocContenu[]
+  liens         LienCompetence[]
+
+  @@index([chapitreId, statut, id])
+  @@index([etablissementId])
+  @@map("lecon")
+  @@schema("raai_apprendre")
+}
+
+enum StatutPublication {
+  brouillon
+  en_relecture
+  publiee
+  archivee
+
+  @@map("statut_publication")
+  @@schema("raai_apprendre")
+}
+
+/// Une leçon n'est pas du HTML : c'est une liste ordonnée de blocs typés, dont
+/// le `contenu` est validé par un schéma Zod propre à son `type`.
+/// Le HTML libre est proscrit — il rendrait l'export, l'accessibilité et la
+/// protection XSS impossibles à garantir.
+model BlocContenu {
+  id      String    @id @default(uuid()) @db.Uuid
+  leconId String    @map("lecon_id") @db.Uuid
+  type    TypeBloc
+  contenu Json      @default("{}")
+  ordre   Int
+  /// Marqué si produit par IA. Ne peut être publié sans validation humaine.
+  genereParIa Boolean @default(false) @map("genere_par_ia")
+
+  lecon Lecon @relation(fields: [leconId], references: [id], onDelete: Cascade)
+
+  @@index([leconId, ordre])
+  @@map("bloc_contenu")
+  @@schema("raai_apprendre")
+}
+
+enum TypeBloc {
+  texte
+  image
+  schema
+  video
+  modele3d
+  pdf
+  lien
+  bibliographie
+  fichier
+
+  @@map("type_bloc")
+  @@schema("raai_apprendre")
+}
+
+/// Le rattachement d'une ressource au référentiel. Sans lui, tout le suivi de
+/// compétences s'effondre — d'où sa place à l'étape 1 du parcours de création
+/// et non à la fin (doc 05 §2).
+model LienCompetence {
+  id           String @id @default(uuid()) @db.Uuid
+  leconId      String @map("lecon_id") @db.Uuid
+  competenceId String @map("competence_id") @db.Uuid
+
+  lecon      Lecon      @relation(fields: [leconId], references: [id], onDelete: Cascade)
+  competence Competence @relation(fields: [competenceId], references: [id], onDelete: Cascade)
+
+  @@unique([leconId, competenceId])
+  @@index([competenceId, leconId])
+  @@map("lien_competence")
+  @@schema("raai_apprendre")
+}
+
+model Ressource {
+  id              String  @id @default(uuid()) @db.Uuid
+  /// NULL = ressource nationale.
+  etablissementId String? @map("etablissement_id") @db.Uuid
+  nom             String
+  typeMime        String  @map("type_mime")
+  cheminStockage  String  @map("chemin_stockage")
+  /// GLB allégé ou vignette : c'est ce qui rend la 3D utilisable sur tablette.
+  cheminApercu    String? @map("chemin_apercu")
+  tailleOctets    BigInt  @map("taille_octets")
+  licence         String  @default("")
+  statutTraitement StatutTraitement @default(en_attente) @map("statut_traitement")
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  etablissement Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+
+  @@index([etablissementId])
+  @@map("ressource")
+  @@schema("raai_apprendre")
+}
+
+enum StatutTraitement {
+  en_attente
+  en_cours
+  pret
+  echoue
+
+  @@map("statut_traitement")
+  @@schema("raai_apprendre")
+}
+
+// ===========================================================================
+// ÉVALUATION ET PROGRESSION
+// ===========================================================================
+
+model Evaluation {
+  id              String @id @default(uuid()) @db.Uuid
+  chapitreId      String @map("chapitre_id") @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  titre           String
+  type            TypeEvaluation
+  statut          StatutPublication @default(brouillon)
+  dureeMaxMin     Int?   @map("duree_max_min")
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+
+  chapitre   Chapitre    @relation(fields: [chapitreId], references: [id], onDelete: Cascade)
+  questions  Question[]
+  tentatives Tentative[]
+
+  @@index([chapitreId, statut])
+  @@map("evaluation")
+  @@schema("raai_apprendre")
+}
+
+enum TypeEvaluation {
+  exercice
+  quiz
+  devoir
+  tp
+  ccf
+  examen
+
+  @@map("type_evaluation")
+  @@schema("raai_apprendre")
+}
+
+model Question {
+  id           String @id @default(uuid()) @db.Uuid
+  evaluationId String @map("evaluation_id") @db.Uuid
+  type         TypeQuestion
+  enonce       String
+  /// Propositions, appariements… selon le type.
+  options      Json   @default("[]")
+  /// Le corrigé n'est JAMAIS envoyé au client avant soumission : un modèle ne
+  /// peut pas divulguer ce qu'il n'a pas, un navigateur non plus.
+  corrige      Json   @default("{}")
+  bareme       Decimal @default(1.0) @db.Decimal(5, 2)
+  ordre        Int
+  genereParIa  Boolean @default(false) @map("genere_par_ia")
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  reponses   Reponse[]
+
+  @@index([evaluationId, ordre])
+  @@map("question")
+  @@schema("raai_apprendre")
+}
+
+enum TypeQuestion {
+  qcm
+  vrai_faux
+  appariement
+  numerique
+  texte_court
+  texte_long
+
+  @@map("type_question")
+  @@schema("raai_apprendre")
+}
+
+/// Immuable. Une révision de note crée une nouvelle tentative liée à la
+/// précédente, elle ne modifie pas celle-ci.
+model Tentative {
+  id              String   @id @default(uuid()) @db.Uuid
+  evaluationId    String   @map("evaluation_id") @db.Uuid
+  apprenantId     String   @map("apprenant_id") @db.Uuid
+  etablissementId String   @map("etablissement_id") @db.Uuid
+  /// Tentative que celle-ci révise, le cas échéant.
+  reviseId        String?  @map("revise_id") @db.Uuid
+  statut          StatutTentative @default(en_cours)
+  score           Decimal? @db.Decimal(6, 2)
+  scoreMax        Decimal? @map("score_max") @db.Decimal(6, 2)
+  dureeSecondes   Int      @default(0) @map("duree_secondes")
+  /// Anti-triche indicatif : compté et affiché à l'enseignant, jamais probant.
+  changementsOnglet Int    @default(0) @map("changements_onglet")
+  /// Rend le double-clic sur « soumettre » sans effet.
+  cleIdempotence  String?  @unique @map("cle_idempotence")
+  creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  soumiseLe       DateTime? @map("soumise_le") @db.Timestamptz(6)
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  apprenant  Apprenant  @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  reponses   Reponse[]
+
+  @@index([apprenantId, evaluationId, creeLe(sort: Desc)])
+  @@index([etablissementId, creeLe])
+  @@map("tentative")
+  @@schema("raai_apprendre")
+}
+
+enum StatutTentative {
+  en_cours
+  soumise
+  corrigee_auto
+  attente_correction
+  corrigee
+  abandonnee
+
+  @@map("statut_tentative")
+  @@schema("raai_apprendre")
+}
+
+model Reponse {
+  id          String   @id @default(uuid()) @db.Uuid
+  tentativeId String   @map("tentative_id") @db.Uuid
+  questionId  String   @map("question_id") @db.Uuid
+  valeur      Json     @default("{}")
+  score       Decimal? @db.Decimal(6, 2)
+  commentaire String   @default("")
+
+  tentative Tentative @relation(fields: [tentativeId], references: [id], onDelete: Cascade)
+  question  Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([tentativeId, questionId])
+  @@map("reponse")
+  @@schema("raai_apprendre")
+}
+
+/// LE point de rencontre des deux arbres : la seule table qui référence à la
+/// fois un apprenant (établissement) et une compétence (national).
+model AcquisCompetence {
+  id              String @id @default(uuid()) @db.Uuid
+  apprenantId     String @map("apprenant_id") @db.Uuid
+  competenceId    String @map("competence_id") @db.Uuid
+  /// Pour rester lisible après une réforme d'arrêté.
+  versionReferentielId String @map("version_referentiel_id") @db.Uuid
+  etablissementId String @map("etablissement_id") @db.Uuid
+  niveau          NiveauAcquisition @default(non_abordee)
+  score           Decimal? @db.Decimal(5, 2)
+  origine         OrigineAcquis
+  /// Traçabilité : un acquis doit toujours répondre à « d'où vient cette
+  /// validation ? ».
+  sourceId        String? @map("source_id") @db.Uuid
+  constateLe      DateTime @default(now()) @map("constate_le") @db.Timestamptz(6)
+
+  apprenant  Apprenant          @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  competence Competence         @relation(fields: [competenceId], references: [id], onDelete: Cascade)
+  version    VersionReferentiel @relation(fields: [versionReferentielId], references: [id], onDelete: Cascade)
+
+  @@unique([apprenantId, competenceId, versionReferentielId])
+  @@index([apprenantId, competenceId])
+  @@index([etablissementId, competenceId])
+  @@map("acquis_competence")
+  @@schema("raai_apprendre")
+}
+
+enum NiveauAcquisition {
+  non_abordee
+  en_cours
+  acquise
+  /// Deux constats distincts espacés d'au moins 7 jours : une réussite unique
+  /// ne prouve pas la maîtrise.
+  maitrisee
+
+  @@map("niveau_acquisition")
+  @@schema("raai_apprendre")
+}
+
+enum OrigineAcquis {
+  evaluation
+  /// L'emporte toujours sur un calcul automatique.
+  declaration_enseignant
+  ccf
+  import
+
+  @@map("origine_acquis")
+  @@schema("raai_apprendre")
+}
+
+/// Une ligne par apprenant et par jour : régularité et temps passé, sans
+/// événement fin. Suivre chaque clic serait de la surveillance.
+model PresenceJour {
+  apprenantId     String   @map("apprenant_id") @db.Uuid
+  etablissementId String   @map("etablissement_id") @db.Uuid
+  jour            DateTime @db.Date
+  minutes         Int      @default(0)
+
+  apprenant Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+
+  @@id([apprenantId, jour])
+  @@index([etablissementId, jour])
+  @@map("presence_jour")
+  @@schema("raai_apprendre")
+}
+
+// ===========================================================================
+// TRANSVERSE
+// ===========================================================================
+
+/// Un module publie, il n'appelle pas. Cette table est aussi la matière
+/// première du journal d'audit et de la ré-indexation de la recherche.
+model EvenementDomaine {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String
+  charge    Json
+  etablissementId String? @map("etablissement_id") @db.Uuid
+  survenuLe DateTime @default(now()) @map("survenu_le") @db.Timestamptz(6)
+  traiteLe  DateTime? @map("traite_le") @db.Timestamptz(6)
+
+  @@index([type, traiteLe])
+  @@map("evenement_domaine")
+  @@schema("raai_apprendre")
+}
+
+/// Append-only. Le schéma raai_apprendre_audit n'est jamais exposé à
+/// PostgREST ; UPDATE et DELETE y sont révoqués par migration SQL.
+/// Jamais le contenu en clair : un journal qui recopie les données devient
+/// lui-même une base de données personnelles.
+model EvenementAudit {
+  id              String   @id @default(uuid()) @db.Uuid
+  sujetId         String?  @map("sujet_id") @db.Uuid
+  sujetType       String   @map("sujet_type")
+  roleEffectif    String   @map("role_effectif")
+  action          String
+  ressourceType   String   @map("ressource_type")
+  ressourceId     String?  @map("ressource_id") @db.Uuid
+  etablissementId String?  @map("etablissement_id") @db.Uuid
+  idRequete       String   @map("id_requete")
+  /// Tronquée : /24 en IPv4, /48 en IPv6.
+  ipTronquee      String?  @map("ip_tronquee")
+  survenuLe       DateTime @default(now()) @map("survenu_le") @db.Timestamptz(6)
+
+  @@index([etablissementId, survenuLe])
+  @@index([sujetId, survenuLe])
+  @@map("evenement")
+  @@schema("raai_apprendre_audit")
+}
+
+/// Consommation IA par établissement et par mois, comptée côté serveur.
+/// La clé API ne quitte jamais le serveur.
+model QuotaIa {
+  etablissementId String  @map("etablissement_id") @db.Uuid
+  mois            String  @db.VarChar(7)
+  utilises        Int     @default(0)
+  plafond         Int     @default(500)
+  coutCentimes    Int     @default(0) @map("cout_centimes")
+
+  @@id([etablissementId, mois])
+  @@map("quota_ia")
+  @@schema("raai_apprendre")
+}

@@ -45,12 +45,15 @@ module.exports = {
       name: 'module-surface-publique',
       severity: 'error',
       comment:
-        "On importe l'index.ts d'un module, jamais son intérieur. " +
-        'Sinon la surface publique ne veut plus rien dire.',
-      from: { path: '^src/domaines/([^/]+)/', pathNot: '^src/domaines/$1/' },
+        "On importe l'index.ts d'un AUTRE module, jamais son intérieur. " +
+        'Sinon la surface publique ne veut plus rien dire. À l\'intérieur d\'un ' +
+        'module, en revanche, les couches s\'importent librement.',
+      // `$1` reprend le nom de module capturé dans `from` : la règle ne vise
+      // donc que les imports d'un module vers un autre.
+      from: { path: '^src/domaines/([^/]+)/' },
       to: {
-        path: '^src/domaines/([^/]+)/(.+)',
-        pathNot: ['^src/domaines/([^/]+)/index\\.ts$'],
+        path: '^src/domaines/([^/]+)/',
+        pathNot: ['^src/domaines/$1/', '^src/domaines/[^/]+/index\\.ts$'],
       },
     },
     {
@@ -59,7 +62,9 @@ module.exports = {
       comment:
         'La couche domaine ne dépend de rien : ni infrastructure, ni application, ' +
         'ni librairie tierce. Les flèches pointent vers le centre.',
-      from: { path: '^src/domaines/[^/]+/domaine/' },
+      // Les tests du domaine sont exclus : ils importent vitest, et c'est leur
+      // rôle. C'est le code de production qui doit rester pur.
+      from: { path: '^src/domaines/[^/]+/domaine/', pathNot: '\\.test\\.ts$' },
       to: {
         pathNot: ['^src/domaines/[^/]+/domaine/', '^src/noyau/'],
       },

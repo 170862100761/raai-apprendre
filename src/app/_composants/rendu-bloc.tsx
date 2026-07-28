@@ -1,4 +1,9 @@
 import type { ContenuBloc } from '@/domaines/catalogue'
+// Import direct, et c'est voulu : `next/dynamic` avec `ssr: false` n'est pas
+// permis dans un composant serveur, et serait ici sans objet. La visionneuse
+// elle-même est légère ; c'est Three.js qui pèse, et elle ne le charge qu'au
+// clic de l'élève.
+import { Visionneuse3d } from './visionneuse-3d'
 
 /**
  * Rendu d'un bloc de leçon.
@@ -72,17 +77,12 @@ export function RenduBloc({ contenu }: { contenu: ContenuBloc }) {
 
     case 'modele3d':
       return (
-        <figure className="flex flex-col gap-3 rounded-carte border border-bordure p-4">
-          <figcaption className="font-medium">{contenu.titre}</figcaption>
-          {/* La description n'est pas un repli : elle est toujours affichée.
-              Une partie du parc des établissements n'a pas de WebGL, et un
-              modèle qu'on ne peut pas voir doit rester compréhensible. */}
-          <p className="text-sm text-mine-doux">{contenu.description}</p>
-          <p className="text-sm text-mine-doux">
-            Modèle {contenu.format.toUpperCase()} — la visionneuse 3D n’est pas
-            encore branchée.
-          </p>
-        </figure>
+        <Visionneuse3d
+          ressourceId={contenu.ressourceId}
+          titre={contenu.titre}
+          description={contenu.description}
+          format={contenu.format}
+        />
       )
 
     case 'pdf':

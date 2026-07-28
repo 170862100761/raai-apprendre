@@ -129,7 +129,8 @@ export async function semer(bd) {
 
   await semerFormateur(q)
   const imageId = await semerImage(q)
-  await semerCours(q, competences, imageId)
+  const modeleId = await semerModele3d(q)
+  await semerCours(q, competences, imageId, modeleId)
 
   console.log('\n  Jeu de démonstration semé :')
   console.log('    MFR Escatalens · Bac Pro Agroéquipement · TAE 2026')
@@ -176,7 +177,7 @@ async function semerImage(q) {
  * Le contenu est écrit, pas inventé au hasard : une démonstration qui affiche
  * du faux-texte ne dit rien de ce que verra un enseignant.
  */
-async function semerCours(q, competences, imageId) {
+async function semerCours(q, competences, imageId, modeleId) {
   const M = id(200) // matière
   const MOD = id(201)
   const CH1 = id(202)
@@ -239,6 +240,16 @@ async function semerCours(q, competences, imageId) {
           url: 'https://chlorofil.fr/diplomes/secondaire/bac-pro/1re-term/agroequip',
           titre: 'Référentiel Bac Pro Agroéquipement',
           description: 'La fiche officielle du diplôme sur ChloroFil.',
+        },
+        {
+          type: 'modele3d',
+          ressourceId: modeleId,
+          titre: 'Corps de vérin hydraulique',
+          description:
+            'Corps de vérin cylindrique de 60 mm de long et 24 mm de diamètre, ' +
+            'avec une collerette de fixation en pied. Le piston et la tige ne ' +
+            'sont pas représentés.',
+          format: 'stl',
         },
         {
           type: 'bibliographie',
@@ -381,4 +392,89 @@ function crc32(tampon) {
   let c = 0xffffffff
   for (const octet of tampon) c = TABLE_CRC[(c ^ octet) & 0xff] ^ (c >>> 8)
   return (c ^ 0xffffffff) >>> 0
+}
+
+/**
+ * Un STL binaire engendré ici : un cylindre à collerette, qui évoque un corps
+ * de vérin.
+ *
+ * Comme pour l'image, engendrer vaut mieux qu'un blob en base64 dans le dépôt :
+ * on peut relire ce que ça produit. Le but n'est pas la justesse mécanique mais
+ * de prouver que la chaîne 3D fonctionne — et une forme ronde révèle tout de
+ * suite un défaut de normales ou de cadrage, ce qu'un cube masquerait.
+ */
+function engendrerStl(segments = 48) {
+  const triangles = []
+  const R = 20
+  const r = 12
+  const H = 60
+
+  const point = (rayon, i, y) => {
+    const a = (i / segments) * Math.PI * 2
+    return [Math.cos(a) * rayon, y, Math.sin(a) * rayon]
+  }
+
+  for (let i = 0; i < segments; i++) {
+    const j = (i + 1) % segments
+    const [ax, , az] = point(r, i, 0)
+    const [bx, , bz] = point(r, j, 0)
+
+    // Paroi du corps.
+    triangles.push([point(r, i, 0), point(r, j, 0), point(r, j, H)])
+    triangles.push([point(r, i, 0), point(r, j, H), point(r, i, H)])
+
+    // Collerette de fixation, en pied.
+    triangles.push([point(R, i, 0), point(R, j, 0), point(r, j, 0)])
+    triangles.push([point(R, i, 0), point(r, j, 0), point(r, i, 0)])
+
+    // Fonds.
+    triangles.push([[0, 0, 0], [ax, 0, az], [bx, 0, bz]])
+    triangles.push([[0, H, 0], point(r, j, H), point(r, i, H)])
+  }
+
+  const tampon = Buffer.alloc(84 + triangles.length * 50)
+  tampon.write('RAAI Apprendre - corps de verin (demonstration)', 0, 'latin1')
+  tampon.writeUInt32LE(triangles.length, 80)
+
+  let p = 84
+  for (const [a, b, c] of triangles) {
+    // Normale à zéro : la visionneuse les recalcule (`computeVertexNormals`).
+    // Les écrire fausses serait pire que de ne pas les écrire.
+    tampon.writeFloatLE(0, p)
+    tampon.writeFloatLE(0, p + 4)
+    tampon.writeFloatLE(0, p + 8)
+    p += 12
+    for (const sommet of [a, b, c]) {
+      for (const valeur of sommet) {
+        tampon.writeFloatLE(valeur, p)
+        p += 4
+      }
+    }
+    tampon.writeUInt16LE(0, p)
+    p += 2
+  }
+
+  return tampon
+}
+
+/** Dépose le STL et renvoie l'identifiant de ressource. */
+async function semerModele3d(q) {
+  const stl = engendrerStl()
+  const etablissement = id(3)
+  const chemin = `${etablissement}/${randomUUID()}`
+  const destination = join(process.cwd(), 'outils', 'medias-locaux', chemin)
+
+  await mkdir(dirname(destination), { recursive: true })
+  await writeFile(destination, stl)
+
+  const ressourceId = id(212)
+  await q(
+    `INSERT INTO raai_apprendre.ressource
+       (id, etablissement_id, nom, type_mime, chemin_stockage, taille_octets,
+        statut_traitement)
+     VALUES ($1, $2, 'corps-de-verin.stl', 'model/stl', $3, $4, 'pret')`,
+    [ressourceId, etablissement, chemin, stl.byteLength],
+  )
+
+  return ressourceId
 }

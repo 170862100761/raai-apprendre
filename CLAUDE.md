@@ -158,6 +158,24 @@ en-têtes sont la seule barrière.
 adulte : Supabase Storage n'est pas ouvert. Sur Vercel le disque est éphémère et
 non partagé — cet adaptateur n'a rien à y faire. Seul ce fichier changera.
 
+## Visionneuse 3D
+
+GLB et STL. **Le STEP n'est pas lu dans le navigateur** : sa tessellation
+appartient à un travail serveur (doc 02 §5). Charger OpenCascade sur un
+Chromebook de MFR reviendrait à promettre ce qu'on ne peut pas tenir.
+
+Three.js n'est importé que par `_composants/moteur-3d.ts`, chargé
+dynamiquement **au clic de l'élève**. La page de cours reste à 108 kB : une
+leçon sans modèle 3D ne paie jamais ces 150 ko. Si ce budget saute, c'est que
+quelqu'un a importé le moteur statiquement.
+
+`DoubleSide` sur le matériau : les STL issus de CAO ont souvent des triangles
+mal orientés, et sans cela l'élève voit des trous noirs et croit le modèle
+cassé.
+
+La description d'un modèle est **obligatoire** et toujours affichée — c'est ce
+que lisent les lecteurs d'écran et ce que voient les postes sans WebGL.
+
 ## Connexion des adultes — transitoire
 
 `compte.mot_de_passe_hash` et la table `session_compte` sont **provisoires** :

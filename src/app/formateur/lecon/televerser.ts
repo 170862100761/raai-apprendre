@@ -10,6 +10,7 @@ import {
 } from '@/domaines/mediatheque'
 import { peut } from '@/domaines/identite'
 import { sessionCourante } from '../../_session'
+import { auditer } from '../../_audit'
 
 export type EtatTeleversement = {
   readonly ressourceId?: string
@@ -65,7 +66,12 @@ export async function envoyerFichier(
 
   // 5. Invalider — rien : la ressource n'est référencée qu'au moment où
   //    l'enseignant enregistre la leçon.
-  // 6. Auditer — arrivera avec le module `audit`.
+  // 6. Auditer — déposer un fichier dans un établissement laisse une trace :
+  //    c'est ce qui permet de remonter à l'auteur d'un contenu litigieux.
+  await auditer('ressource.deposee', session, {
+    type: 'ressource',
+    id: resultat.valeur.ressourceId,
+  })
 
   return {
     ressourceId: resultat.valeur.ressourceId,

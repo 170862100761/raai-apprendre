@@ -13,6 +13,7 @@ import {
 } from '@/domaines/catalogue'
 import { peut } from '@/domaines/identite'
 import { sessionCourante } from '../../_session'
+import { auditer } from '../../_audit'
 
 export type EtatEdition = {
   readonly message?: string
@@ -163,6 +164,8 @@ export async function publier(
   const leconId = z.string().uuid().safeParse(donnees.get('leconId'))
   if (!leconId.success) return { erreur: 'Leçon inconnue.' }
 
+  const session = await sessionCourante()
+
   return (await encadrer('publier', async () => {
     const resultat = await publierLecon(
       identifiant<IdentifiantLecon>(leconId.data),
@@ -174,6 +177,9 @@ export async function publier(
     revalidatePath('/formateur')
     revalidatePath('/aujourdhui')
     revalidatePath(`/cours/${leconId.data}`)
+
+    // Publier, c'est envoyer un contenu à des mineurs : on garde qui l'a fait.
+    await auditer('lecon.publiee', session, { type: 'lecon', id: leconId.data })
 
     return {
       message: `Publiée — ${resultat.valeur.dureeEstimeeMin} min de lecture estimées.`,

@@ -52,8 +52,9 @@ export async function marquerLecture(
   // 5. Invalider — le tableau de bord change d'action prioritaire.
   revalidatePath('/aujourdhui')
 
-  // 6. Auditer — arrivera avec le module `audit`. Marquer une lecture n'est pas
-  //    une action sensible : ni note, ni permission, ni donnée personnelle.
+  // 6. Auditer — volontairement PAS journalisé. Marquer une lecture n'est ni
+  //    une note, ni une permission, ni une donnée personnelle ; en garder la
+  //    trace reviendrait à suivre les élèves à la page, ce qu'on a refusé.
 
   return { enregistre: true }
 }

@@ -159,6 +159,34 @@ indulgente sur la forme pour les textes courts : on évalue la compréhension,
 pas l'orthographe ni l'arrondi. Les réponses rédigées attendent un enseignant —
 aucune note n'est inventée.
 
+## Journal d'audit
+
+**Le journal ne recopie jamais les données.** On enregistre qui a fait quoi sur
+quoi — jamais la valeur. Un journal qui garde le contenu devient lui-même une
+base de données personnelles, avec sa propre conservation, ses propres droits et
+ses propres risques de fuite.
+
+La garantie est structurelle : la fonction `raai_apprendre_audit.journaliser`
+n'a que neuf paramètres, tous des métadonnées. Il n'existe aucun champ
+« détail » ou « commentaire » où glisser une valeur. Un test vérifie que la
+signature n'en acquiert pas.
+
+Écriture par cette fonction `SECURITY DEFINER` uniquement — le schéma est fermé
+à tous les rôles (`REVOKE ALL ON SCHEMA`), donc une lecture directe **échoue**
+avant même que la RLS ait à trancher. Réécriture et suppression bloquées par
+déclencheur ; seule `purger()`, réservée à une tâche planifiée, y déroge.
+
+**Une panne du journal ne fait jamais échouer l'action auditée.** La garantie
+vit dans `tracer`, pas dans un adaptateur : refuser une connexion parce que le
+journal est indisponible transformerait une panne d'observabilité en panne de
+service.
+
+Adresses IP tronquées deux fois — par le domaine et par la fonction SQL. On
+garde de quoi reconnaître un réseau, jamais un poste.
+
+Ce qui n'est PAS journalisé, et c'est délibéré : la lecture d'une leçon. En
+garder la trace reviendrait à suivre les élèves à la page.
+
 ## Mise en route d'un établissement
 
 `/administration` — réservé à `admin_etablissement` : créer une classe, coller

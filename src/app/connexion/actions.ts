@@ -9,6 +9,7 @@ import {
   OPTIONS_COOKIE,
   signerJeton,
 } from '@/noyau/cookie-session'
+import { auditerAnonyme } from '../_audit'
 import {
   depotIdentitePrisma,
   hachageBcrypt,
@@ -67,6 +68,15 @@ export async function connecter(
   )
 
   if (!resultat.ok) {
+    // Sans cette trace, une attaque par force brute ne laisserait rien
+    // derrière elle — précisément le cas où l'on veut une trace.
+    await auditerAnonyme(
+      resultat.erreur.code === 'compte_verrouille'
+        ? 'connexion.verrouillage'
+        : 'connexion.echouee',
+      { type: 'apprenant' },
+    )
+
     return {
       erreur: resultat.erreur.message,
       ...(resultat.erreur.champs ? { champs: resultat.erreur.champs } : {}),
@@ -86,7 +96,8 @@ export async function connecter(
   })
 
   // 5. Invalider — rien en cache à ce stade.
-  // 6. Auditer — le journal d'audit arrive avec le module `audit`.
+  // 6. Auditer
+  await auditerAnonyme('connexion.reussie', { type: 'apprenant' })
 
   redirect(destination(entree.data.suite))
 }

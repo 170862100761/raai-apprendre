@@ -14,6 +14,7 @@ import {
   type LigneRejetee,
 } from '@/domaines/organisation'
 import { sessionCourante } from '../_session'
+import { auditer } from '../_audit'
 
 export type EtatClasse = {
   readonly classeId?: string
@@ -65,6 +66,7 @@ export async function creer(
   }
 
   revalidatePath('/administration')
+  await auditer('classe.creee', session, { type: 'classe', id: resultat.valeur.id })
 
   return {
     classeId: resultat.valeur.id,
@@ -124,6 +126,14 @@ export async function importer(
 
   revalidatePath('/administration')
   revalidatePath('/formateur')
+
+  // Deux traces distinctes : créer un compte d'élève et lui remettre son code
+  // sont deux actes différents, et le second est celui qui expose un secret.
+  await auditer('apprenant.cree', session, { type: 'classe', id: entree.data.classeId })
+  await auditer('apprenant.acces_remis', session, {
+    type: 'classe',
+    id: entree.data.classeId,
+  })
 
   return {
     acces: resultat.valeur.acces,

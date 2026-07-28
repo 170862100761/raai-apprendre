@@ -10,6 +10,7 @@ import {
 } from '@/domaines/progression'
 import { peut } from '@/domaines/identite'
 import { sessionCourante } from '../../../../../_session'
+import { auditer } from '../../../../../_audit'
 
 /**
  * Export CSV de la grille de suivi.

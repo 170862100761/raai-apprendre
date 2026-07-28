@@ -9,6 +9,7 @@ import { depotEvaluationPrisma, soumettre } from '@/domaines/evaluation'
 import { depotProgressionPrisma, enregistrerResultat } from '@/domaines/progression'
 import { peut } from '@/domaines/identite'
 import { sessionCourante } from '../../_session'
+import { auditer } from '../../_audit'
 
 export type EtatCopie = {
   readonly score?: number
@@ -84,9 +85,12 @@ export async function rendreCopie(
   //    changer.
   revalidatePath('/aujourdhui')
 
-  // 6. Auditer — une note est une donnée sensible. Arrivera avec le module
-  //    `audit` ; c'est la première action de la plateforme qui l'exigera
-  //    vraiment.
+  // 6. Auditer — une note est une donnée sensible : un établissement doit
+  //    pouvoir répondre à « d'où vient ce résultat ? ».
+  await auditer('copie.rendue', session, {
+    type: 'evaluation',
+    id: entree.data.evaluationId,
+  })
 
   return {
     score: resultat.valeur.score,

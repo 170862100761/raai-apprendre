@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { prisma } from '@/noyau/prisma'
 import { COOKIE_COMPTE, OPTIONS_COOKIE, signerJeton } from '@/noyau/cookie-session'
+import { auditerAnonyme } from '../_audit'
 import {
   depotIdentitePrisma,
   DUREE_SESSION_COMPTE_JOURS,
@@ -36,7 +37,15 @@ export async function connecterFormateur(
     horloge: HORLOGE_SYSTEME,
   })
 
-  if (!resultat.ok) return { erreur: resultat.erreur.message }
+  if (!resultat.ok) {
+    await auditerAnonyme(
+      resultat.erreur.code === 'compte_verrouille'
+        ? 'connexion.verrouillage'
+        : 'connexion.echouee',
+      { type: 'compte' },
+    )
+    return { erreur: resultat.erreur.message }
+  }
 
   const secret = process.env.SECRET_SESSION_APPRENANT
   if (!secret) return { erreur: 'Le service est mal configuré.' }
@@ -46,6 +55,8 @@ export async function connecterFormateur(
     ...OPTIONS_COOKIE,
     maxAge: DUREE_SESSION_COMPTE_JOURS * 86_400,
   })
+
+  await auditerAnonyme('connexion.reussie', { type: 'compte' })
 
   redirect('/formateur')
 }

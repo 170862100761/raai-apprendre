@@ -12,6 +12,7 @@ import type {
 import { declarer, depotProgressionPrisma } from '@/domaines/progression'
 import { peut } from '@/domaines/identite'
 import { sessionCourante } from '../../../_session'
+import { auditer } from '../../../_audit'
 
 export type EtatDeclaration = { readonly message?: string; readonly erreur?: string }
 
@@ -81,8 +82,12 @@ export async function declarerAcquis(
   revalidatePath(`/formateur/classe/${entree.data.classeId}`)
   revalidatePath('/aujourdhui')
 
-  // 6. Auditer — modifier un acquis est une action sensible. Arrivera avec le
-  //    module `audit`.
+  // 6. Auditer — c'est LA trace qui permet de répondre à « qui a validé cette
+  //    compétence, et quand ? ».
+  await auditer('competence.declaree', session, {
+    type: 'acquis_competence',
+    id: entree.data.competenceId,
+  })
 
   return { message: 'Enregistré.' }
 }

@@ -61,6 +61,28 @@ Les trois familles de tests de permissions doivent passer sur Supabase comme
 elles passent sur PGlite. Si l'une échoue, **ne pas ouvrir aux établissements** :
 c'est le cloisonnement entre MFR qui est en cause.
 
+### L'écran de journal ne peut pas être vérifié avant cette étape
+
+`/administration/journal` affiche « Aucune action enregistrée » en mode
+transitoire, et c'est attendu : `lire_journal` filtre sur
+`raai_apprendre.etablissement_courant()`, qui lit `auth.uid()`. Sans Supabase
+Auth, `auth.uid()` est nul, la condition n'est jamais satisfaite, et la fonction
+ne renvoie rien — quel que soit le contenu réel du journal.
+
+L'écriture, elle, est vérifiée sur PGlite (`src/test/audit.test.ts`). C'est donc
+**la lecture seule** qui reste à confirmer, et elle doit l'être ici :
+
+1. se connecter avec un compte `admin_etablissement` réel ;
+2. ouvrir `/administration/journal` et constater que des lignes s'affichent ;
+3. se connecter avec un compte `enseignant` du même établissement et vérifier
+   que la page renvoie vers `/formateur` ;
+4. **le point qui compte** : vérifier qu'un `admin_etablissement` d'un AUTRE
+   établissement ne voit aucune ligne de celui-ci.
+
+Tant que le point 4 n'est pas constaté de visu, considérer que l'écran n'est pas
+vérifié. Un journal qui fuiterait d'un établissement à l'autre serait pire que
+pas de journal du tout.
+
 ## 4. Migrer les comptes adultes existants
 
 Chaque compte de `raai_apprendre.compte` doit exister dans `auth.users` **avec

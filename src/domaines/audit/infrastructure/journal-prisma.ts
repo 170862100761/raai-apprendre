@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
-import { tronquerIp } from '../domaine/evenement'
-import type { JournalAudit } from '../ports/journal'
+import { tronquerIp, type ActionAuditee } from '../domaine/evenement'
+import type { JournalAudit, LectureJournal } from '../ports/journal'
 
 /**
  * Écriture par la fonction `SECURITY DEFINER`, jamais par un INSERT direct.
@@ -25,6 +25,32 @@ export function journalPrisma(prisma: PrismaClient): JournalAudit {
             ${evenement.idRequete},
             ${tronquerIp(evenement.ipTronquee)}
           )`
+    },
+  }
+}
+
+/**
+ * Lecture par `lire_journal`, jamais par un SELECT direct.
+ *
+ * Le schéma d'audit est fermé à tous les rôles (`REVOKE ALL ON SCHEMA`) : un
+ * SELECT y échoue avant même que la RLS ait à trancher. La fonction porte donc
+ * seule le contrôle d'accès — elle exige `admin_etablissement` et l'appartenance
+ * à l'établissement consulté. La vérification faite côté application est un
+ * confort d'interface, pas la barrière.
+ */
+export function lectureJournalPrisma(prisma: PrismaClient): LectureJournal {
+  return {
+    async lire(etablissementId, limite) {
+      const lignes = await prisma.$queryRaw<
+        { action: string; ressource_type: string; role_effectif: string; survenu_le: Date }[]
+      >`SELECT * FROM raai_apprendre_audit.lire_journal(${etablissementId}::uuid, ${limite}::integer)`
+
+      return lignes.map((l) => ({
+        action: l.action as ActionAuditee,
+        ressourceType: l.ressource_type,
+        roleEffectif: l.role_effectif,
+        survenuLe: l.survenu_le,
+      }))
     },
   }
 }

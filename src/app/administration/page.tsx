@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
 import { peut } from '@/domaines/identite'
@@ -31,6 +32,10 @@ export default async function PageAdministration() {
       </header>
 
       <MiseEnRoute offres={offres} annees={annees} />
+
+      <Link href="/administration/journal" className="text-sm underline">
+        Consulter le journal des actions
+      </Link>
     </main>
   )
 }

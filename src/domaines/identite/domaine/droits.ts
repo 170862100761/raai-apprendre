@@ -37,6 +37,7 @@ export type Action =
   | 'apprenant.lire_nominatif'
   | 'membre.gerer'
   | 'etablissement.gerer'
+  | 'journal.consulter'
   // Pilotage
   | 'statistiques.etablissement'
   | 'statistiques.nationales'
@@ -85,6 +86,9 @@ const ROLES_REQUIS: Record<Action, readonly Role[]> = {
   'apprenant.lire_nominatif': ['admin_etablissement', 'responsable_pedagogique', 'enseignant'],
   'membre.gerer': ['admin_etablissement'],
   'etablissement.gerer': ['admin_etablissement'],
+  // Doit rester identique à `lire_journal` côté SQL. Si les deux divergent,
+  // c'est le SQL qui fait foi — l'écran afficherait un lien vers une page vide.
+  'journal.consulter': ['admin_etablissement'],
 
   'statistiques.etablissement': ['admin_etablissement', 'responsable_pedagogique'],
   'statistiques.nationales': ['admin_national', 'admin_academie'],

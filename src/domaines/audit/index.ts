@@ -13,6 +13,19 @@ export {
 
 export { tracer, verifierCharge, type Cible, type Contexte } from './application/tracer'
 
-export type { JournalAudit } from './ports/journal'
+export {
+  aSignaler,
+  libelle,
+  libelleRole,
+  parJournee,
+  type JourneeJournal,
+  type LigneJournal,
+} from './domaine/lecture'
 
-export { journalMuet, journalPrisma } from './infrastructure/journal-prisma'
+export type { JournalAudit, LectureJournal } from './ports/journal'
+
+export {
+  journalMuet,
+  journalPrisma,
+  lectureJournalPrisma,
+} from './infrastructure/journal-prisma'

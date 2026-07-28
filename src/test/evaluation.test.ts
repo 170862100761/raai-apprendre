@@ -8,7 +8,6 @@ import { PrismaClient } from '@prisma/client'
 import { identifiant } from '@/noyau/identifiants'
 import type {
   IdentifiantApprenant,
-  IdentifiantCompetence,
   IdentifiantEvaluation,
 } from '@/noyau/identifiants'
 import {

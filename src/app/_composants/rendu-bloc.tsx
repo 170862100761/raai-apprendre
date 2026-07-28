@@ -36,10 +36,17 @@ export function RenduBloc({ contenu }: { contenu: ContenuBloc }) {
     case 'schema':
       return (
         <figure className="flex flex-col gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {/* `max-w-full` et non `w-full` : un schéma de 300 px de large ne doit
               pas être étiré à la largeur du conteneur. Agrandi, il devient flou
-              — et un schéma hydraulique flou ne s'enseigne pas. */}
+              — et un schéma hydraulique flou ne s'enseigne pas.
+
+              `<img>` et non `next/image` : le média est servi par
+              `/api/v1/medias/[id]`, qui pose lui-même `nosniff`, une CSP
+              `sandbox` et un `Content-Type` issu de NOTRE liste blanche. Passer
+              par l'optimiseur ferait resservir le fichier par un autre chemin,
+              sans ces en-têtes — c'est la seule barrière tant que les médias ne
+              sont pas sur un domaine distinct. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/api/v1/medias/${contenu.ressourceId}`}
             alt={contenu.alternative}

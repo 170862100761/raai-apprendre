@@ -46,6 +46,12 @@ export async function GET(
 
   const { nomClasse, grille, index } = suivi.valeur
 
+  // `export.produit` figure parmi les actions dont la trace est OBLIGATOIRE :
+  // ce fichier emporte hors de la plateforme le suivi de compétences d'une
+  // classe entière. L'import de `auditer` était là depuis le début, l'appel
+  // manquait — l'export sortait sans laisser de trace.
+  await auditer('export.produit', session, { type: 'classe', id: classeId })
+
   // La mise en forme vit dans le domaine : séparateur, BOM et neutralisation
   // des formules sont des règles, pas de la plomberie HTTP — et elles se
   // testent sans démarrer de serveur.

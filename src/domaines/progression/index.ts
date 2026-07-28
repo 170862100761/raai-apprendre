@@ -18,6 +18,32 @@ export {
   type ResultatAEnregistrer,
 } from './application/enregistrer-resultat'
 
+export { suivreClasse, type SuiviClasse } from './application/suivre-classe'
+
+export {
+  BOM,
+  echapperCellule,
+  grilleEnCsv,
+  nomFichierSur,
+  LIBELLES_NIVEAU,
+} from './domaine/export-csv'
+
+export {
+  avancement,
+  cle,
+  competencesEnDifficulte,
+  couvertureReferentiel,
+  indexer,
+  jamaisConnectes,
+  niveauDe,
+  sansConnexionRecente,
+  JOURS_AVANT_SIGNALEMENT,
+  type Cellule,
+  type ColonneCompetence,
+  type Grille,
+  type LigneApprenant,
+} from './domaine/suivi'
+
 export type { DepotProgression, EcritureAcquis } from './ports/depot-progression'
 
 export { depotProgressionPrisma } from './infrastructure/depot-progression-prisma'

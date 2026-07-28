@@ -1,6 +1,9 @@
 import type { PrismaClient } from '@prisma/client'
 import { identifiant } from '@/noyau/identifiants'
-import type { IdentifiantCompetence } from '@/noyau/identifiants'
+import type {
+  IdentifiantApprenant,
+  IdentifiantCompetence,
+} from '@/noyau/identifiants'
 import type { AcquisExistant, NiveauAcquisition } from '../domaine/acquisition'
 import type { DepotProgression } from '../ports/depot-progression'
 
@@ -68,6 +71,73 @@ export function depotProgressionPrisma(prisma: PrismaClient): DepotProgression {
           ]
         }),
       )
+    },
+
+    async lireGrilleClasse(classeId) {
+      const classe = await prisma.classe.findUnique({
+        where: { id: classeId },
+        select: {
+          nom: true,
+          etablissementId: true,
+          offre: { select: { diplomeId: true } },
+          inscriptions: {
+            where: { statut: 'active' },
+            select: {
+              apprenant: {
+                select: { id: true, prenom: true, initialeNom: true, vuLe: true, actif: true },
+              },
+            },
+          },
+        },
+      })
+      if (!classe) return null
+
+      // Les compétences du diplôme de la classe, version en vigueur — pas tout
+      // le catalogue national : une grille de 200 colonnes ne se lit pas.
+      const competences = await prisma.competence.findMany({
+        where: {
+          version: { statut: 'publie', diplomeId: classe.offre.diplomeId },
+          // Seules les capacités de rang 1 : c'est le niveau auquel un
+          // enseignant raisonne et auquel le référentiel définit les blocs.
+          parentId: null,
+        },
+        orderBy: { ordre: 'asc' },
+        select: { id: true, code: true, intitule: true },
+      })
+
+      const apprenants = classe.inscriptions
+        .map((i) => i.apprenant)
+        .filter((a) => a.actif)
+        .sort((a, b) => a.prenom.localeCompare(b.prenom, 'fr'))
+
+      const acquis = await prisma.acquisCompetence.findMany({
+        where: {
+          apprenantId: { in: apprenants.map((a) => a.id) },
+          competenceId: { in: competences.map((c) => c.id) },
+        },
+        select: { apprenantId: true, competenceId: true, niveau: true },
+      })
+
+      return {
+        nomClasse: classe.nom,
+        etablissementId: classe.etablissementId,
+        apprenants: apprenants.map((a) => ({
+          id: identifiant<IdentifiantApprenant>(a.id),
+          prenom: a.prenom,
+          initialeNom: a.initialeNom,
+          vuLe: a.vuLe,
+        })),
+        competences: competences.map((c) => ({
+          id: identifiant<IdentifiantCompetence>(c.id),
+          code: c.code,
+          intitule: c.intitule,
+        })),
+        cellules: acquis.map((a) => ({
+          apprenantId: identifiant<IdentifiantApprenant>(a.apprenantId),
+          competenceId: identifiant<IdentifiantCompetence>(a.competenceId),
+          niveau: a.niveau as NiveauAcquisition,
+        })),
+      }
     },
   }
 }

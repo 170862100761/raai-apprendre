@@ -1,5 +1,10 @@
-import type { IdentifiantApprenant, IdentifiantCompetence } from '@/noyau/identifiants'
+import type {
+  IdentifiantApprenant,
+  IdentifiantClasse,
+  IdentifiantCompetence,
+} from '@/noyau/identifiants'
 import type { AcquisExistant, NiveauAcquisition, OrigineAcquis } from '../domaine/acquisition'
+import type { Grille } from '../domaine/suivi'
 
 export type EcritureAcquis = {
   readonly apprenantId: IdentifiantApprenant
@@ -20,4 +25,10 @@ export interface DepotProgression {
 
   /** La version de référentiel est résolue par l'adaptateur, pas par le domaine. */
   ecrireAcquis(ecritures: readonly EcritureAcquis[]): Promise<void>
+
+  /** `null` si la classe n'existe pas ou est hors périmètre. */
+  lireGrilleClasse(classeId: IdentifiantClasse): Promise<(Grille & {
+    readonly nomClasse: string
+    readonly etablissementId: string
+  }) | null>
 }

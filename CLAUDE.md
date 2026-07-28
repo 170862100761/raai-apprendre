@@ -159,6 +159,31 @@ indulgente sur la forme pour les textes courts : on évalue la compréhension,
 pas l'orthographe ni l'arrondi. Les réponses rédigées attendent un enseignant —
 aucune note n'est inventée.
 
+## Grille de suivi
+
+`/formateur/classe/[id]` : élèves en lignes, compétences en colonnes. C'est
+l'écran que les établissements attendent le plus — il répond à l'inspection
+(« prouvez-moi que le référentiel est couvert ») et à l'enseignant (« qui
+bloque, et sur quoi »).
+
+**Jamais la couleur seule.** Quatre niveaux, quatre symboles (· ◐ ● ★) plus un
+libellé lu par les lecteurs d'écran. L'agroéquipement est une filière très
+masculine, et environ 8 % des garçons sont daltoniens : un code chromatique y
+serait illisible pour deux élèves par classe.
+
+Seules les **capacités de rang 1** sont affichées, et seulement celles du
+diplôme de la classe. Une grille de 200 colonnes ne se lit pas.
+
+Le seuil de signalement d'inactivité est **fixe à 14 jours**, assumé pour le
+MVP : un enseignant peut expliquer « il ne s'est pas connecté depuis 14 jours »,
+il ne peut pas expliquer un score de risque. Un élève qui ne s'est **jamais**
+connecté relève de la mise en route de la classe, pas du décrochage — les deux
+sont signalés séparément.
+
+Export CSV : séparateur point-virgule, BOM UTF-8, et neutralisation des
+formules (un intitulé commençant par `=` s'exécuterait à l'ouverture dans
+Excel). Ces règles vivent dans le domaine et sont testées.
+
 ## Médias
 
 Types acceptés en **liste blanche** (`domaines/mediatheque`), avec vérification

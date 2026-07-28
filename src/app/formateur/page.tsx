@@ -26,6 +26,14 @@ export default async function PageFormateur() {
     session.etablissementId,
   )
 
+  // Les classes que ce compte encadre réellement. Sans affectation, un
+  // enseignant ne voit aucun élève — la liste est donc vide, et c'est juste.
+  const classes = await prisma.classe.findMany({
+    where: { id: { in: [...session.classes] }, archivee: false },
+    orderBy: { nom: 'asc' },
+    select: { id: true, nom: true, _count: { select: { inscriptions: true } } },
+  })
+
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-10">
       <header className="flex items-baseline justify-between gap-4">
@@ -36,6 +44,28 @@ export default async function PageFormateur() {
           </button>
         </form>
       </header>
+
+      {classes.length > 0 ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-sm font-medium text-mine-doux">Mes classes</h2>
+          <ul className="flex flex-wrap gap-2">
+            {classes.map((classe) => (
+              <li key={classe.id}>
+                <Link
+                  href={`/formateur/classe/${classe.id}`}
+                  className="flex flex-col rounded-carte border border-bordure px-4 py-3 hover:bg-surface-2"
+                >
+                  <span className="font-medium">{classe.nom}</span>
+                  <span className="text-sm text-mine-doux">
+                    {classe._count.inscriptions} élève
+                    {classe._count.inscriptions > 1 ? 's' : ''} · suivi des compétences
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <Link
         href="/formateur/lecon/nouvelle"

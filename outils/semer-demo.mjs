@@ -123,6 +123,7 @@ export async function semer(bd) {
     }
   }
 
+  await semerFormateur(q)
   await semerCours(q, competences)
 
   console.log('\n  Jeu de démonstration semé :')
@@ -130,6 +131,7 @@ export async function semer(bd) {
   for (const [prenom, , identifiant, code] of ELEVES) {
     console.log(`    ${prenom.padEnd(7)} ${identifiant.padEnd(20)} code ${code}`)
   }
+  console.log('    Formateur  marc@mfr-escatalens.fr  mot de passe formateur2026')
 }
 
 /**
@@ -257,5 +259,26 @@ async function semerCours(q, competences) {
        (apprenant_id, lecon_id, etablissement_id, position, terminee_le)
      VALUES ($1,$2,$3,3,now())`,
     [id(40), L1, id(3)],
+  )
+}
+
+/** Un formateur, avec un mot de passe local (transitoire, avant Supabase). */
+async function semerFormateur(q) {
+  const COMPTE = id(100)
+  await q(
+    `INSERT INTO raai_apprendre.compte (id, email, nom, prenom, mot_de_passe_hash)
+     VALUES ($1, 'marc@mfr-escatalens.fr', 'Delmas', 'Marc', $2)`,
+    [COMPTE, await bcrypt.hash('formateur2026', 10)],
+  )
+  const MEMBRE = id(101)
+  await q(
+    `INSERT INTO raai_apprendre.membre (id, compte_id, etablissement_id, role)
+     VALUES ($1, $2, $3, 'enseignant')`,
+    [MEMBRE, COMPTE, id(3)],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.affectation (id, membre_id, classe_id)
+     VALUES ($1, $2, $3)`,
+    [id(102), MEMBRE, id(9)],
   )
 }

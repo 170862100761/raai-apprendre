@@ -12,9 +12,11 @@ import type {
   JetonSession,
 } from '@/noyau/identifiants'
 import { ouvrirSessionApprenant } from './ouvrir-session-apprenant'
+import { ouvrirSessionCompte } from './ouvrir-session-compte'
 import { resoudreSession } from './resoudre-session'
 import type {
   ApprenantAuthentifiable,
+  CompteAuthentifiable,
   DepotIdentite,
   Hachage,
   Horloge,
@@ -31,6 +33,8 @@ class DepotDouble implements DepotIdentite {
   verrous = new Map<string, EtatVerrou>()
   sessions = new Map<string, SessionApprenantStockee>()
   profils = new Map<string, ProfilCompte>()
+  comptes = new Map<string, CompteAuthentifiable>()
+  sessionsCompte = new Map<string, IdentifiantCompte>()
   vus: string[] = []
   jetonsCrees = 0
 
@@ -54,6 +58,17 @@ class DepotDouble implements DepotIdentite {
   async revoquerSessionsApprenant() {}
   async chargerProfilCompte(compteId: IdentifiantCompte) {
     return this.profils.get(compteId) ?? null
+  }
+  async trouverCompteParEmail(email: string) {
+    return this.comptes.get(email) ?? null
+  }
+  async creerSessionCompte(compteId: IdentifiantCompte) {
+    const jeton = identifiant<JetonSession>(`jeton-compte-${++this.jetonsCrees}`)
+    this.sessionsCompte.set(jeton, compteId)
+    return jeton
+  }
+  async resoudreJetonCompte(jeton: JetonSession) {
+    return this.sessionsCompte.get(jeton) ?? null
   }
   async marquerVu(sujetId: string) {
     this.vus.push(sujetId)
@@ -260,5 +275,77 @@ describe('résolution de session', () => {
     expect(s.sujetId).toBe(COMPTE)
     expect(s.attributions.map((a) => a.role)).toEqual(['enseignant'])
     expect(s.attributions.map((a) => a.role)).not.toContain('apprenant')
+  })
+})
+
+
+describe('connexion adulte (transitoire, avant Supabase)', () => {
+  const COMPTE = identifiant<IdentifiantCompte>('compte-ens')
+
+  beforeEach(() => {
+    depot.comptes.set('marc@mfr-escatalens.fr', {
+      id: COMPTE,
+      motDePasseHash: 'bon-motdepasse-solide',
+      actif: true,
+    })
+    depot.profils.set(COMPTE, {
+      compteId: COMPTE,
+      attributions: [
+        { role: 'enseignant', portee: { type: 'etablissement', etablissementId: ETAB } },
+      ],
+      etablissementId: ETAB,
+      classes: [],
+    })
+  })
+
+  const connecter = (email: string, motDePasse: string) =>
+    ouvrirSessionCompte({ email, motDePasse }, { depot, hachage, horloge })
+
+  it('ouvre une session avec le bon mot de passe', async () => {
+    const r = await connecter('marc@mfr-escatalens.fr', 'motdepasse-solide')
+    expect(r.ok).toBe(true)
+  })
+
+  it("tolère la casse et les espaces autour de l'adresse", async () => {
+    const r = await connecter('  MARC@MFR-ESCATALENS.FR ', 'motdepasse-solide')
+    expect(r.ok).toBe(true)
+  })
+
+  it('répond la même chose pour une adresse inconnue et un mot de passe faux', async () => {
+    const inconnu = await connecter('personne@mfr.fr', 'motdepasse-solide')
+    const faux = await connecter('marc@mfr-escatalens.fr', 'raté')
+    expect(inconnu.ok).toBe(false)
+    expect(faux.ok).toBe(false)
+    expect(!inconnu.ok && inconnu.erreur.message).toBe(!faux.ok && faux.erreur.message)
+  })
+
+  it("verrouille l'adresse après cinq échecs, comme pour un élève", async () => {
+    // Un mot de passe d'enseignant protège les données de trente mineurs :
+    // il mérite au moins autant de soin qu'un code à 4 chiffres.
+    for (let i = 0; i < ESSAIS_AVANT_VERROU; i++) {
+      await connecter('marc@mfr-escatalens.fr', 'raté')
+      avancerDe(1)
+    }
+    const r = await connecter('marc@mfr-escatalens.fr', 'motdepasse-solide')
+    expect(r.ok).toBe(false)
+    expect(!r.ok && r.erreur.code).toBe('compte_verrouille')
+  })
+
+  it('la session ouverte porte bien les attributions du compte', async () => {
+    const ouverture = await connecter('marc@mfr-escatalens.fr', 'motdepasse-solide')
+    if (!ouverture.ok) throw new Error('ouverture attendue')
+
+    const compteId = await depot.resoudreJetonCompte(ouverture.valeur.jeton)
+    const session = await resoudreSession({ compteId }, depot)
+
+    expect(session.origine).toBe('compte')
+    expect(session.attributions.map((a) => a.role)).toEqual(['enseignant'])
+  })
+
+  it("un compte sans mot de passe local ne s'authentifie pas par cette voie", async () => {
+    // C'est le cas d'un compte déjà migré vers Supabase Auth.
+    depot.comptes.delete('marc@mfr-escatalens.fr')
+    const r = await connecter('marc@mfr-escatalens.fr', 'motdepasse-solide')
+    expect(r.ok).toBe(false)
   })
 })

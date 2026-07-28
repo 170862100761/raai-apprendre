@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { COOKIE_APPRENANT, verifierJeton } from '@/noyau/cookie-session'
+import { COOKIE_APPRENANT, COOKIE_COMPTE, verifierJeton } from '@/noyau/cookie-session'
 
 /**
  * Le middleware s'exécute sur l'Edge : **pas de Prisma ici.**
@@ -14,7 +14,7 @@ import { COOKIE_APPRENANT, verifierJeton } from '@/noyau/cookie-session'
  * le sait. Ne jamais traiter le passage du middleware comme une autorisation.
  */
 
-const PUBLIC = ['/', '/connexion', '/offre', '/mentions-legales']
+const PUBLIC = ['/', '/connexion', '/connexion-formateur', '/offre', '/mentions-legales']
 
 function estPublic(chemin: string): boolean {
   return (
@@ -42,7 +42,7 @@ export async function middleware(requete: NextRequest) {
     requete.cookies.get(COOKIE_APPRENANT)?.value,
     secret,
   )
-  const aUnCompte = requete.cookies.has('sb-access-token')
+  const aUnCompte = requete.cookies.has(COOKIE_COMPTE)
 
   if (!jetonApprenant && !aUnCompte) {
     const versConnexion = new URL('/connexion', requete.url)

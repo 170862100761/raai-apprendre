@@ -17,6 +17,7 @@ import type { Attribution, Role } from '../domaine/session'
 import type { EtatVerrou } from '../domaine/verrou'
 import type {
   ApprenantAuthentifiable,
+  CompteAuthentifiable,
   DepotIdentite,
   ProfilCompte,
   SessionApprenantStockee,
@@ -139,6 +140,44 @@ export function depotIdentitePrisma(prisma: PrismaClient): DepotIdentite {
           : null,
         classes: [...new Set(classes)],
       }
+    },
+
+    async trouverCompteParEmail(email): Promise<CompteAuthentifiable | null> {
+      const compte = await prisma.compte.findUnique({
+        where: { email },
+        select: { id: true, motDePasseHash: true, actif: true },
+      })
+
+      // Pas de mot de passe local = compte destiné à Supabase Auth. Il ne
+      // s'authentifie pas par cette voie, et ce n'est pas une erreur.
+      if (!compte?.motDePasseHash) return null
+
+      return {
+        id: identifiant<IdentifiantCompte>(compte.id),
+        motDePasseHash: compte.motDePasseHash,
+        actif: compte.actif,
+      }
+    },
+
+    async creerSessionCompte(compteId, expireLe): Promise<JetonSession> {
+      const session = await prisma.sessionCompte.create({
+        data: { compteId, expireLe },
+        select: { jeton: true },
+      })
+      return identifiant<JetonSession>(session.jeton)
+    },
+
+    async resoudreJetonCompte(jeton): Promise<IdentifiantCompte | null> {
+      const session = await prisma.sessionCompte.findFirst({
+        where: {
+          jeton,
+          expireLe: { gt: new Date() },
+          revoqueeLe: null,
+          compte: { actif: true },
+        },
+        select: { compteId: true },
+      })
+      return session ? identifiant<IdentifiantCompte>(session.compteId) : null
     },
 
     async marquerVu(sujetId) {

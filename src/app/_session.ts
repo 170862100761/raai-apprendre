@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
 import { COOKIE_APPRENANT, COOKIE_COMPTE, verifierJeton } from '@/noyau/cookie-session'
-import { identifiant, type IdentifiantCompte, type JetonSession } from '@/noyau/identifiants'
+import { identifiant, type JetonSession } from '@/noyau/identifiants'
 import {
   depotIdentitePrisma,
   resoudreSession,
@@ -27,17 +27,21 @@ export async function sessionCourante(): Promise<Session> {
 
   const bocal = await cookies()
 
-  const jeton = await verifierJeton(bocal.get(COOKIE_APPRENANT)?.value, secret)
+  const jetonApprenant = await verifierJeton(bocal.get(COOKIE_APPRENANT)?.value, secret)
+  const jetonCompte = await verifierJeton(bocal.get(COOKIE_COMPTE)?.value, secret)
 
-  // Supabase n'est pas branché : le cookie de compte existe dans le contrat
-  // mais aucun JWT n'est encore vérifié. Le jour où il l'est, seule cette
-  // ligne change — le reste de l'application ne bouge pas.
-  const compteId = lireCompteId(bocal.get(COOKIE_COMPTE)?.value)
+  // TRANSITOIRE : tant que Supabase Auth n'est pas ouvert, le jeton de compte
+  // est un jeton maison, vérifié en base exactement comme celui d'un élève.
+  // Le jour où Supabase arrive, seules ces trois lignes changent — ni les
+  // écrans ni les autorisations ne bougent.
+  const compteId = jetonCompte
+    ? await depot.resoudreJetonCompte(identifiant<JetonSession>(jetonCompte))
+    : null
 
   return resoudreSession(
     {
       compteId,
-      jetonApprenant: jeton ? identifiant<JetonSession>(jeton) : null,
+      jetonApprenant: jetonApprenant ? identifiant<JetonSession>(jetonApprenant) : null,
     },
     depot,
   )
@@ -48,13 +52,4 @@ export async function exigerSession(): Promise<Session> {
   const session = await sessionCourante()
   if (session.sujetId === null) redirect('/connexion')
   return session
-}
-
-/**
- * À remplacer par la vérification du JWT Supabase quand le compte sera ouvert.
- * En attendant, renvoyer `null` est le comportement sûr : aucun compte adulte
- * ne peut être usurpé par un cookie fabriqué à la main.
- */
-function lireCompteId(_valeur: string | undefined): IdentifiantCompte | null {
-  return null
 }

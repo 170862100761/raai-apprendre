@@ -35,6 +35,11 @@ model Compte {
   email    String  @unique
   nom      String  @default("")
   prenom   String  @default("")
+  /// TRANSITOIRE — mot de passe local, en attendant l'ouverture de Supabase
+  /// Auth. Nullable : un compte migré vers Supabase n'en aura plus, et les
+  /// deux chemins cohabiteront le temps de la bascule. Rien d'autre dans le
+  /// code ne dépend de cette colonne que le dépôt d'identité.
+  motDePasseHash String? @map("mot_de_passe_hash")
   actif    Boolean @default(true)
   creeLe   DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
   vuLe     DateTime? @map("vu_le") @db.Timestamptz(6)
@@ -42,6 +47,7 @@ model Compte {
   membres       Membre[]
   apprenant     Apprenant?
   consentements Consentement[]
+  sessions      SessionCompte[]
 
   @@map("compte")
   @@schema("raai_apprendre")
@@ -343,6 +349,24 @@ model SessionApprenant {
 
   @@index([apprenantId])
   @@map("session_apprenant")
+  @@schema("raai_apprendre")
+}
+
+/// Session d'un adulte. TRANSITOIRE, comme `compte.mot_de_passe_hash` : quand
+/// Supabase Auth sera ouvert, c'est son JWT qui prendra le relais et cette
+/// table disparaîtra. Elle vit derrière le même port que les sessions élèves,
+/// donc la bascule ne touchera pas le reste du code.
+model SessionCompte {
+  jeton      String   @id @default(uuid()) @db.Uuid
+  compteId   String   @map("compte_id") @db.Uuid
+  creeLe     DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
+  expireLe   DateTime @map("expire_le") @db.Timestamptz(6)
+  revoqueeLe DateTime? @map("revoquee_le") @db.Timestamptz(6)
+
+  compte Compte @relation(fields: [compteId], references: [id], onDelete: Cascade)
+
+  @@index([compteId])
+  @@map("session_compte")
   @@schema("raai_apprendre")
 }
 

@@ -128,3 +128,19 @@ Deux limites, propres à PGlite et absentes en production :
 Comptes de démonstration : `lea.escatalens` / `4271`, `thomas.escatalens` /
 `8305`, `ines.escatalens` / `6194`. Trois états de progression différents, pour
 que la démonstration ne montre pas qu'un seul cas.
+Formateur : `marc@mfr-escatalens.fr` / `formateur2026`, sur `/connexion-formateur`.
+
+PGlite est fragile sous usage soutenu : si l'application affiche « Can't reach
+database server », relancer `npm run bd:locale`. Les données sont en mémoire,
+tout repart du jeu de démonstration.
+
+## Connexion des adultes — transitoire
+
+`compte.mot_de_passe_hash` et la table `session_compte` sont **provisoires** :
+elles n'existent que parce que le compte Supabase n'est pas encore ouvert, et
+qu'un éditeur de leçons sans enseignant connecté ne sert à rien.
+
+Le jour où Supabase Auth arrive : son JWT alimente `resoudreSession`, la colonne
+passe à NULL sur les comptes migrés, la table disparaît. Tout cela vit derrière
+le port `DepotIdentite` — ni les écrans, ni les autorisations, ni la RLS ne
+bougeront. Ne pas bâtir de fonctionnalité sur ces deux objets.

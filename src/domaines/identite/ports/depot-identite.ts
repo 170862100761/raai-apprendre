@@ -27,6 +27,12 @@ export type SessionApprenantStockee = {
   readonly etablissementId: IdentifiantEtablissement
 }
 
+export type CompteAuthentifiable = {
+  readonly id: IdentifiantCompte
+  readonly motDePasseHash: string
+  readonly actif: boolean
+}
+
 export type ProfilCompte = {
   readonly compteId: IdentifiantCompte
   readonly attributions: readonly Attribution[]
@@ -53,6 +59,14 @@ export interface DepotIdentite {
 
   /** Attributions non expirées d'un compte adulte, avec ses classes encadrées. */
   chargerProfilCompte(compteId: IdentifiantCompte): Promise<ProfilCompte | null>
+
+  /** `null` si l'email est inconnu ou si le compte n'a pas de mot de passe local. */
+  trouverCompteParEmail(email: string): Promise<CompteAuthentifiable | null>
+
+  creerSessionCompte(compteId: IdentifiantCompte, expireLe: Date): Promise<JetonSession>
+
+  /** `null` si le jeton est inconnu, expiré ou révoqué. */
+  resoudreJetonCompte(jeton: JetonSession): Promise<IdentifiantCompte | null>
 
   marquerVu(sujetId: IdentifiantApprenant | IdentifiantCompte): Promise<void>
 }

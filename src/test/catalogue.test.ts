@@ -7,16 +7,33 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 import { identifiant, type IdentifiantApprenant, type IdentifiantLecon } from '@/noyau/identifiants'
-import { chargerParcours, depotCataloguePrisma, enregistrerLecture } from '@/domaines/catalogue'
+import {
+  chargerParcours,
+  creerLecon,
+  depotCataloguePrisma,
+  enregistrerLecon,
+  enregistrerLecture,
+  publierLecon,
+} from '@/domaines/catalogue'
+import { identifiant as marquer } from '@/noyau/identifiants'
+import type { IdentifiantCompetence } from '@/noyau/identifiants'
 
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
-  'postgresql://postgres:postgres@127.0.0.1:5433/postgres?schema=raai_apprendre'
+  // `connection_limit=1` : PGlite ne sert qu'une connexion à la fois, et le
+  // pool par défaut de Prisma en ouvre plusieurs. En revanche PAS
+  // `pgbouncer=true` ici : ce mode casse le protocole du serveur PGlite
+  // (« unexpected message from server ») alors qu'il est nécessaire côté
+  // application. Constaté, pas supposé.
+  'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
+    '?schema=raai_apprendre&connection_limit=1'
 
 const LECON_HYDRAULIQUE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000204')
 const LECON_SECURITE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000205')
 const THOMAS = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000042')
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
+const CHAPITRE = '00000000-0000-4000-8000-000000000202'
+const COMPETENCE_C9 = '00000000-0000-4000-8000-000000000024'
 
 let prisma: PrismaClient
 let depot: ReturnType<typeof depotCataloguePrisma>
@@ -135,5 +152,109 @@ describe('parcours d’un apprenant', () => {
     })
     expect(lecture?.termineeLe).not.toBeNull()
     expect(lecture?.position).toBe(3)
+  })
+})
+
+
+describe('édition et publication par un enseignant', () => {
+  let creeeId: string | null = null
+
+  afterAll(async () => {
+    if (creeeId) await prisma.lecon.deleteMany({ where: { id: creeeId } })
+  })
+
+  it('refuse de créer une leçon sans compétence rattachée', async () => {
+    if (!disponible) return
+
+    // Le refus qui protège tout le suivi : une leçon non rattachée ne compte
+    // dans la progression d'aucun élève.
+    const r = await creerLecon(
+      { chapitreId: CHAPITRE, etablissementId: ETABLISSEMENT, titre: 'Essai', competences: [] },
+      depot,
+    )
+    expect(r.ok).toBe(false)
+  })
+
+  it('crée une leçon en brouillon, invisible des élèves', async () => {
+    if (!disponible) return
+
+    const r = await creerLecon(
+      {
+        chapitreId: CHAPITRE,
+        etablissementId: ETABLISSEMENT,
+        titre: 'Entretien du cardan',
+        competences: [marquer<IdentifiantCompetence>(COMPETENCE_C9)],
+      },
+      depot,
+    )
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    creeeId = r.valeur.leconId
+
+    const parcours = await chargerParcours(THOMAS, depot)
+    expect(parcours.lecons.map((l) => l.id)).not.toContain(creeeId)
+  })
+
+  it('refuse de publier une leçon vide', async () => {
+    if (!disponible) return
+    const r = await publierLecon(identifiant<IdentifiantLecon>(creeeId!), depot)
+    expect(r.ok).toBe(false)
+    expect(!r.ok && r.erreur.message).toMatch(/vide/)
+  })
+
+  it('écarte les blocs invalides à l’enregistrement, garde les bons', async () => {
+    if (!disponible) return
+
+    const r = await enregistrerLecon(
+      {
+        leconId: identifiant<IdentifiantLecon>(creeeId!),
+        titre: 'Entretien du cardan',
+        competences: [marquer<IdentifiantCompetence>(COMPETENCE_C9)],
+        blocs: [
+          { type: 'texte', texte: 'Le protecteur de cardan se vérifie avant chaque usage.' },
+          { type: 'lien', url: 'javascript:alert(1)', titre: 'Piège' },
+          { type: 'inconnu' },
+        ],
+      },
+      depot,
+    )
+
+    expect(r.ok).toBe(true)
+    expect(r.ok && r.valeur.blocsRetenus).toBe(1)
+    expect(r.ok && r.valeur.blocsRefuses).toBe(2)
+  })
+
+  it('publie, calcule la durée, et la leçon apparaît chez l’élève', async () => {
+    if (!disponible) return
+
+    const r = await publierLecon(identifiant<IdentifiantLecon>(creeeId!), depot)
+    expect(r.ok).toBe(true)
+    // La durée est calculée, jamais saisie : un enseignant la sous-estimerait.
+    expect(r.ok && r.valeur.dureeEstimeeMin).toBeGreaterThanOrEqual(1)
+
+    const parcours = await chargerParcours(THOMAS, depot)
+    expect(parcours.lecons.map((l) => l.id)).toContain(creeeId)
+  })
+
+  it('modifier une leçon publiée la repasse en brouillon, sur une version neuve', async () => {
+    if (!disponible) return
+
+    const avant = await depot.chargerLecon(identifiant<IdentifiantLecon>(creeeId!))
+
+    await enregistrerLecon(
+      {
+        leconId: identifiant<IdentifiantLecon>(creeeId!),
+        titre: 'Entretien du cardan (révisé)',
+        competences: [marquer<IdentifiantCompetence>(COMPETENCE_C9)],
+        blocs: [{ type: 'texte', texte: 'Texte revu après retour des élèves.' }],
+      },
+      depot,
+    )
+
+    const apres = await depot.chargerLecon(identifiant<IdentifiantLecon>(creeeId!))
+    // Un élève en train de lire ne doit pas voir l'énoncé changer sous ses yeux.
+    expect(apres!.statut).toBe('brouillon')
+    expect(apres!.version).toBe(avant!.version + 1)
+    expect(apres!.titre).toBe('Entretien du cardan (révisé)')
   })
 })

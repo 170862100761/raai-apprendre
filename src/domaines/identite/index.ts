@@ -38,6 +38,12 @@ export {
 } from './application/ouvrir-session-apprenant'
 
 export {
+  ouvrirSessionCompte,
+  DUREE_SESSION_COMPTE_JOURS,
+  type EntreeCompte,
+} from './application/ouvrir-session-compte'
+
+export {
   resoudreSession,
   resoudreSessionAuthentifiee,
   type Preuves,

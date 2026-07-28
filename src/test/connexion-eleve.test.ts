@@ -30,7 +30,13 @@ import {
 
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
-  'postgresql://postgres:postgres@127.0.0.1:5433/postgres?schema=raai_apprendre'
+  // `connection_limit=1` : PGlite ne sert qu'une connexion à la fois, et le
+  // pool par défaut de Prisma en ouvre plusieurs. En revanche PAS
+  // `pgbouncer=true` ici : ce mode casse le protocole du serveur PGlite
+  // (« unexpected message from server ») alors qu'il est nécessaire côté
+  // application. Constaté, pas supposé.
+  'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
+    '?schema=raai_apprendre&connection_limit=1'
 
 let prisma: PrismaClient
 let disponible = false

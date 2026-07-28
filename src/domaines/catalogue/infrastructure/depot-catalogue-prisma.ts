@@ -7,7 +7,13 @@ import type {
 } from '@/noyau/identifiants'
 import { lireContenu, type Bloc } from '../domaine/bloc'
 import type { LeconDuParcours, StatutLecon } from '../domaine/lecon'
-import type { DepotCatalogue, LeconPubliee } from '../ports/depot-catalogue'
+import type {
+  Chapitre,
+  CompetenceOption,
+  DepotCatalogue,
+  LeconEditable,
+  LeconPubliee,
+} from '../ports/depot-catalogue'
 
 export function depotCataloguePrisma(prisma: PrismaClient): DepotCatalogue {
   return {
@@ -67,6 +73,121 @@ export function depotCataloguePrisma(prisma: PrismaClient): DepotCatalogue {
         where: { id },
         data: { statut: 'publiee', dureeEstimeeMin, version, publieeLe: new Date() },
       })
+    },
+
+    async depublier(id, version) {
+      await prisma.lecon.update({
+        where: { id },
+        data: { statut: 'brouillon', version, publieeLe: null },
+      })
+    },
+
+    async creerLecon({ chapitreId, etablissementId, titre, competences }) {
+      const lecon = await prisma.lecon.create({
+        data: {
+          chapitreId,
+          etablissementId,
+          titre,
+          statut: 'brouillon',
+          liens: { create: competences.map((competenceId) => ({ competenceId })) },
+        },
+        select: { id: true },
+      })
+      return identifiant<IdentifiantLecon>(lecon.id)
+    },
+
+    async remplacerBlocs(leconId, blocs) {
+      // Remplacement complet dans une transaction : un enregistrement
+      // interrompu ne doit pas laisser une leçon amputée de la moitié de ses
+      // blocs.
+      await prisma.$transaction([
+        prisma.blocContenu.deleteMany({ where: { leconId } }),
+        prisma.blocContenu.createMany({
+          data: blocs.map((bloc, i) => ({
+            leconId,
+            type: bloc.contenu.type,
+            contenu: bloc.contenu,
+            ordre: i + 1,
+            genereParIa: bloc.genereParIa,
+          })),
+        }),
+      ])
+    },
+
+    async remplacerCompetences(leconId, competences) {
+      await prisma.$transaction([
+        prisma.lienCompetence.deleteMany({ where: { leconId } }),
+        prisma.lienCompetence.createMany({
+          data: competences.map((competenceId) => ({ leconId, competenceId })),
+        }),
+      ])
+    },
+
+    async modifierTitre(leconId, titre) {
+      await prisma.lecon.update({ where: { id: leconId }, data: { titre } })
+    },
+
+    async leconsDeLEtablissement(etablissementId): Promise<readonly LeconEditable[]> {
+      const lecons = await prisma.lecon.findMany({
+        where: { etablissementId },
+        orderBy: [{ statut: 'asc' }, { creeLe: 'desc' }],
+        select: {
+          id: true,
+          titre: true,
+          statut: true,
+          chapitre: { select: { titre: true } },
+          _count: { select: { blocs: true, liens: true } },
+        },
+      })
+
+      return lecons.map((l) => ({
+        id: identifiant<IdentifiantLecon>(l.id),
+        titre: l.titre,
+        statut: l.statut,
+        chapitre: l.chapitre.titre,
+        nombreBlocs: l._count.blocs,
+        nombreCompetences: l._count.liens,
+      }))
+    },
+
+    async chapitresDisponibles(etablissementId): Promise<readonly Chapitre[]> {
+      const chapitres = await prisma.chapitre.findMany({
+        where: { module: { matiere: { etablissementId } } },
+        orderBy: [{ module: { ordre: 'asc' } }, { ordre: 'asc' }],
+        select: {
+          id: true,
+          titre: true,
+          module: { select: { matiere: { select: { intitule: true } } } },
+        },
+      })
+
+      return chapitres.map((c) => ({
+        id: c.id,
+        titre: c.titre,
+        matiere: c.module.matiere.intitule,
+      }))
+    },
+
+    async competencesDuDiplome(etablissementId): Promise<readonly CompetenceOption[]> {
+      // Les compétences des diplômes que l'établissement a ouverts, dans la
+      // version en vigueur. Proposer tout le catalogue national noierait
+      // l'enseignant sous des référentiels qui ne le concernent pas.
+      const competences = await prisma.competence.findMany({
+        where: {
+          version: {
+            statut: 'publie',
+            diplome: { offres: { some: { etablissementId } } },
+          },
+        },
+        orderBy: { ordre: 'asc' },
+        select: { id: true, code: true, intitule: true },
+      })
+
+      return competences.map((c) => ({
+        id: identifiant<IdentifiantCompetence>(c.id),
+        code: c.code,
+        intitule: c.intitule,
+      }))
     },
   }
 }

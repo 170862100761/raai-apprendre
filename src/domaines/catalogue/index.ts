@@ -33,7 +33,20 @@ export {
 
 export { chargerParcours, type Parcours } from './application/parcours-apprenant'
 
-export type { DepotCatalogue, LeconPubliee } from './ports/depot-catalogue'
+export {
+  creerLecon,
+  enregistrerLecon,
+  type EntreeCreation,
+  type EntreeBlocs,
+} from './application/editer-lecon'
+
+export type {
+  Chapitre,
+  CompetenceOption,
+  DepotCatalogue,
+  LeconEditable,
+  LeconPubliee,
+} from './ports/depot-catalogue'
 
 export {
   depotCataloguePrisma,

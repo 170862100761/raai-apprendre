@@ -307,6 +307,8 @@ async function semerCours(q, competences, imageId, modeleId) {
     }
   }
 
+  await semerQuiz(q, CH1)
+
   // Léa a déjà lu le premier cours : le tableau de bord doit lui proposer le
   // second, pas recommencer au début.
   await q(
@@ -477,4 +479,85 @@ async function semerModele3d(q) {
   )
 
   return ressourceId
+}
+
+/**
+ * Un quiz sur le chapitre d'hydraulique, avec les quatre types de questions
+ * corrigés automatiquement.
+ *
+ * Les questions portent sur le contenu réellement écrit dans la leçon : un quiz
+ * qui n'interroge pas ce qu'on vient de lire n'apprend rien et décourage.
+ */
+async function semerQuiz(q, chapitreId) {
+  const EVAL = id(220)
+
+  await q(
+    `INSERT INTO raai_apprendre.evaluation
+       (id, chapitre_id, etablissement_id, titre, type, statut, duree_max_min)
+     VALUES ($1, $2, $3, 'Débit et pression : les bases', 'quiz', 'publiee', 15)`,
+    [EVAL, chapitreId, id(3)],
+  )
+
+  const questions = [
+    {
+      intitule: 'Quelle grandeur détermine la VITESSE d’un vérin ?',
+      type: 'qcm',
+      options: {
+        propositions: [
+          'Le débit, en litres par minute',
+          'La pression, en bars',
+          'La température de l’huile',
+          'La longueur du flexible',
+        ],
+      },
+      corrige: { bonnes: [0] },
+      bareme: 2,
+    },
+    {
+      intitule:
+        'Un tracteur relève lentement un outil lourd : il manque de pression.',
+      type: 'vrai_faux',
+      options: {},
+      corrige: { bonne: false },
+      bareme: 2,
+    },
+    {
+      intitule:
+        'Une pompe débite 60 L/min sous 180 bars. Quelle puissance développe-t-elle ?',
+      type: 'numerique',
+      options: { unite: 'kW' },
+      // Tolérance : 18 et 18,0 valent la même chose, l'arrondi n'est pas la
+      // compétence évaluée.
+      corrige: { valeur: 18, tolerance: 0.5 },
+      bareme: 3,
+    },
+    {
+      intitule: 'Dans quelle unité mesure-t-on un débit hydraulique ?',
+      type: 'texte_court',
+      options: {},
+      corrige: {
+        acceptees: ['litres par minute', 'L/min', 'l par minute', 'litre par minute'],
+      },
+      bareme: 2,
+    },
+  ]
+
+  let n = 221
+  for (const [i, question] of questions.entries()) {
+    await q(
+      `INSERT INTO raai_apprendre.question
+         (id, evaluation_id, type, enonce, options, corrige, bareme, ordre)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        id(n++),
+        EVAL,
+        question.type,
+        question.intitule,
+        JSON.stringify(question.options),
+        JSON.stringify(question.corrige),
+        question.bareme,
+        i + 1,
+      ],
+    )
+  }
 }

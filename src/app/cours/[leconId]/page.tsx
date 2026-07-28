@@ -54,6 +54,17 @@ export default async function PageLecon({
         ))}
       </article>
 
+      {/* Le quiz suit la leçon : c'est là qu'un élève a envie de vérifier
+          qu'il a compris, pas dans un onglet séparé. */}
+      {lecon.evaluation ? (
+        <Link
+          href={`/evaluation/${lecon.evaluation.id}`}
+          className="w-fit rounded-carte bg-accent px-5 py-3 font-medium text-accent-contraste"
+        >
+          Passer le quiz : {lecon.evaluation.titre}
+        </Link>
+      ) : null}
+
       <MarqueurDeLecture
         leconId={leconId}
         apprenantId={session.sujetId as IdentifiantApprenant}

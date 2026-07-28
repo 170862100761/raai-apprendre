@@ -10,6 +10,8 @@ import type { Lecon, LeconDuParcours } from '../domaine/lecon'
 export type LeconPubliee = Lecon & {
   readonly chapitre: string
   readonly matiere: string
+  /** Évaluation publiée du même chapitre, s'il y en a une. */
+  readonly evaluation: { readonly id: string; readonly titre: string } | null
 }
 
 export interface DepotCatalogue {

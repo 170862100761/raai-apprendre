@@ -134,6 +134,31 @@ PGlite est fragile sous usage soutenu : si l'application affiche « Can't reach
 database server », relancer `npm run bd:locale`. Les données sont en mémoire,
 tout repart du jeu de démonstration.
 
+## Évaluation et progression
+
+**Le corrigé ne sort jamais.** La projection qui sert l'énoncé
+(`chargerPourEleve`) ne lit pas la colonne `corrige` — ce qui n'est pas lu ne
+peut pas fuir. Les corrigés ne sont chargés qu'à la soumission
+(`chargerCorriges`). Un test vérifie que l'objet sérialisé vers l'élève ne
+contient aucune bonne réponse.
+
+**Un acquis ne se dégrade pas sur une évaluation.** Un élève qui a validé une
+compétence puis rate un quiz reste validé. Seule une déclaration d'enseignant
+peut faire descendre. Garanti à trois niveaux : domaine, application, et
+déclencheur SQL.
+
+La **maîtrise** demande deux validations espacées d'au moins sept jours : une
+réussite unique peut être un coup de chance.
+
+`evaluation` ne sait pas ce qu'est une compétence acquise ; `progression` ne
+sait pas ce qu'est un QCM. La couche de présentation appelle les deux — c'est
+ce qui permet de faire évoluer la notation sans toucher au suivi de compétences.
+
+Barème partiel sur les QCM, tolérance sur les réponses numériques, comparaison
+indulgente sur la forme pour les textes courts : on évalue la compréhension,
+pas l'orthographe ni l'arrondi. Les réponses rédigées attendent un enseignant —
+aucune note n'est inventée.
+
 ## Médias
 
 Types acceptés en **liste blanche** (`domaines/mediatheque`), avec vérification

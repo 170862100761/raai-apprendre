@@ -29,11 +29,22 @@ export function depotCataloguePrisma(prisma: PrismaClient): DepotCatalogue {
           blocs: { orderBy: { ordre: 'asc' } },
           liens: { select: { competenceId: true } },
           chapitre: {
-            select: { titre: true, module: { select: { matiere: { select: { intitule: true } } } } },
+            select: {
+              titre: true,
+              module: { select: { matiere: { select: { intitule: true } } } },
+              evaluations: {
+                where: { statut: 'publiee' },
+                orderBy: { creeLe: 'asc' },
+                take: 1,
+                select: { id: true, titre: true },
+              },
+            },
           },
         },
       })
       if (!lecon) return null
+
+      const evaluation = lecon.chapitre.evaluations[0] ?? null
 
       return {
         id: identifiant<IdentifiantLecon>(lecon.id),
@@ -45,6 +56,7 @@ export function depotCataloguePrisma(prisma: PrismaClient): DepotCatalogue {
         competences: lecon.liens.map((l) => identifiant<IdentifiantCompetence>(l.competenceId)),
         chapitre: lecon.chapitre.titre,
         matiere: lecon.chapitre.module.matiere.intitule,
+        evaluation: evaluation ? { id: evaluation.id, titre: evaluation.titre } : null,
       }
     },
 

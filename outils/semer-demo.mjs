@@ -137,7 +137,8 @@ export async function semer(bd) {
   for (const [prenom, , identifiant, code] of ELEVES) {
     console.log(`    ${prenom.padEnd(7)} ${identifiant.padEnd(20)} code ${code}`)
   }
-  console.log('    Formateur  marc@mfr-escatalens.fr  mot de passe formateur2026')
+  console.log('    Formateur  marc@mfr-escatalens.fr       mot de passe formateur2026')
+  console.log('    Direction  direction@mfr-escatalens.fr  mot de passe direction2026')
 }
 
 /**
@@ -327,6 +328,20 @@ async function semerFormateur(q) {
      VALUES ($1, 'marc@mfr-escatalens.fr', 'Delmas', 'Marc', $2)`,
     [COMPTE, await bcrypt.hash('formateur2026', 10)],
   )
+  // Un administrateur d'établissement : c'est lui qui crée les classes et
+  // remet les identifiants. Le formateur, lui, ne crée que des leçons.
+  const ADMIN = id(103)
+  await q(
+    `INSERT INTO raai_apprendre.compte (id, email, nom, prenom, mot_de_passe_hash)
+     VALUES ($1, 'direction@mfr-escatalens.fr', 'Bonnet', 'Sylvie', $2)`,
+    [ADMIN, await bcrypt.hash('direction2026', 10)],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.membre (id, compte_id, etablissement_id, role)
+     VALUES ($1, $2, $3, 'admin_etablissement')`,
+    [id(104), ADMIN, id(3)],
+  )
+
   const MEMBRE = id(101)
   await q(
     `INSERT INTO raai_apprendre.membre (id, compte_id, etablissement_id, role)

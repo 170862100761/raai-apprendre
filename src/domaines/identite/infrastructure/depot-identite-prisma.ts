@@ -132,6 +132,22 @@ export function depotIdentitePrisma(prisma: PrismaClient): DepotIdentite {
 
       const premierEtablissement = compte.membres.find((m) => m.etablissementId)?.etablissementId
 
+      // Un responsable pédagogique ou un administrateur voit TOUTES les classes
+      // de son établissement, pas seulement celles qu'il encadre. La fonction
+      // SQL `classes_du_sujet()` le dit déjà ; sans cela les deux couches
+      // divergeraient, et l'écran montrerait moins que ce que la base autorise.
+      const pilote = compte.membres.some(
+        (m) => m.role === 'responsable_pedagogique' || m.role === 'admin_etablissement',
+      )
+
+      if (pilote && premierEtablissement) {
+        const toutes = await prisma.classe.findMany({
+          where: { etablissementId: premierEtablissement, archivee: false },
+          select: { id: true },
+        })
+        for (const classe of toutes) classes.push(identifiant<IdentifiantClasse>(classe.id))
+      }
+
       return {
         compteId: identifiant<IdentifiantCompte>(compte.id),
         attributions,

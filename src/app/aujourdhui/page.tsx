@@ -27,7 +27,9 @@ export default async function PageAujourdhui() {
   const acces = peut(session, 'progression.lire_la_sienne', {
     apprenantId: session.sujetId as IdentifiantApprenant,
   })
-  if (!acces.autorise) redirect('/connexion')
+  // Un adulte connecté n'a rien à faire ici : on l'envoie chez lui, pas vers
+  // une page de connexion qui le renverrait aussitôt ici.
+  if (!acces.autorise) redirect('/formateur')
 
   const apprenant = await prisma.apprenant.findUnique({
     where: { id: session.sujetId as string },

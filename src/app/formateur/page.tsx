@@ -67,6 +67,12 @@ export default async function PageFormateur() {
         </section>
       ) : null}
 
+      {peut(session, 'classe.creer').autorise ? (
+        <Link href="/administration" className="w-fit text-sm underline">
+          Mise en route : créer une classe, inscrire des élèves
+        </Link>
+      ) : null}
+
       <Link
         href="/formateur/lecon/nouvelle"
         className="w-fit rounded-carte bg-accent px-5 py-3 font-medium text-accent-contraste"

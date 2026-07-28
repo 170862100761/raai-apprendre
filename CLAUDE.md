@@ -159,6 +159,29 @@ indulgente sur la forme pour les textes courts : on évalue la compréhension,
 pas l'orthographe ni l'arrondi. Les réponses rédigées attendent un enseignant —
 aucune note n'est inventée.
 
+## Mise en route d'un établissement
+
+`/administration` — réservé à `admin_etablissement` : créer une classe, coller
+une liste d'élèves, remettre les accès.
+
+**Les codes ne s'affichent qu'une fois.** Ils sont hachés en base, donc
+irrécupérables — c'est précisément ce qui rend acceptable un secret à quatre
+chiffres pour des mineurs. L'écran le dit sans détour et propose impression,
+téléchargement et copie. Le fichier est engendré **dans le navigateur** : les
+codes en clair ne repassent pas par le serveur et n'atterrissent dans aucun
+journal.
+
+L'import ne garde que **prénom + initiale**. Les colonnes en trop (date de
+naissance, e-mail) sont écartées, et l'utilisateur en est prévenu plutôt que de
+croire qu'elles ont été enregistrées.
+
+Identifiants : `prenom.uai`, sans accent ni majuscule — ils sont dictés par un
+formateur et recopiés par un élève de seize ans. Collisions suffixées
+(`lea2.0820001a`), sans jamais révéler le nom de famille.
+
+Codes de rattachement : alphabet sans O/0 ni I/1/L. Un code mal recopié, c'est
+dix minutes de cours perdues.
+
 ## Grille de suivi
 
 `/formateur/classe/[id]` : élèves en lignes, compétences en colonnes. C'est

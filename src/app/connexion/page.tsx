@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { aRole } from '@/domaines/identite'
 import { sessionCourante } from '../_session'
 import { FormulaireConnexion } from './formulaire'
 
@@ -11,9 +12,12 @@ export default async function PageConnexion({
 }) {
   const { suite, erreur } = await searchParams
 
-  // Déjà connecté : inutile de redemander.
+  // Déjà connecté : inutile de redemander — mais chacun chez soi. Renvoyer un
+  // adulte vers le tableau de bord élève créait une boucle de redirection,
+  // puisque celui-ci le renvoyait ici. Constaté en naviguant.
   const session = await sessionCourante()
-  if (session.sujetId !== null) redirect('/aujourdhui')
+  if (aRole(session, 'apprenant')) redirect('/aujourdhui')
+  if (session.sujetId !== null) redirect('/formateur')
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-6 py-12">

@@ -277,13 +277,26 @@ cassé.
 La description d'un modèle est **obligatoire** et toujours affichée — c'est ce
 que lisent les lecteurs d'écran et ce que voient les postes sans WebGL.
 
-## Connexion des adultes — transitoire
+## Connexion des adultes — bascule automatique
 
-`compte.mot_de_passe_hash` et la table `session_compte` sont **provisoires** :
-elles n'existent que parce que le compte Supabase n'est pas encore ouvert, et
-qu'un éditeur de leçons sans enseignant connecté ne sert à rien.
+Deux chemins coexistent, et le choix se fait **tout seul** dans
+`sessionCourante()` :
 
-Le jour où Supabase Auth arrive : son JWT alimente `resoudreSession`, la colonne
-passe à NULL sur les comptes migrés, la table disparaît. Tout cela vit derrière
-le port `DepotIdentite` — ni les écrans, ni les autorisations, ni la RLS ne
-bougeront. Ne pas bâtir de fonctionnalité sur ces deux objets.
+- si `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` sont
+  renseignées, Supabase Auth authentifie les adultes ;
+- sinon, le chemin transitoire (`compte.mot_de_passe_hash` + `session_compte`).
+
+Aucun écran, aucune autorisation, aucune politique RLS ne dépend de ce choix.
+Procédure complète de bascule : [`docs/13-bascule-supabase.md`](docs/13-bascule-supabase.md).
+
+**`getUser()` et jamais `getSession()`.** Le second se contente de décoder le
+JWT du cookie, qu'un client peut fabriquer. Sur une plateforme où un compte
+adulte donne accès aux données de trente mineurs, la différence n'est pas
+négociable.
+
+Les trois variables Supabase vont ensemble : une configuration à moitié remplie
+fait échouer le démarrage. Et `NEXT_PUBLIC_SUPABASE_ANON_KEY` est la **seule**
+exception nominative au contrôle anti-secrets — elle est publique par
+conception, elle n'ouvre rien sans RLS.
+
+Ne pas bâtir de fonctionnalité sur `mot_de_passe_hash` ni sur `session_compte`.

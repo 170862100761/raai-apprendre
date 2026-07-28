@@ -60,6 +60,12 @@ export {
 
 // Adaptateurs.
 export { depotIdentitePrisma } from './infrastructure/depot-identite-prisma'
+
+export {
+  compteDepuisSupabase,
+  configurationSupabase,
+  type ConfigurationSupabase,
+} from './infrastructure/supabase-auth'
 export { genererCode, hachageBcrypt } from './infrastructure/hachage-bcrypt'
 
 // Politique de verrouillage : exposée car l'interface enseignant affiche l'état

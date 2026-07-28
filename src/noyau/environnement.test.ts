@@ -20,14 +20,22 @@ describe('aucun secret exposé au navigateur', () => {
   })
 
   it("laisse passer les variables publiques légitimes", () => {
-    // ANON_KEY est conçue pour être publique : elle ne donne rien sans RLS.
     expect(
       verifierAucunSecretExpose({
         NEXT_PUBLIC_URL_SITE: 'https://raai-apprendre.vercel.app',
         NEXT_PUBLIC_SUPABASE_URL: 'https://x.supabase.co',
+        // Conçue pour partir dans le navigateur : elle n'ouvre rien sans RLS.
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGci...',
         ANTHROPIC_API_KEY: 'sk-x',
       }),
     ).toEqual([])
+  })
+
+  it("l'exception est nominative, pas une catégorie", () => {
+    // Élargir à « ANON » ouvrirait la porte à n'importe quelle variable qu'on
+    // baptiserait ainsi.
+    expect(verifierAucunSecretExpose({ NEXT_PUBLIC_ANON_KEY: 'x' })).toHaveLength(1)
+    expect(verifierAucunSecretExpose({ NEXT_PUBLIC_SUPABASE_SERVICE_KEY: 'x' })).toHaveLength(1)
   })
 
   it("fait échouer le démarrage plutôt que de démarrer compromis", () => {
@@ -55,5 +63,31 @@ describe('variables requises', () => {
   it('nomme précisément ce qui manque', () => {
     const { DATABASE_URL: _, ...sansBase } = VALIDE
     expect(() => lireEnvironnement(sansBase)).toThrow(/DATABASE_URL/)
+  })
+})
+
+describe('bascule vers Supabase', () => {
+  const cles = {
+    NEXT_PUBLIC_SUPABASE_URL: 'https://x.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon',
+    SUPABASE_SERVICE_ROLE_KEY: 'service',
+  }
+
+  it('accepte les trois variables ensemble', () => {
+    expect(() => lireEnvironnement({ ...VALIDE, ...cles })).not.toThrow()
+  })
+
+  it('refuse une configuration à moitié remplie', () => {
+    // Pire que pas de Supabase du tout : l'application basculerait sur le
+    // chemin Supabase sans pouvoir s'authentifier, et personne ne
+    // comprendrait pourquoi.
+    const { SUPABASE_SERVICE_ROLE_KEY: _, ...partielle } = cles
+    expect(() => lireEnvironnement({ ...VALIDE, ...partielle })).toThrow(
+      /SUPABASE_SERVICE_ROLE_KEY/,
+    )
+  })
+
+  it("n'exige rien tant qu'aucune variable Supabase n'est posée", () => {
+    expect(() => lireEnvironnement(VALIDE)).not.toThrow()
   })
 })

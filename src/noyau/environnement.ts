@@ -12,12 +12,26 @@ import { z } from 'zod'
 
 const SENSIBLE = /(KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL)/i
 
+/**
+ * Une seule exception, nominative et documentée.
+ *
+ * La clé anonyme Supabase est **conçue** pour partir dans le navigateur : elle
+ * n'ouvre rien par elle-même, tout dépend de la RLS. La refuser rendrait
+ * Supabase inutilisable ; élargir la règle à « ANON » ouvrirait la porte à
+ * n'importe quelle variable qu'on baptiserait ainsi. D'où la liste d'un seul
+ * nom exact.
+ */
+const PUBLIQUES_ASSUMEES: ReadonlySet<string> = new Set(['NEXT_PUBLIC_SUPABASE_ANON_KEY'])
+
 /** Rejoué en test ET au démarrage : le contrôle ne sert à rien s'il est différable. */
 export function verifierAucunSecretExpose(
   variables: Record<string, string | undefined>,
 ): string[] {
   return Object.keys(variables).filter(
-    (nom) => nom.startsWith('NEXT_PUBLIC_') && SENSIBLE.test(nom.slice('NEXT_PUBLIC_'.length)),
+    (nom) =>
+      nom.startsWith('NEXT_PUBLIC_') &&
+      !PUBLIQUES_ASSUMEES.has(nom) &&
+      SENSIBLE.test(nom.slice('NEXT_PUBLIC_'.length)),
   )
 }
 
@@ -65,6 +79,24 @@ export function lireEnvironnement(source: SourceEnvironnement = process.env): En
     throw new Error(
       `Secrets exposés au navigateur : ${exposes.join(', ')}. ` +
         `Retirer le préfixe NEXT_PUBLIC_ et considérer ces valeurs comme compromises.`,
+    )
+  }
+
+  // Une configuration Supabase à moitié remplie est pire que pas de Supabase
+  // du tout : l'application basculerait sur le chemin Supabase sans pouvoir
+  // s'authentifier, et personne ne comprendrait pourquoi.
+  const supabase = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+  ]
+  const remplies = supabase.filter((nom) => source[nom])
+
+  if (remplies.length > 0 && remplies.length < supabase.length) {
+    const manquantes = supabase.filter((nom) => !source[nom])
+    throw new Error(
+      `Configuration Supabase incomplète : ${manquantes.join(', ')}. ` +
+        `Renseigne les trois variables, ou aucune.`,
     )
   }
 

@@ -5,6 +5,8 @@ import { prisma } from '@/noyau/prisma'
 import { COOKIE_APPRENANT, COOKIE_COMPTE, verifierJeton } from '@/noyau/cookie-session'
 import { identifiant, type JetonSession } from '@/noyau/identifiants'
 import {
+  compteDepuisSupabase,
+  configurationSupabase,
   depotIdentitePrisma,
   resoudreSession,
   SESSION_ANONYME,
@@ -28,15 +30,17 @@ export async function sessionCourante(): Promise<Session> {
   const bocal = await cookies()
 
   const jetonApprenant = await verifierJeton(bocal.get(COOKIE_APPRENANT)?.value, secret)
-  const jetonCompte = await verifierJeton(bocal.get(COOKIE_COMPTE)?.value, secret)
 
-  // TRANSITOIRE : tant que Supabase Auth n'est pas ouvert, le jeton de compte
-  // est un jeton maison, vérifié en base exactement comme celui d'un élève.
-  // Le jour où Supabase arrive, seules ces trois lignes changent — ni les
-  // écrans ni les autorisations ne bougent.
-  const compteId = jetonCompte
-    ? await depot.resoudreJetonCompte(identifiant<JetonSession>(jetonCompte))
-    : null
+  // Bascule automatique : dès que Supabase est configuré, c'est lui qui
+  // authentifie les adultes. Sinon on retombe sur le jeton maison, transitoire.
+  // Aucune des deux voies n'est visible au-delà de cette fonction.
+  const configuration = configurationSupabase()
+
+  const compteId = configuration
+    ? await compteDepuisSupabase(configuration, {
+        lire: () => bocal.getAll().map((c) => ({ name: c.name, value: c.value })),
+      })
+    : await compteMaison(bocal.get(COOKIE_COMPTE)?.value, secret)
 
   return resoudreSession(
     {
@@ -45,6 +49,15 @@ export async function sessionCourante(): Promise<Session> {
     },
     depot,
   )
+}
+
+/**
+ * Chemin TRANSITOIRE, actif tant que Supabase n'est pas configuré.
+ * Il disparaîtra avec `compte.mot_de_passe_hash` et `session_compte`.
+ */
+async function compteMaison(valeur: string | undefined, secret: string) {
+  const jeton = await verifierJeton(valeur, secret)
+  return jeton ? depot.resoudreJetonCompte(identifiant<JetonSession>(jeton)) : null
 }
 
 /** Pour les pages qui n'ont aucun sens sans session. */

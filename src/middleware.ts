@@ -45,6 +45,13 @@ export async function middleware(requete: NextRequest) {
   const aUnCompte = requete.cookies.has(COOKIE_COMPTE)
 
   if (!jetonApprenant && !aUnCompte) {
+    // Une route d'API ne se redirige pas vers une page de connexion : un
+    // `<img>` suivrait la redirection et recevrait du HTML en 200, ce qui
+    // masque l'erreur au lieu de la signaler.
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse(null, { status: 404 })
+    }
+
     const versConnexion = new URL('/connexion', requete.url)
     // Pour revenir où l'élève voulait aller après s'être identifié.
     versConnexion.searchParams.set('suite', pathname)

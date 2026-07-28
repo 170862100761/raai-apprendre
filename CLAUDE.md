@@ -134,6 +134,30 @@ PGlite est fragile sous usage soutenu : si l'application affiche « Can't reach
 database server », relancer `npm run bd:locale`. Les données sont en mémoire,
 tout repart du jeu de démonstration.
 
+## Médias
+
+Types acceptés en **liste blanche** (`domaines/mediatheque`), avec vérification
+des octets de tête : l'extension ne prouve rien, `schema.png` peut être un
+exécutable. Le SVG est refusé malgré son apparence d'image — c'est un document
+XML qui peut porter du script.
+
+Le fichier est validé **avant** toute écriture. Écrire puis vérifier laisserait
+des fichiers refusés sur le disque.
+
+Le chemin de stockage est un UUID préfixé par l'établissement, jamais le nom
+fourni. Un nom d'utilisateur dans un chemin est une traversée de répertoire en
+puissance.
+
+`/api/v1/medias/[id]` fixe le `Content-Type` depuis NOTRE liste, pose `nosniff`,
+sert en `attachment` tout ce qui n'est pas image ou vidéo, et applique une CSP
+`default-src 'none'; sandbox`. En production, ces fichiers devront être servis
+depuis un domaine distinct de l'application ; tant que ce n'est pas le cas, ces
+en-têtes sont la seule barrière.
+
+**Stockage disque transitoire** (`stockage-disque.ts`), comme la connexion
+adulte : Supabase Storage n'est pas ouvert. Sur Vercel le disque est éphémère et
+non partagé — cet adaptateur n'a rien à y faire. Seul ce fichier changera.
+
 ## Connexion des adultes — transitoire
 
 `compte.mot_de_passe_hash` et la table `session_compte` sont **provisoires** :

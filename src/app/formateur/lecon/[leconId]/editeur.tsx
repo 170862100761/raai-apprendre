@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom'
 import { lireContenu, type CompetenceOption, type ContenuBloc } from '@/domaines/catalogue'
 import { RenduBloc } from '../../../_composants/rendu-bloc'
 import { enregistrer, publier, type EtatEdition } from '../actions'
+import { ChampImage } from './champ-image'
 
 /**
  * Éditeur de leçon.
@@ -33,11 +34,19 @@ type BlocEdite =
    * SUPPRIMER au premier enregistrement, puisque celui-ci remplace la totalité
    * des blocs — un enseignant perdrait ses images sans comprendre pourquoi.
    */
+  | {
+      readonly cle: string
+      readonly type: 'image'
+      readonly ressourceId: string
+      readonly alternative: string
+      readonly legende: string
+    }
   | { readonly cle: string; readonly type: 'opaque'; readonly contenu: ContenuBloc }
 
 const LIBELLE_BLOC: Record<BlocEdite['type'], string> = {
   texte: 'Texte',
   lien: 'Lien',
+  image: 'Image ou schéma',
   // « Contenu média » serait inexact : ce sont aussi des bibliographies.
   opaque: 'Contenu non modifiable ici',
 }
@@ -51,12 +60,19 @@ function versContenu(bloc: BlocEdite): ContenuBloc | null {
   const brut =
     bloc.type === 'texte'
       ? { type: 'texte', texte: bloc.texte }
-      : {
-          type: 'lien',
-          url: bloc.url,
-          titre: bloc.titre,
-          ...(bloc.description ? { description: bloc.description } : {}),
-        }
+      : bloc.type === 'image'
+        ? {
+            type: 'image',
+            ressourceId: bloc.ressourceId,
+            alternative: bloc.alternative,
+            ...(bloc.legende ? { legende: bloc.legende } : {}),
+          }
+        : {
+            type: 'lien',
+            url: bloc.url,
+            titre: bloc.titre,
+            ...(bloc.description ? { description: bloc.description } : {}),
+          }
 
   // Le même validateur que le serveur : ce que l'aperçu montre est exactement
   // ce qui sera accepté. Un aperçu plus permissif que l'enregistrement serait
@@ -98,6 +114,17 @@ export function Editeur({
     blocsInitiaux.flatMap((contenu): BlocEdite[] => {
       if (contenu.type === 'texte') {
         return [{ cle: nouvelleCle(), type: 'texte', texte: contenu.texte }]
+      }
+      if (contenu.type === 'image') {
+        return [
+          {
+            cle: nouvelleCle(),
+            type: 'image',
+            ressourceId: contenu.ressourceId,
+            alternative: contenu.alternative,
+            legende: contenu.legende ?? '',
+          },
+        ]
       }
       if (contenu.type === 'lien') {
         return [
@@ -232,6 +259,13 @@ export function Editeur({
                   Ce contenu n’est pas encore modifiable ici. Il est conservé tel
                   quel et reste visible par les élèves.
                 </p>
+              ) : bloc.type === 'image' ? (
+                <ChampImage
+                  ressourceId={bloc.ressourceId}
+                  alternative={bloc.alternative}
+                  legende={bloc.legende}
+                  onChange={(champs) => modifier(bloc.cle, champs)}
+                />
               ) : bloc.type === 'texte' ? (
                 <textarea
                   value={bloc.texte}
@@ -285,6 +319,24 @@ export function Editeur({
               className="rounded-carte border border-bordure px-4 py-2 text-sm"
             >
               + Lien
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setBlocs((a) => [
+                  ...a,
+                  {
+                    cle: nouvelleCle(),
+                    type: 'image',
+                    ressourceId: '',
+                    alternative: '',
+                    legende: '',
+                  },
+                ])
+              }
+              className="rounded-carte border border-bordure px-4 py-2 text-sm"
+            >
+              + Image
             </button>
           </div>
         </section>

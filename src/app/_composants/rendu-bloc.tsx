@@ -32,10 +32,13 @@ export function RenduBloc({ contenu }: { contenu: ContenuBloc }) {
       return (
         <figure className="flex flex-col gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* `max-w-full` et non `w-full` : un schéma de 300 px de large ne doit
+              pas être étiré à la largeur du conteneur. Agrandi, il devient flou
+              — et un schéma hydraulique flou ne s'enseigne pas. */}
           <img
             src={`/api/v1/medias/${contenu.ressourceId}`}
             alt={contenu.alternative}
-            className="w-full rounded-carte border border-bordure"
+            className="h-auto max-w-full rounded-carte border border-bordure"
             loading="lazy"
           />
           {contenu.legende ? (

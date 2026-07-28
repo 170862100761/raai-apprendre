@@ -6,6 +6,10 @@
  * ne ressemble à rien de ce que verront les établissements.
  */
 import bcrypt from 'bcryptjs'
+import { randomUUID } from 'node:crypto'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { deflateSync } from 'node:zlib'
 
 const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
 
@@ -124,7 +128,8 @@ export async function semer(bd) {
   }
 
   await semerFormateur(q)
-  await semerCours(q, competences)
+  const imageId = await semerImage(q)
+  await semerCours(q, competences, imageId)
 
   console.log('\n  Jeu de démonstration semé :')
   console.log('    MFR Escatalens · Bac Pro Agroéquipement · TAE 2026')
@@ -135,12 +140,43 @@ export async function semer(bd) {
 }
 
 /**
+ * Une image réelle sur le disque, pour que la démonstration exerce la chaîne
+ * complète : dépôt, route de service, rendu dans la leçon.
+ */
+async function semerImage(q) {
+  // Un PNG lisible, engendré ici plutôt que collé en base64 : un blob binaire
+  // dans un dépôt ne se relit pas et ne se vérifie pas. Il ne s'agit pas
+  // d'illustrer quoi que ce soit, seulement de prouver qu'un fichier traverse
+  // toute la chaîne — disque, base, route de service, rendu dans la leçon —
+  // et qu'on le VOIT à l'écran.
+  const png = engendrerPng(480, 200)
+
+  const etablissement = id(3)
+  const chemin = `${etablissement}/${randomUUID()}`
+  const destination = join(process.cwd(), 'outils', 'medias-locaux', chemin)
+
+  await mkdir(dirname(destination), { recursive: true })
+  await writeFile(destination, png)
+
+  const ressourceId = id(211)
+  await q(
+    `INSERT INTO raai_apprendre.ressource
+       (id, etablissement_id, nom, type_mime, chemin_stockage, taille_octets,
+        statut_traitement)
+     VALUES ($1, $2, 'schema-circuit-hydraulique.png', 'image/png', $3, $4, 'pret')`,
+    [ressourceId, etablissement, chemin, png.byteLength],
+  )
+
+  return ressourceId
+}
+
+/**
  * Deux cours réels, rattachés aux capacités C7 et C8 du référentiel rénové.
  *
  * Le contenu est écrit, pas inventé au hasard : une démonstration qui affiche
  * du faux-texte ne dit rien de ce que verra un enseignant.
  */
-async function semerCours(q, competences) {
+async function semerCours(q, competences, imageId) {
   const M = id(200) // matière
   const MOD = id(201)
   const CH1 = id(202)
@@ -189,6 +225,14 @@ async function semerCours(q, competences) {
             "outil lourd manque de débit, pas de pression.\n\n" +
             "La puissance hydraulique se calcule ainsi : P (kW) = Q (L/min) × p (bar) / 600. " +
             "Une pompe débitant 60 L/min sous 180 bars développe donc 18 kW.",
+        },
+        {
+          type: 'image',
+          ressourceId: imageId,
+          alternative:
+            'Schéma d’un circuit hydraulique simple : pompe, distributeur, vérin ' +
+            'double effet et retour au réservoir.',
+          legende: 'Circuit hydraulique élémentaire.',
         },
         {
           type: 'lien',
@@ -281,4 +325,60 @@ async function semerFormateur(q) {
      VALUES ($1, $2, $3)`,
     [id(102), MEMBRE, id(9)],
   )
+}
+
+/**
+ * Engendre un PNG opaque avec un damier, sans dépendance.
+ *
+ * Assez pour qu'un relecteur voie tout de suite si l'image est servie, mise à
+ * l'échelle ou déformée — ce qu'un aplat uni ne montrerait pas.
+ */
+function engendrerPng(largeur, hauteur) {
+  const brut = Buffer.alloc(hauteur * (1 + largeur * 3))
+
+  for (let y = 0; y < hauteur; y++) {
+    const debut = y * (1 + largeur * 3)
+    brut[debut] = 0 // type de filtre : aucun
+    for (let x = 0; x < largeur; x++) {
+      const clair = (Math.floor(x / 40) + Math.floor(y / 40)) % 2 === 0
+      const p = debut + 1 + x * 3
+      brut[p] = clair ? 0x3f : 0x22
+      brut[p + 1] = clair ? 0x8a : 0x4a
+      brut[p + 2] = clair ? 0x5a : 0x33
+    }
+  }
+
+  const morceau = (type, donnees) => {
+    const longueur = Buffer.alloc(4)
+    longueur.writeUInt32BE(donnees.length)
+    const corps = Buffer.concat([Buffer.from(type, 'latin1'), donnees])
+    const crc = Buffer.alloc(4)
+    crc.writeUInt32BE(crc32(corps) >>> 0)
+    return Buffer.concat([longueur, corps, crc])
+  }
+
+  const entete = Buffer.alloc(13)
+  entete.writeUInt32BE(largeur, 0)
+  entete.writeUInt32BE(hauteur, 4)
+  entete[8] = 8 // profondeur
+  entete[9] = 2 // couleur vraie, sans alpha
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    morceau('IHDR', entete),
+    morceau('IDAT', deflateSync(brut)),
+    morceau('IEND', Buffer.alloc(0)),
+  ])
+}
+
+const TABLE_CRC = Array.from({ length: 256 }, (_, n) => {
+  let c = n
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
+  return c >>> 0
+})
+
+function crc32(tampon) {
+  let c = 0xffffffff
+  for (const octet of tampon) c = TABLE_CRC[(c ^ octet) & 0xff] ^ (c >>> 8)
+  return (c ^ 0xffffffff) >>> 0
 }

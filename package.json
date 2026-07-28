@@ -16,8 +16,9 @@
     "test:permissions": "vitest run --dir src/test/permissions",
     "architecture": "depcruise src --config .dependency-cruiser.cjs",
     "bd:locale": "node outils/base-locale.mjs --semer",
+    "cles:reprendre": "node outils/reprendre-cles-supabase.mjs",
     "bd:generer": "prisma generate",
-    "bd:migrer": "prisma migrate dev",
+    "bd:migrer": "node outils/migrer.mjs",
     "bd:deployer": "prisma migrate deploy",
     "referentiel:importer": "node outils/import-referentiel/importer.mjs",
     "verifier": "npm run types && npm run lint && npm run architecture && npm run test"

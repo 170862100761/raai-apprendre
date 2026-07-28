@@ -12,3 +12,4 @@ next-env.d.ts
 coverage/
 /outils/import-referentiel/travail/
 outils/medias-locaux/
+.env.local.sauvegarde

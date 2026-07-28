@@ -23,9 +23,22 @@ import {
 
 const depot = depotIdentitePrisma(prisma)
 
-export async function sessionCourante(): Promise<Session> {
+/**
+ * Ce que la résolution a constaté, en plus de la session elle-même.
+ *
+ * `compteInconnu` : un cookie de compte était présent mais aucun profil ne le
+ * réclame — base réinitialisée, compte désactivé, ou cookie posé par une autre
+ * application du même hôte (les cookies ignorent le numéro de port). Périmé,
+ * pas hostile.
+ */
+type Resolution = {
+  readonly session: Session
+  readonly compteInconnu: boolean
+}
+
+async function resoudre(): Promise<Resolution> {
   const secret = process.env.SECRET_SESSION_APPRENANT
-  if (!secret) return SESSION_ANONYME
+  if (!secret) return { session: SESSION_ANONYME, compteInconnu: false }
 
   const bocal = await cookies()
 
@@ -42,13 +55,20 @@ export async function sessionCourante(): Promise<Session> {
       })
     : await compteMaison(bocal.get(COOKIE_COMPTE)?.value, secret)
 
-  return resoudreSession(
+  const session = await resoudreSession(
     {
       compteId,
       jetonApprenant: jetonApprenant ? identifiant<JetonSession>(jetonApprenant) : null,
     },
     depot,
   )
+
+  return { session, compteInconnu: compteId !== null && session.sujetId === null }
+}
+
+export async function sessionCourante(): Promise<Session> {
+  const { session } = await resoudre()
+  return session
 }
 
 /**
@@ -62,7 +82,13 @@ async function compteMaison(valeur: string | undefined, secret: string) {
 
 /** Pour les pages qui n'ont aucun sens sans session. */
 export async function exigerSession(): Promise<Session> {
-  const session = await sessionCourante()
-  if (session.sujetId === null) redirect('/connexion')
-  return session
+  const { session, compteInconnu } = await resoudre()
+
+  if (session.sujetId !== null) return session
+
+  // Renvoyer vers `/connexion` avec le cookie fautif encore en place produisait
+  // une boucle : l'élève s'identifiait avec succès, puis retombait ici, le
+  // cookie de compte primant sur son jeton. On passe donc par la sortie qui
+  // efface — un rendu ne peut pas supprimer un cookie, une route le peut.
+  redirect(compteInconnu ? '/deconnexion' : '/connexion')
 }

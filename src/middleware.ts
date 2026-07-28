@@ -14,7 +14,17 @@ import { COOKIE_APPRENANT, COOKIE_COMPTE, verifierJeton } from '@/noyau/cookie-s
  * le sait. Ne jamais traiter le passage du middleware comme une autorisation.
  */
 
-const PUBLIC = ['/', '/connexion', '/connexion-formateur', '/offre', '/mentions-legales']
+// `/deconnexion` est publique par nécessité : c'est la route qui efface les
+// cookies. La protéger la rendrait inatteignable précisément quand elle sert —
+// quand la session ne se résout plus.
+const PUBLIC = [
+  '/',
+  '/connexion',
+  '/connexion-formateur',
+  '/deconnexion',
+  '/offre',
+  '/mentions-legales',
+]
 
 function estPublic(chemin: string): boolean {
   return (

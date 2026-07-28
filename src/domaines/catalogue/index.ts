@@ -17,6 +17,16 @@ export {
 } from './domaine/bloc'
 
 export {
+  chercher,
+  normaliser,
+  score,
+  termes,
+  LONGUEUR_MINIMALE,
+  type Cherchable,
+  type Resultat as ResultatRecherche,
+} from './domaine/recherche'
+
+export {
   peutPasserA,
   prochaineAction,
   validerPourPublication,

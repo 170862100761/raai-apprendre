@@ -38,6 +38,9 @@ export default async function PageFormateur() {
     <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-10">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="text-2xl font-semibold">Mes leçons</h1>
+        <Link href="/recherche" className="text-sm underline">
+          Rechercher
+        </Link>
         <form action={deconnecterFormateur}>
           <button type="submit" className="text-sm text-mine-doux underline">
             Se déconnecter

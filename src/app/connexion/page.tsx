@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { aRole } from '@/domaines/identite'
 import { sessionCourante } from '../_session'
@@ -43,6 +44,16 @@ export default async function PageConnexion({
       <p className="text-sm text-mine-doux">
         Code oublié ou accès bloqué ? Seul ton formateur peut le réinitialiser —
         nous n’avons ni ton adresse e-mail ni ton nom de famille.
+      </p>
+
+      {/* Un adulte qui a cliqué « Se connecter » atterrit ici et se retrouve
+          devant un champ à quatre chiffres où son mot de passe n'entre pas.
+          Sans cette porte de sortie, l'impasse est complète. */}
+      <p className="text-sm text-mine-doux">
+        Vous êtes enseignant ou membre de l’établissement ?{' '}
+        <Link href="/connexion-formateur" className="underline">
+          Connexion de l’établissement
+        </Link>
       </p>
     </main>
   )

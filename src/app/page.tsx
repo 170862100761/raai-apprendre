@@ -13,6 +13,17 @@ export default function Accueil() {
       >
         Se connecter
       </Link>
+
+      {/* Le chemin des adultes existait, sans qu'aucun écran n'y mène : un
+          formateur arrivant sur l'application n'avait aucun moyen de trouver
+          sa connexion. Discret mais présent — l'élève reste le parcours
+          principal, il est cent fois plus fréquent. */}
+      <p className="text-sm text-mine-doux">
+        Enseignant, formateur ou direction ?{' '}
+        <Link href="/connexion-formateur" className="underline">
+          Connexion de l’établissement
+        </Link>
+      </p>
     </main>
   )
 }

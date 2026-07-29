@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { sessionCourante } from '../_session'
 import { FormulaireFormateur } from './formulaire'
@@ -14,12 +15,21 @@ export default async function PageConnexionFormateur() {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Espace formateur</h1>
         <p className="text-mine-doux">
-          Les élèves se connectent depuis la page d’accueil, avec leur
-          identifiant et leur code.
+          Connexion des enseignants, formateurs et personnels de direction, par
+          adresse e-mail et mot de passe.
         </p>
       </header>
 
       <FormulaireFormateur />
+
+      {/* La phrase renvoyait les élèves « à la page d'accueil » sans lien : un
+          élève arrivé ici par erreur devait deviner. */}
+      <p className="text-sm text-mine-doux">
+        Tu es élève ?{' '}
+        <Link href="/connexion" className="underline">
+          Connexion avec ton identifiant et ton code
+        </Link>
+      </p>
     </main>
   )
 }

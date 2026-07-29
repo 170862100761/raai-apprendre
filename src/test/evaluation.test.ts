@@ -11,6 +11,7 @@ import type {
   IdentifiantEvaluation,
 } from '@/noyau/identifiants'
 import {
+  chargerEcheances,
   demarrerOuReprendre,
   depotEvaluationPrisma,
   soumettre,
@@ -20,10 +21,18 @@ import { depotProgressionPrisma, enregistrerResultat } from '@/domaines/progress
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const QUIZ = identifiant<IdentifiantEvaluation>('00000000-0000-4000-8000-000000000220')
-const INES = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000044')
+const DEVOIR_EN_RETARD = identifiant<IdentifiantEvaluation>('00000000-0000-4000-8000-000000000240')
+const ENTRAINEMENT = identifiant<IdentifiantEvaluation>('00000000-0000-4000-8000-000000000242')
+// Les identifiants d'élèves ne sont PAS 40, 41, 42 : le semoir consomme la même
+// suite pour les inscriptions et les acquis. Léa est 40, Thomas 47, Inès 54.
+// L'ancienne valeur (44) désignait une ligne d'acquis de Léa, donc aucun élève —
+// et les tests passaient quand même, faute de tomber en panne bruyamment.
+const INES = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000054')
+/** Léa a rendu le devoir en retard, Inès non — le jeu de démonstration le pose. */
+const LEA = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000040')
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
 
 let prisma: PrismaClient
@@ -33,11 +42,23 @@ let disponible = false
 
 beforeAll(async () => {
   prisma = new PrismaClient({ datasources: { db: { url: URL_TEST } } })
+
+  // Deux situations que l'ancien `catch` confondait, au prix de tests qui ne
+  // testaient plus rien : base absente — on s'abstient, c'est légitime — et
+  // base présente mais jeu de démonstration incomplet, qui est un échec.
   try {
-    disponible = (await prisma.evaluation.findUnique({ where: { id: QUIZ } })) !== null
+    await prisma.$queryRaw`SELECT 1`
   } catch {
     return
   }
+
+  if ((await prisma.evaluation.findUnique({ where: { id: QUIZ } })) === null) {
+    throw new Error(
+      'Base joignable mais jeu de démonstration absent. Relancer `npm run bd:locale`.',
+    )
+  }
+
+  disponible = true
   depot = depotEvaluationPrisma(prisma)
   progression = depotProgressionPrisma(prisma)
 }, 60_000)
@@ -87,6 +108,49 @@ describe('énoncé servi à l’élève', () => {
     if (!disponible) return
     const evaluation = await depot.chargerPourEleve(QUIZ)
     expect(evaluation!.competences.length).toBeGreaterThan(0)
+  })
+})
+
+describe('échéances', () => {
+  it('remonte le retard en tête, devant ce qui est simplement proche', async () => {
+    if (!disponible) return
+
+    const tableau = await chargerEcheances(INES, depot)
+
+    expect(tableau.affichees.length).toBeGreaterThan(0)
+    expect(tableau.affichees[0]?.evaluationId).toBe(DEVOIR_EN_RETARD)
+    // Ordonné du plus pressant au moins pressant, jusqu'en base.
+    const dates = tableau.affichees.map((e) => e.echeanceLe.getTime())
+    expect([...dates].sort((a, b) => a - b)).toEqual(dates)
+  })
+
+  it('n’affiche pas une évaluation sans date de rendu', async () => {
+    if (!disponible) return
+
+    // NULL est le cas courant, pas une anomalie : un entraînement se refait
+    // quand on veut et n'a rien à faire dans « À rendre ».
+    const tableau = await chargerEcheances(INES, depot)
+    const toutes = [...tableau.affichees, ...tableau.reste]
+    expect(toutes.map((e) => e.evaluationId)).not.toContain(ENTRAINEMENT)
+  })
+
+  it('retire de la liste ce que l’élève a déjà rendu', async () => {
+    if (!disponible) return
+
+    // Même échéance, deux élèves, deux réponses : c'est la tentative soumise
+    // de Léa qui fait la différence, et non un réglage d'affichage.
+    const chezLea = await chargerEcheances(LEA, depot)
+    const chezInes = await chargerEcheances(INES, depot)
+
+    expect(chezLea.affichees.map((e) => e.evaluationId)).not.toContain(DEVOIR_EN_RETARD)
+    expect(chezInes.affichees.map((e) => e.evaluationId)).toContain(DEVOIR_EN_RETARD)
+  })
+
+  it('renseigne le chapitre, que l’élève lit pour se repérer', async () => {
+    if (!disponible) return
+
+    const tableau = await chargerEcheances(INES, depot)
+    expect(tableau.affichees.every((e) => e.chapitre.length > 0)).toBe(true)
   })
 })
 

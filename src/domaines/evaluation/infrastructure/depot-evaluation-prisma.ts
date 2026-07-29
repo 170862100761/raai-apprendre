@@ -6,6 +6,7 @@ import type {
   IdentifiantEvaluation,
   IdentifiantTentative,
 } from '@/noyau/identifiants'
+import type { Echeance, TypeEvaluation } from '../domaine/echeance'
 import { lireCorrige, lireEnonce } from '../domaine/question'
 import type { StatutTentative } from '../domaine/tentative'
 import type {
@@ -127,6 +128,58 @@ export function depotEvaluationPrisma(prisma: PrismaClient): DepotEvaluation {
           },
         }),
       ])
+    },
+
+    async echeancesDeLApprenant(apprenantId, borneHaute): Promise<readonly Echeance[]> {
+      const apprenant = await prisma.apprenant.findUnique({
+        where: { id: apprenantId },
+        select: { etablissementId: true },
+      })
+      if (!apprenant) return []
+
+      const evaluations = await prisma.evaluation.findMany({
+        where: {
+          etablissementId: apprenant.etablissementId,
+          statut: 'publiee',
+          // `not: null` et la borne haute ensemble : l'index
+          // (etablissement_id, echeance_le) ne sert que si la colonne est
+          // contrainte, pas seulement lue.
+          echeanceLe: { not: null, lte: borneHaute },
+        },
+        orderBy: { echeanceLe: 'asc' },
+        select: {
+          id: true,
+          titre: true,
+          type: true,
+          echeanceLe: true,
+          chapitre: { select: { titre: true } },
+          // Une seule ligne suffit à répondre « rendue ? ». Charger toutes les
+          // tentatives pour n'en tester que l'existence coûterait sans rien
+          // apprendre de plus.
+          tentatives: {
+            where: { apprenantId, statut: { not: 'en_cours' } },
+            select: { id: true },
+            take: 1,
+          },
+        },
+      })
+
+      return evaluations.flatMap((e) =>
+        // Le filtre garantit déjà la date ; ce test-ci est là pour le typage,
+        // Prisma ne sachant pas restreindre `Date | null` par le `where`.
+        e.echeanceLe === null
+          ? []
+          : [
+              {
+                evaluationId: identifiant<IdentifiantEvaluation>(e.id),
+                titre: e.titre,
+                type: e.type as TypeEvaluation,
+                chapitre: e.chapitre.titre,
+                echeanceLe: e.echeanceLe,
+                rendue: e.tentatives.length > 0,
+              },
+            ],
+      )
     },
 
     async derniereTentative(evaluationId, apprenantId) {

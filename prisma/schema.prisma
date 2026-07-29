@@ -738,6 +738,11 @@ model Evaluation {
   type            TypeEvaluation
   statut          StatutPublication @default(brouillon)
   dureeMaxMin     Int?   @map("duree_max_min")
+  /// NULL = pas de date de rendu, et c'est un cas courant : un exercice
+  /// d'entraînement se refait quand on veut. L'échéance n'est pas une
+  /// fermeture — rien n'empêche de rendre après. Elle ordonne le tableau de
+  /// bord de l'élève ; sanctionner un retard est une décision d'enseignant.
+  echeanceLe      DateTime? @map("echeance_le") @db.Timestamptz(6)
   creeLe          DateTime @default(now()) @map("cree_le") @db.Timestamptz(6)
 
   chapitre   Chapitre    @relation(fields: [chapitreId], references: [id], onDelete: Cascade)
@@ -745,6 +750,8 @@ model Evaluation {
   tentatives Tentative[]
 
   @@index([chapitreId, statut])
+  /// Les échéances à venir d'un établissement, sans parcourir la table.
+  @@index([etablissementId, echeanceLe])
   @@map("evaluation")
   @@schema("raai_apprendre")
 }

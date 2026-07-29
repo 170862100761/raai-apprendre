@@ -4,6 +4,7 @@ import type {
   IdentifiantEvaluation,
   IdentifiantTentative,
 } from '@/noyau/identifiants'
+import type { Echeance } from '../domaine/echeance'
 import type { Enonce, Corrige, Reponse } from '../domaine/question'
 import type { StatutTentative } from '../domaine/tentative'
 
@@ -71,6 +72,20 @@ export interface DepotEvaluation {
       score: number | null
     }[]
   }): Promise<void>
+
+  /**
+   * Les évaluations datées qui concernent cet élève.
+   *
+   * `borneHaute` vient du domaine, jamais de l'infrastructure : c'est une règle
+   * de lecture — « jusqu'où regarde-t-on ? » — et la loger ici la rendrait
+   * invisible et intestable. Il n'y a délibérément pas de borne basse : un
+   * devoir en retard depuis trois semaines reste ce que l'élève doit voir en
+   * premier, et l'oublier au bout de N jours serait décider à sa place.
+   */
+  echeancesDeLApprenant(
+    apprenantId: IdentifiantApprenant,
+    borneHaute: Date,
+  ): Promise<readonly Echeance[]>
 
   /** Meilleure tentative achevée, pour l'affichage du résultat. */
   derniereTentative(

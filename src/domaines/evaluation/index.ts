@@ -25,6 +25,19 @@ export {
 } from './domaine/tentative'
 
 export {
+  libelle as libelleEcheance,
+  urgence,
+  type Echeance,
+  type TypeEvaluation,
+  type Urgence,
+} from './domaine/echeance'
+
+export {
+  chargerEcheances,
+  type TableauDEcheances,
+} from './application/echeances-a-venir'
+
+export {
   demarrerOuReprendre,
   soumettre,
   type Copie,

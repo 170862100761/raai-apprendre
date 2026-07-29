@@ -3,6 +3,14 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
 import { chargerParcours, depotCataloguePrisma } from '@/domaines/catalogue'
+import {
+  chargerEcheances,
+  depotEvaluationPrisma,
+  libelleEcheance,
+  urgence,
+  type Echeance,
+  type Urgence,
+} from '@/domaines/evaluation'
 import { peut } from '@/domaines/identite'
 import type { IdentifiantApprenant } from '@/noyau/identifiants'
 import { exigerSession } from '../_session'
@@ -51,6 +59,15 @@ export default async function PageAujourdhui() {
           </button>
         </form>
       </header>
+
+      {/* Les échéances d'abord : un élève qui a un devoir pour demain n'a pas
+          besoin qu'on lui propose le chapitre 4 (doc 05 §1). Quand il n'y en a
+          aucune, la section ne s'affiche pas du tout et la leçon reprend sa
+          place en haut — un bloc vide « Rien à rendre » occuperait l'espace le
+          plus précieux de l'écran pour ne rien dire. */}
+      <Suspense fallback={null}>
+        <ARendre apprenantId={session.sujetId as IdentifiantApprenant} />
+      </Suspense>
 
       <Suspense fallback={<SqueletteAction />}>
         <ActionPrioritaire apprenantId={session.sujetId as IdentifiantApprenant} />
@@ -123,6 +140,117 @@ async function ActionPrioritaire({ apprenantId }: { apprenantId: IdentifiantAppr
       </p>
     </section>
   )
+}
+
+/**
+ * Ce qui est à rendre, trois lignes au plus.
+ *
+ * Le reste vit derrière un dépliant plutôt que derrière une page « toutes mes
+ * échéances » : une liste de sept devoirs tient dans l'écran une fois ouverte,
+ * et une route de plus à maintenir pour l'afficher serait payée par tout le
+ * monde pour servir les cas rares.
+ */
+async function ARendre({ apprenantId }: { apprenantId: IdentifiantApprenant }) {
+  // Un seul instant pour toute la section : deux appels à `new Date()` de part
+  // et d'autre de minuit produiraient « aujourd'hui » et « hier » pour la même
+  // échéance, dans le même écran.
+  const maintenant = new Date()
+  const tableau = await chargerEcheances(apprenantId, depotEvaluationPrisma(prisma), maintenant)
+
+  if (tableau.affichees.length === 0) return null
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-mine-doux">À rendre</h2>
+
+      <ul className="flex flex-col gap-2">
+        {tableau.affichees.map((e) => (
+          <li key={e.evaluationId}>
+            <LigneEcheance echeance={e} maintenant={maintenant} />
+          </li>
+        ))}
+      </ul>
+
+      {tableau.masquees > 0 && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-mine-doux underline">
+            Voir {tableau.masquees} autre{tableau.masquees > 1 ? 's' : ''} échéance
+            {tableau.masquees > 1 ? 's' : ''}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-2">
+            {tableau.reste.map((e) => (
+              <li key={e.evaluationId}>
+                <LigneEcheance echeance={e} maintenant={maintenant} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  )
+}
+
+function LigneEcheance({ echeance, maintenant }: { echeance: Echeance; maintenant: Date }) {
+  const niveau = urgence(echeance, maintenant)
+  const enRetard = niveau === 'depassee'
+
+  return (
+    <Link
+      href={`/evaluation/${echeance.evaluationId}`}
+      className={`flex items-baseline gap-3 rounded-carte border px-4 py-3 transition-opacity
+                  hover:opacity-90 ${
+                    enRetard ? 'border-alerte/40 bg-alerte-douce' : 'border-bordure'
+                  }`}
+    >
+      {/* Le symbole n'est jamais seul à porter l'information : il est doublé du
+          libellé en toutes lettres, juste à droite. Il ne sert qu'à repérer une
+          ligne d'un coup d'œil, et reste donc caché aux lecteurs d'écran, qui
+          liraient sinon un caractère sans signification. */}
+      <span aria-hidden="true" className="text-lg leading-none">
+        {SYMBOLE[niveau]}
+      </span>
+
+      <span className="flex flex-1 flex-col gap-0.5">
+        <span className="text-sm text-mine-doux">
+          {LIBELLE_TYPE[echeance.type]} · {echeance.chapitre}
+        </span>
+        <span className="font-medium">{echeance.titre}</span>
+        <span className={`text-sm ${enRetard ? 'text-alerte' : 'text-mine-doux'}`}>
+          {/* Le libellé relatif se lit, la date exacte lève l'ambiguïté : ni
+              l'un ni l'autre seul ne suffit. */}
+          {libelleEcheance(echeance, maintenant)} — {dateExacte(echeance.echeanceLe)}
+        </span>
+      </span>
+    </Link>
+  )
+}
+
+/** Quatre niveaux, quatre symboles — comme la grille de suivi. */
+const SYMBOLE: Record<Urgence, string> = {
+  depassee: '!',
+  aujourdhui: '●',
+  demain: '◐',
+  cette_semaine: '·',
+  plus_tard: '·',
+}
+
+const LIBELLE_TYPE: Record<Echeance['type'], string> = {
+  exercice: 'Exercice',
+  quiz: 'Quiz',
+  devoir: 'Devoir',
+  tp: 'TP',
+  ccf: 'CCF',
+  examen: 'Examen',
+}
+
+const FORMAT_DATE = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+})
+
+function dateExacte(date: Date): string {
+  return FORMAT_DATE.format(date)
 }
 
 async function Progression({ apprenantId }: { apprenantId: IdentifiantApprenant }) {

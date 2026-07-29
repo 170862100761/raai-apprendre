@@ -309,6 +309,7 @@ async function semerCours(q, competences, imageId, modeleId) {
   }
 
   await semerQuiz(q, CH1)
+  await semerEcheances(q, CH1, CH2)
 
   // Léa a déjà lu le premier cours : le tableau de bord doit lui proposer le
   // second, pas recommencer au début.
@@ -497,6 +498,52 @@ async function semerModele3d(q) {
 }
 
 /**
+ * De quoi remplir le bloc « À rendre » du tableau de bord.
+ *
+ * Trois évaluations datées et une sans date, parce que les quatre cas doivent
+ * se voir en démonstration : le retard, l'urgent, le lointain — et l'exercice
+ * d'entraînement qui n'a pas d'échéance et ne doit donc apparaître nulle part.
+ *
+ * Aucune question n'est attachée : ces évaluations servent l'affichage des
+ * échéances, pas la passation. Le quiz d'hydraulique reste le seul complet.
+ */
+async function semerEcheances(q, CH1, CH2) {
+  const DEVOIR = id(240)
+  const TP = id(241)
+  const ENTRAINEMENT = id(242)
+
+  const evaluations = [
+    // En retard d'un jour : c'est le cas qu'on veut voir remonter en tête, et
+    // celui qu'aucune interface ne montre correctement d'habitude.
+    [DEVOIR, CH2, 'Analyse d’un accident d’attelage', 'devoir', `now() - interval '1 day'`],
+    [TP, CH1, 'TP — Relevé de pression sur banc', 'tp', `now() + interval '5 days'`],
+    // Sans échéance : un entraînement se refait quand on veut. Il ne doit pas
+    // apparaître dans « À rendre », et c'est précisément ce qu'il démontre.
+    [ENTRAINEMENT, CH1, 'S’entraîner : calculs de puissance', 'exercice', 'NULL'],
+  ]
+
+  for (const [evaluationId, chapitreId, titre, type, echeance] of evaluations) {
+    await q(
+      `INSERT INTO raai_apprendre.evaluation
+         (id, chapitre_id, etablissement_id, titre, type, statut, echeance_le)
+       VALUES ($1, $2, $3, $4, $5, 'publiee', ${echeance})`,
+      [evaluationId, chapitreId, id(3), titre, type],
+    )
+  }
+
+  // Léa a rendu le devoir en retard, Thomas et Inès non : le même écran ne
+  // raconte pas la même chose selon l'élève, ce qui est tout l'intérêt d'avoir
+  // trois comptes de démonstration.
+  await q(
+    `INSERT INTO raai_apprendre.tentative
+       (id, evaluation_id, apprenant_id, etablissement_id, statut, score,
+        score_max, duree_secondes, soumise_le)
+     VALUES ($1, $2, $3, $4, 'corrigee', 14, 20, 1820, now() - interval '2 days')`,
+    [id(243), DEVOIR, id(40), id(3)],
+  )
+}
+
+/**
  * Un quiz sur le chapitre d'hydraulique, avec les quatre types de questions
  * corrigés automatiquement.
  *
@@ -506,10 +553,15 @@ async function semerModele3d(q) {
 async function semerQuiz(q, chapitreId) {
   const EVAL = id(220)
 
+  // Échéance relative à `now()`, jamais une date en dur : un jeu de
+  // démonstration semé en janvier montrerait sinon quatre devoirs en retard de
+  // six mois le jour de la présentation.
   await q(
     `INSERT INTO raai_apprendre.evaluation
-       (id, chapitre_id, etablissement_id, titre, type, statut, duree_max_min)
-     VALUES ($1, $2, $3, 'Débit et pression : les bases', 'quiz', 'publiee', 15)`,
+       (id, chapitre_id, etablissement_id, titre, type, statut, duree_max_min,
+        echeance_le)
+     VALUES ($1, $2, $3, 'Débit et pression : les bases', 'quiz', 'publiee', 15,
+             now() + interval '2 days')`,
     [EVAL, chapitreId, id(3)],
   )
 

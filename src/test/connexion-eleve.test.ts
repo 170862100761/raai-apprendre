@@ -31,12 +31,15 @@ import {
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   // `connection_limit=1` : PGlite ne sert qu'une connexion à la fois, et le
-  // pool par défaut de Prisma en ouvre plusieurs. En revanche PAS
-  // `pgbouncer=true` ici : ce mode casse le protocole du serveur PGlite
-  // (« unexpected message from server ») alors qu'il est nécessaire côté
-  // application. Constaté, pas supposé.
+  // pool par défaut de Prisma en ouvre plusieurs.
+  //
+  // `pgbouncer=true` : identique à l'application, et pour la même raison. PGlite
+  // conserve les requêtes préparées d'une connexion à la suivante, si bien que
+  // la DEUXIÈME exécution des tests contre une même base échouait sur
+  // « prepared statement "s0" already exists ». Le garde attrapait l'erreur et
+  // s'abstenait : la suite passait au vert sans avoir rien exécuté.
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 let prisma: PrismaClient
 let disponible = false

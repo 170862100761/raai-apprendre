@@ -10,15 +10,22 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { PrismaClient } from '@prisma/client'
+import { randomUUID } from 'node:crypto'
 import { journalPrisma, tracer } from '@/domaines/audit'
 
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
-const REQUETE = 'test-audit-integration'
+// Unique à chaque exécution, et non une constante partagée : le journal est
+// append-only par construction — réécriture et suppression sont bloquées par
+// déclencheur, seule `purger()` y déroge. Une valeur fixe accumulait donc une
+// ligne par exécution, et « toHaveLength(1) » tombait dès la deuxième. Nettoyer
+// après coup reviendrait à demander au test la permission que le schéma refuse
+// justement à tout le monde ; s'isoler est la seule voie honnête.
+const REQUETE = `test-audit-${randomUUID()}`
 
 let prisma: PrismaClient
 let journal: ReturnType<typeof journalPrisma>

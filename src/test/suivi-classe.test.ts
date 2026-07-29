@@ -12,7 +12,7 @@ import { depotProgressionPrisma, niveauDe, suivreClasse } from '@/domaines/progr
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const CLASSE = identifiant<IdentifiantClasse>('00000000-0000-4000-8000-000000000009')
 const LEA = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000040')
@@ -23,11 +23,22 @@ let disponible = false
 
 beforeAll(async () => {
   prisma = new PrismaClient({ datasources: { db: { url: URL_TEST } } })
+  // Base absente : abstention légitime. Base présente mais jeu de démonstration
+  // incomplet : échec. Un seul `catch` autour des deux laissait passer la
+  // seconde situation sans bruit.
   try {
-    disponible = (await prisma.classe.findUnique({ where: { id: CLASSE } })) !== null
+    await prisma.$queryRaw`SELECT 1`
   } catch {
     return
   }
+
+  if ((await prisma.classe.findUnique({ where: { id: CLASSE } })) === null) {
+    throw new Error(
+      'Base joignable mais jeu de démonstration absent. Relancer `npm run bd:locale`.',
+    )
+  }
+
+  disponible = true
   depot = depotProgressionPrisma(prisma)
 }, 60_000)
 

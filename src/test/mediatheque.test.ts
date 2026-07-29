@@ -25,7 +25,7 @@ import {
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const ETABLISSEMENT = identifiant<IdentifiantEtablissement>(
   '00000000-0000-4000-8000-000000000003',
@@ -49,14 +49,22 @@ const affichable = (mime: string) =>
 
 beforeAll(async () => {
   prisma = new PrismaClient({ datasources: { db: { url: URL_TEST } } })
+  // Base absente : abstention légitime. Base présente mais jeu de démonstration
+  // incomplet : échec. Un seul `catch` autour des deux laissait passer la
+  // seconde situation sans bruit.
   try {
-    const etablissement = await prisma.etablissement.findUnique({
-      where: { id: ETABLISSEMENT },
-    })
-    disponible = etablissement !== null
+    await prisma.$queryRaw`SELECT 1`
   } catch {
     return
   }
+
+  if ((await prisma.etablissement.findUnique({ where: { id: ETABLISSEMENT } })) === null) {
+    throw new Error(
+      'Base joignable mais jeu de démonstration absent. Relancer `npm run bd:locale`.',
+    )
+  }
+
+  disponible = true
   depot = depotMediathequePrisma(prisma)
 }, 60_000)
 

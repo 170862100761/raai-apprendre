@@ -21,16 +21,22 @@ import type { IdentifiantCompetence } from '@/noyau/identifiants'
 const URL_TEST =
   process.env.DATABASE_URL_TEST ??
   // `connection_limit=1` : PGlite ne sert qu'une connexion à la fois, et le
-  // pool par défaut de Prisma en ouvre plusieurs. En revanche PAS
-  // `pgbouncer=true` ici : ce mode casse le protocole du serveur PGlite
-  // (« unexpected message from server ») alors qu'il est nécessaire côté
-  // application. Constaté, pas supposé.
+  // pool par défaut de Prisma en ouvre plusieurs.
+  //
+  // `pgbouncer=true` : identique à l'application, et pour la même raison. PGlite
+  // conserve les requêtes préparées d'une connexion à la suivante, si bien que
+  // la DEUXIÈME exécution des tests contre une même base échouait sur
+  // « prepared statement "s0" already exists ». Le garde attrapait l'erreur et
+  // s'abstenait : la suite passait au vert sans avoir rien exécuté.
   'postgresql://postgres:postgres@127.0.0.1:5433/postgres' +
-    '?schema=raai_apprendre&connection_limit=1'
+    '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const LECON_HYDRAULIQUE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000204')
 const LECON_SECURITE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000205')
-const THOMAS = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000042')
+// Le semoir puise dans la même suite pour les apprenants, leurs inscriptions et
+// leurs acquis : les élèves sont 40, 47 et 54, pas 40, 41 et 42. L'ancienne
+// valeur (42) désignait une ligne d'acquis de Léa, donc aucun élève.
+const THOMAS = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000047')
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
 const CHAPITRE = '00000000-0000-4000-8000-000000000202'
 const COMPETENCE_C9 = '00000000-0000-4000-8000-000000000024'
@@ -41,12 +47,24 @@ let disponible = false
 
 beforeAll(async () => {
   prisma = new PrismaClient({ datasources: { db: { url: URL_TEST } } })
+  // Base absente : on s'abstient, c'est légitime. Base présente mais jeu de
+  // démonstration incomplet : c'est un échec. Les confondre — ce que faisait un
+  // `catch` unique autour de la recherche du fixture — rendait ce fichier
+  // silencieusement inerte, et neuf de ses assertions fausses sans que rien ne
+  // rougisse.
   try {
-    const lecon = await prisma.lecon.findUnique({ where: { id: LECON_HYDRAULIQUE } })
-    disponible = lecon !== null
+    await prisma.$queryRaw`SELECT 1`
   } catch {
     return
   }
+
+  if ((await prisma.lecon.findUnique({ where: { id: LECON_HYDRAULIQUE } })) === null) {
+    throw new Error(
+      'Base joignable mais jeu de démonstration absent. Relancer `npm run bd:locale`.',
+    )
+  }
+
+  disponible = true
   depot = depotCataloguePrisma(prisma)
 }, 60_000)
 
@@ -68,9 +86,14 @@ describe('chargement d’une leçon', () => {
     expect(lecon).not.toBeNull()
     expect(lecon!.titre).toBe('Débit, pression et puissance hydraulique')
     expect(lecon!.matiere).toBe('Agroéquipement')
+    // Les cinq blocs semés, dans l'ordre. L'image et le modèle 3D sont arrivés
+    // avec la médiathèque et la visionneuse ; cette attente en était restée à
+    // trois, sans que personne ne le voie — la suite ne s'exécutait plus.
     expect(lecon!.blocs.map((b) => b.contenu.type)).toEqual([
       'texte',
+      'image',
       'lien',
+      'modele3d',
       'bibliographie',
     ])
   })
@@ -87,6 +110,13 @@ describe('chargement d’une leçon', () => {
     // Le cas réel : un import raté, une migration, une écriture manuelle.
     // Rendre au jugé reviendrait à faire confiance à la base pour ce qui
     // s'affichera chez un élève.
+    //
+    // Comptage AVANT plutôt qu'un nombre écrit en dur : ce que ce test doit
+    // prouver, c'est qu'ajouter un bloc invalide ne change rien à ce qui sort,
+    // pas que la leçon semée compte tel nombre de blocs. La version précédente
+    // attendait 3 et serait retombée en panne au prochain bloc ajouté au jeu.
+    const avant = (await depot.chargerLecon(LECON_HYDRAULIQUE))!.blocs.length
+
     await prisma.blocContenu.create({
       data: {
         id: BLOC_CORROMPU,
@@ -98,7 +128,7 @@ describe('chargement d’une leçon', () => {
     })
 
     const lecon = await depot.chargerLecon(LECON_HYDRAULIQUE)
-    expect(lecon!.blocs).toHaveLength(3)
+    expect(lecon!.blocs).toHaveLength(avant)
     expect(lecon!.blocs.some((b) => b.id === BLOC_CORROMPU)).toBe(false)
   })
 

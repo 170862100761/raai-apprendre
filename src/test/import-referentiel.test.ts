@@ -3,12 +3,21 @@
  * Une mise en page simulée prouverait seulement que le parseur lit ce que le
  * test a écrit.
  *
- * Les PDF sont téléchargés une fois puis mis en cache dans travail/, qui est
- * hors dépôt. Sans réseau, les tests sont ignorés plutôt que rouges : ils ne
- * doivent pas bloquer une CI pour une indisponibilité de chlorofil.fr.
+ * Deux dépendances extérieures, deux abstentions possibles — et toutes deux
+ * doivent se VOIR. `vitest` compte un `return` anticipé comme une réussite :
+ * c'est ainsi que six tests d'ici sont restés rouges pendant que d'autres, plus
+ * loin, passaient au vert sans rien exécuter. On utilise donc `skipIf` et
+ * `ctx.skip()`, que le rapporteur affiche « skipped » noir sur blanc.
+ *
+ * - `pdftotext` (Poppler) absent de la machine : rien à extraire.
+ * - PDF non mis en cache et chlorofil.fr injoignable : rien à lire.
+ *
+ * Ni l'un ni l'autre n'est une régression du code, et un rouge permanent finit
+ * par ne plus être lu — il masquerait la prochaine vraie.
  */
 import { describe, expect, it, beforeAll } from 'vitest'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 // @ts-expect-error — outil en JavaScript pur, hors du graphe applicatif.
 import { extraireReferentiel } from '../../outils/import-referentiel/extraire.mjs'
@@ -21,6 +30,22 @@ const RENOVE = {
 }
 
 let disponible = false
+
+/**
+ * `pdftotext` répond-il ?
+ *
+ * Testé au chargement du module, et non dans un `beforeAll` : `skipIf` est
+ * évalué à la collecte des tests, avant que le moindre `beforeAll` ne tourne.
+ *
+ * On ne regarde pas le code de sortie — selon les versions de Poppler, `-v`
+ * sort en 0 ou en 99 et écrit sur stderr. La seule question est : le binaire
+ * a-t-il pu être lancé.
+ */
+function extracteurPresent(): boolean {
+  return spawnSync('pdftotext', ['-v']).error === undefined
+}
+
+const EXTRACTEUR = extracteurPresent()
 
 async function telecharger(url: string, destination: string): Promise<boolean> {
   if (existsSync(destination)) return true
@@ -36,20 +61,21 @@ async function telecharger(url: string, destination: string): Promise<boolean> {
 }
 
 beforeAll(async () => {
-  disponible = await telecharger(RENOVE.url, RENOVE.fichier)
+  // Inutile d'aller chercher un PDF que rien ne saura ouvrir.
+  disponible = EXTRACTEUR && (await telecharger(RENOVE.url, RENOVE.fichier))
 }, 120_000)
 
-describe('extraction du Bac Pro Agroéquipement rénové', () => {
-  it("restitue les 10 blocs et les 22 sous-capacités", () => {
-    if (!disponible) return
+describe.skipIf(!EXTRACTEUR)('extraction du Bac Pro Agroéquipement rénové', () => {
+  it("restitue les 10 blocs et les 22 sous-capacités", (ctx) => {
+    if (!disponible) return ctx.skip()
     const r = extraireReferentiel(RENOVE.fichier)
 
     expect(r.statistiques.capacites).toBe(10)
     expect(r.statistiques.sousCapacites).toBe(22)
   })
 
-  it("rattache chaque capacité à son bloc, sauf le module d'adaptation", () => {
-    if (!disponible) return
+  it("rattache chaque capacité à son bloc, sauf le module d'adaptation", (ctx) => {
+    if (!disponible) return ctx.skip()
     const r = extraireReferentiel(RENOVE.fichier)
 
     const sansBloc = r.capacites.filter((c: { codeBloc: string | null }) => !c.codeBloc)
@@ -63,8 +89,8 @@ describe('extraction du Bac Pro Agroéquipement rénové', () => {
     }
   })
 
-  it("n'absorbe pas le paragraphe de glose dans l'intitulé de C4.3", () => {
-    if (!disponible) return
+  it("n'absorbe pas le paragraphe de glose dans l'intitulé de C4.3", (ctx) => {
+    if (!disponible) return ctx.skip()
     const r = extraireReferentiel(RENOVE.fichier)
 
     // Le défaut du prototype : la glose qui suit C4.3 commence par une
@@ -77,8 +103,8 @@ describe('extraction du Bac Pro Agroéquipement rénové', () => {
     )
   })
 
-  it('restitue les intitulés professionnels attendus', () => {
-    if (!disponible) return
+  it('restitue les intitulés professionnels attendus', (ctx) => {
+    if (!disponible) return ctx.skip()
     const r = extraireReferentiel(RENOVE.fichier)
     const parCode = Object.fromEntries(
       r.capacites.map((c: { code: string; intitule: string }) => [c.code, c.intitule]),
@@ -90,8 +116,8 @@ describe('extraction du Bac Pro Agroéquipement rénové', () => {
     expect(parCode['C9']).toContain('maintenance')
   })
 
-  it("signale l'absence d'arrêté plutôt que de la passer sous silence", () => {
-    if (!disponible) return
+  it("signale l'absence d'arrêté plutôt que de la passer sous silence", (ctx) => {
+    if (!disponible) return ctx.skip()
     const r = extraireReferentiel(RENOVE.fichier)
 
     // Ce PDF ne cite pas son propre arrêté. L'import doit le dire : c'est
@@ -100,8 +126,8 @@ describe('extraction du Bac Pro Agroéquipement rénové', () => {
     expect(r.alertes.join(' ')).toMatch(/arrêté/i)
   })
 
-  it('produit une empreinte stable du PDF source', () => {
-    if (!disponible) return
+  it('produit une empreinte stable du PDF source', (ctx) => {
+    if (!disponible) return ctx.skip()
     const a = extraireReferentiel(RENOVE.fichier)
     const b = extraireReferentiel(RENOVE.fichier)
 

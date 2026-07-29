@@ -10,12 +10,27 @@ export {
 } from './domaine/inscription'
 
 export {
+  anonymiser,
+  contientUnTiers,
+  resteIdentifiable,
+  CHAMPS_IDENTIFIANTS,
+  MENTION_ANONYME,
+  type DossierRgpd,
+} from './domaine/dossier-rgpd'
+
+export {
   creerClasse,
   inscrireEleves,
   type Dependances,
   type EntreeClasse,
   type ResultatInscription,
 } from './application/mettre-en-route'
+
+export {
+  effacerApprenant,
+  exporterDossier,
+  type EffacementFait,
+} from './application/dossier-rgpd'
 
 export type {
   AccesEleve,

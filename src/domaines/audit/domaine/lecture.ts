@@ -51,6 +51,7 @@ const LIBELLES: Record<ActionAuditee, string> = {
 
   'export.produit': 'Export produit',
   'donnees.consultees': 'Données personnelles consultées',
+  'apprenant.efface': 'Élève effacé (droit à l’effacement)',
 
   'session.impersonnee': 'Connexion au nom d’un autre compte',
 }
@@ -71,6 +72,7 @@ const A_SIGNALER: ReadonlySet<ActionAuditee> = new Set([
   'note.modifiee',
   'apprenant.acces_remis',
   'donnees.consultees',
+  'apprenant.efface',
   'session.impersonnee',
 ])
 

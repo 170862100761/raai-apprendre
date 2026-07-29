@@ -37,6 +37,8 @@ export type ActionAuditee =
   // Données personnelles
   | 'export.produit'
   | 'donnees.consultees'
+  /** Droit à l'effacement : anonymisation d'un élève, irréversible. */
+  | 'apprenant.efface'
   // Support
   | 'session.impersonnee'
 
@@ -98,6 +100,9 @@ const OBLIGATOIRES: ReadonlySet<ActionAuditee> = new Set([
   'membre.modifie',
   'export.produit',
   'donnees.consultees',
+  // Irréversible et invisible une fois faite : sans trace, plus personne ne
+  // peut dire qui a effacé cet élève, ni quand la demande a été honorée.
+  'apprenant.efface',
   'session.impersonnee',
 ])
 

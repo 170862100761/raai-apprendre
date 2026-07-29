@@ -39,8 +39,10 @@ const LEA = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
 /** La question rédigée du devoir : celle qui crée la pile de correction. */
 const QUESTION_REDIGEE = '00000000-0000-4000-8000-000000000244'
-const COPIE_DE_THOMAS = identifiant<IdentifiantTentative>(
-  '00000000-0000-4000-8000-000000000245',
+/** Élève et copie créés pour ce fichier, et détruits avec lui. */
+const COBAYE = '00000000-0000-4000-8000-0000000009e0'
+const COPIE_DU_COBAYE = identifiant<IdentifiantTentative>(
+  '00000000-0000-4000-8000-0000000009e1',
 )
 
 let prisma: PrismaClient
@@ -69,26 +71,64 @@ beforeAll(async () => {
   disponible = true
   depot = depotEvaluationPrisma(prisma)
   progression = depotProgressionPrisma(prisma)
+
+  // Le test se donne sa propre copie plutôt que d'emprunter celle de Thomas.
+  //
+  // Première version : on corrigeait la copie semée et on la restaurait. Deux
+  // ennuis, tous deux payés. D'abord la restauration devait tomber juste à
+  // chaque fois, sinon le passage suivant trouvait une copie déjà corrigée.
+  // Ensuite, enchaîner plusieurs écritures dans un même `beforeAll` casse le
+  // socket PGlite (« unexpected message from server ») — et vitest compte
+  // alors les tests du fichier comme « skipped », sans les faire figurer dans
+  // le total des échecs. Dix-neuf tests disparaissaient sans un rouge.
+  //
+  // Un fixture qui n'appartient qu'à ce fichier supprime les deux problèmes :
+  // rien à restaurer, et rien que les autres fichiers puissent constater.
+  // Tout en une transaction, donc un seul aller-retour : c'est l'enchaînement
+  // d'écritures séparées qui met le socket par terre.
+  await prisma.$transaction([
+    // Les tentatives d'Inès sont créées par les tests de passage plus bas et
+    // s'accumuleraient sinon d'une exécution à l'autre — « expected 6 to be 1 ».
+    prisma.tentative.deleteMany({ where: { apprenantId: INES } }),
+    prisma.acquisCompetence.deleteMany({ where: { apprenantId: INES } }),
+    prisma.tentative.deleteMany({ where: { apprenantId: COBAYE } }),
+    prisma.apprenant.deleteMany({ where: { id: COBAYE } }),
+    prisma.apprenant.create({
+      data: {
+        id: COBAYE,
+        etablissementId: ETABLISSEMENT,
+        prenom: 'Noé',
+        initialeNom: 'T',
+        identifiant: 'test.correction',
+      },
+    }),
+    prisma.tentative.create({
+      data: {
+        id: COPIE_DU_COBAYE,
+        evaluationId: DEVOIR_EN_RETARD,
+        apprenantId: COBAYE,
+        etablissementId: ETABLISSEMENT,
+        statut: 'attente_correction',
+        score: 0,
+        scoreMax: 20,
+        soumiseLe: new Date(),
+        reponses: {
+          create: {
+            questionId: QUESTION_REDIGEE,
+            valeur: { type: 'texte_long', texte: 'Couper le moteur avant tout.' },
+          },
+        },
+      },
+    }),
+  ])
 }, 60_000)
 
 afterAll(async () => {
   if (disponible) {
-    await prisma.tentative.deleteMany({ where: { apprenantId: INES } })
-    await prisma.acquisCompetence.deleteMany({ where: { apprenantId: INES } })
-
-    // La copie de Thomas est SEMÉE, pas créée par le test : la supprimer
-    // laisserait la pile de correction vide à la deuxième exécution. On la
-    // remet dans son état d'origine — c'est ce qui rend la suite rejouable,
-    // et l'absence de cette remise se paie exactement comme les gardes
-    // silencieux corrigés plus tôt aujourd'hui.
-    await prisma.reponse.updateMany({
-      where: { tentativeId: COPIE_DE_THOMAS },
-      data: { score: null, commentaire: '' },
-    })
-    await prisma.tentative.update({
-      where: { id: COPIE_DE_THOMAS },
-      data: { statut: 'attente_correction', score: 0 },
-    })
+    // Une seule instruction : la suppression de l'élève emporte ses tentatives
+    // et leurs réponses en cascade. Enchaîner les écritures ici est justement
+    // ce qui cassait le socket.
+    await prisma.apprenant.deleteMany({ where: { id: COBAYE } })
   }
   await prisma?.$disconnect()
 })
@@ -177,7 +217,7 @@ describe('échéances', () => {
 })
 
 describe('correction par un enseignant', () => {
-  const COPIE = COPIE_DE_THOMAS
+  const COPIE = COPIE_DU_COBAYE
 
   it('remonte la copie de Thomas dans la pile de l’établissement', async () => {
     if (!disponible) return
@@ -186,7 +226,7 @@ describe('correction par un enseignant', () => {
     const copie = pile.find((c) => c.tentativeId === COPIE)
 
     expect(copie).toBeDefined()
-    expect(copie?.prenom).toBe('Thomas')
+    expect(copie?.prenom).toBe('Noé')
     expect(copie?.aNoter).toBe(1)
     // Prénom et initiale, jamais le nom complet — il n'existe pas en mode
     // minimal, et l'écran doit se comporter pareil dans les deux modes.

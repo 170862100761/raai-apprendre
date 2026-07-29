@@ -33,9 +33,14 @@ export default async function PageAdministration() {
 
       <MiseEnRoute offres={offres} annees={annees} />
 
-      <Link href="/administration/journal" className="text-sm underline">
-        Consulter le journal des actions
-      </Link>
+      <nav className="flex flex-wrap gap-x-6 gap-y-2">
+        <Link href="/administration/journal" className="text-sm underline">
+          Consulter le journal des actions
+        </Link>
+        <Link href="/administration/rgpd" className="text-sm underline">
+          Demandes RGPD
+        </Link>
+      </nav>
     </main>
   )
 }

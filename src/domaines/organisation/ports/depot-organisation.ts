@@ -3,6 +3,7 @@ import type {
   IdentifiantClasse,
   IdentifiantEtablissement,
 } from '@/noyau/identifiants'
+import type { ApprenantAnonymise, DossierRgpd } from '../domaine/dossier-rgpd'
 
 export type Etablissement = {
   readonly id: IdentifiantEtablissement
@@ -69,4 +70,39 @@ export interface DepotOrganisation {
     classeId: IdentifiantClasse,
     etablissementId: IdentifiantEtablissement,
   ): Promise<boolean>
+
+  // --- RGPD ---------------------------------------------------------------
+
+  /** `null` si l'élève n'existe pas ou sort du périmètre de l'établissement. */
+  assemblerDossier(
+    apprenantId: IdentifiantApprenant,
+    etablissementId: IdentifiantEtablissement,
+  ): Promise<DossierRgpd | null>
+
+  /**
+   * Les prénoms des AUTRES élèves des mêmes classes.
+   *
+   * Sert uniquement à vérifier qu'ils ne sont pas dans le dossier qu'on
+   * s'apprête à remettre. Lire pour contrôler, jamais pour exporter.
+   */
+  prenomsDesCamarades(
+    apprenantId: IdentifiantApprenant,
+    etablissementId: IdentifiantEtablissement,
+  ): Promise<readonly string[]>
+
+  anonymiserApprenant(
+    apprenantId: IdentifiantApprenant,
+    etablissementId: IdentifiantEtablissement,
+    valeurs: ApprenantAnonymise,
+  ): Promise<void>
+
+  /** Relecture après écriture, pour confirmer que l'effacement a bien pris. */
+  relireApprenant(apprenantId: IdentifiantApprenant): Promise<{
+    prenom: string
+    initialeNom: string
+    identifiant: string | null
+    codeHash: string | null
+    compteId: string | null
+    vuLe: Date | null
+  } | null>
 }

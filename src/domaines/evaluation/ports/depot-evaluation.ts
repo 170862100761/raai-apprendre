@@ -4,6 +4,7 @@ import type {
   IdentifiantEvaluation,
   IdentifiantTentative,
 } from '@/noyau/identifiants'
+import type { CopieACorriger, NoteEnseignant } from '../domaine/correction'
 import type { Echeance } from '../domaine/echeance'
 import type { Enonce, Corrige, Reponse } from '../domaine/question'
 import type { StatutTentative } from '../domaine/tentative'
@@ -42,7 +43,12 @@ export type TentativeStockee = {
   readonly creeLe: Date
 }
 
-export interface DepotEvaluation {
+/**
+ * `DepotCorrection` est séparé et composé plutôt que fondu ici : la pile de
+ * l'enseignant se lit et s'écrit sans rien savoir du passage d'une évaluation,
+ * et un jour elle pourra vivre derrière son propre adaptateur.
+ */
+export interface DepotEvaluation extends DepotCorrection {
   /** `null` si inexistante, non publiée, ou hors périmètre. */
   chargerPourEleve(id: IdentifiantEvaluation): Promise<EvaluationPourEleve | null>
 
@@ -93,3 +99,69 @@ export interface DepotEvaluation {
     apprenantId: IdentifiantApprenant,
   ): Promise<(TentativeStockee & { score: number | null; scoreMax: number | null }) | null>
 }
+
+/**
+ * Une copie dans la pile de l'enseignant.
+ *
+ * Prénom et initiale, jamais le nom complet : en mode minimal il n'existe pas,
+ * et l'écran doit se comporter pareil dans les deux modes.
+ */
+export type CopieEnAttente = {
+  readonly tentativeId: IdentifiantTentative
+  readonly apprenantId: IdentifiantApprenant
+  readonly prenom: string
+  readonly initialeNom: string
+  readonly evaluationTitre: string
+  readonly chapitre: string
+  readonly soumiseLe: Date | null
+  /** Nombre de questions qui attendent encore une note. */
+  readonly aNoter: number
+}
+
+/**
+ * Le détail d'une copie, côté enseignant.
+ *
+ * Le corrigé attendu y figure — ici c'est légitime et même nécessaire : la
+ * règle « le corrigé ne sort jamais » protège l'élève avant soumission, pas
+ * l'enseignant qui corrige après.
+ */
+export type QuestionCorrigeable = {
+  readonly questionId: string
+  readonly intitule: string
+  readonly type: string
+  readonly bareme: number
+  /** `null` = attend l'enseignant. */
+  readonly score: number | null
+  readonly commentaire: string
+  /** Ce que l'élève a écrit, brut. */
+  readonly reponse: Reponse | null
+  /** Ce qui était attendu. Absent pour les questions purement rédigées. */
+  readonly corrige: Corrige | null
+}
+
+export type CopiePourCorrection = {
+  readonly copie: CopieACorriger
+  readonly apprenantId: IdentifiantApprenant
+  readonly prenom: string
+  readonly initialeNom: string
+  readonly evaluationId: IdentifiantEvaluation
+  readonly evaluationTitre: string
+  readonly etablissementId: string
+  readonly questions: readonly QuestionCorrigeable[]
+}
+
+export interface DepotCorrection {
+  /** La pile de l'établissement, la plus ancienne d'abord. */
+  copiesEnAttente(etablissementId: string): Promise<readonly CopieEnAttente[]>
+
+  chargerPourCorrection(id: IdentifiantTentative): Promise<CopiePourCorrection | null>
+
+  enregistrerNotes(entree: {
+    tentativeId: IdentifiantTentative
+    statut: StatutTentative
+    score: number
+    scoreMax: number
+    notes: readonly NoteEnseignant[]
+  }): Promise<void>
+}
+

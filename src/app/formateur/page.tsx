@@ -38,6 +38,9 @@ export default async function PageFormateur() {
     <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-10">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="text-2xl font-semibold">Mes leçons</h1>
+        <Link href="/formateur/corrections" className="text-sm underline">
+          Copies à corriger
+        </Link>
         <Link href="/recherche" className="text-sm underline">
           Rechercher
         </Link>

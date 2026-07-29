@@ -7,12 +7,15 @@ import type {
   IdentifiantTentative,
 } from '@/noyau/identifiants'
 import type { Echeance, TypeEvaluation } from '../domaine/echeance'
-import { lireCorrige, lireEnonce } from '../domaine/question'
+import { lireCorrige, lireEnonce, lireReponse } from '../domaine/question'
 import type { StatutTentative } from '../domaine/tentative'
 import type {
+  CopieEnAttente,
+  CopiePourCorrection,
   DepotEvaluation,
   EvaluationPourEleve,
   QuestionAvecCorrige,
+  QuestionCorrigeable,
   QuestionPourEleve,
   TentativeStockee,
 } from '../ports/depot-evaluation'
@@ -180,6 +183,125 @@ export function depotEvaluationPrisma(prisma: PrismaClient): DepotEvaluation {
               },
             ],
       )
+    },
+
+    async copiesEnAttente(etablissementId): Promise<readonly CopieEnAttente[]> {
+      const tentatives = await prisma.tentative.findMany({
+        where: { etablissementId, statut: 'attente_correction' },
+        // La plus ancienne d'abord : une copie qui attend depuis trois semaines
+        // passe devant celle rendue ce matin, sinon la pile ne se vide jamais
+        // par le bas.
+        orderBy: { soumiseLe: 'asc' },
+        select: {
+          id: true,
+          apprenantId: true,
+          soumiseLe: true,
+          apprenant: { select: { prenom: true, initialeNom: true } },
+          evaluation: { select: { titre: true, chapitre: { select: { titre: true } } } },
+          reponses: { where: { score: null }, select: { id: true } },
+        },
+      })
+
+      return tentatives.map((t) => ({
+        tentativeId: identifiant<IdentifiantTentative>(t.id),
+        apprenantId: identifiant<IdentifiantApprenant>(t.apprenantId),
+        prenom: t.apprenant.prenom,
+        initialeNom: t.apprenant.initialeNom,
+        evaluationTitre: t.evaluation.titre,
+        chapitre: t.evaluation.chapitre.titre,
+        soumiseLe: t.soumiseLe,
+        aNoter: t.reponses.length,
+      }))
+    },
+
+    async chargerPourCorrection(id): Promise<CopiePourCorrection | null> {
+      const tentative = await prisma.tentative.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          statut: true,
+          apprenantId: true,
+          etablissementId: true,
+          evaluationId: true,
+          apprenant: { select: { prenom: true, initialeNom: true } },
+          evaluation: {
+            select: {
+              titre: true,
+              questions: {
+                orderBy: { ordre: 'asc' },
+                select: {
+                  id: true,
+                  type: true,
+                  enonce: true,
+                  bareme: true,
+                  corrige: true,
+                },
+              },
+            },
+          },
+          reponses: {
+            select: { questionId: true, valeur: true, score: true, commentaire: true },
+          },
+        },
+      })
+      if (!tentative) return null
+
+      const parQuestion = new Map(tentative.reponses.map((r) => [r.questionId, r]))
+
+      const questions: QuestionCorrigeable[] = tentative.evaluation.questions.map((q) => {
+        const reponse = parQuestion.get(q.id)
+        return {
+          questionId: q.id,
+          intitule: q.enonce,
+          type: q.type,
+          bareme: Number(q.bareme),
+          score: reponse?.score === null || reponse?.score === undefined
+            ? null
+            : Number(reponse.score),
+          commentaire: reponse?.commentaire ?? '',
+          reponse: reponse ? lireReponse({ type: q.type, ...(reponse.valeur as object) }) : null,
+          corrige: lireCorrige({ type: q.type, ...(q.corrige as object) }),
+        }
+      })
+
+      return {
+        copie: {
+          tentativeId: identifiant<IdentifiantTentative>(tentative.id),
+          statut: tentative.statut as StatutTentative,
+          questions: questions.map((q) => ({
+            questionId: q.questionId,
+            bareme: q.bareme,
+            score: q.score,
+          })),
+        },
+        apprenantId: identifiant<IdentifiantApprenant>(tentative.apprenantId),
+        prenom: tentative.apprenant.prenom,
+        initialeNom: tentative.apprenant.initialeNom,
+        evaluationId: identifiant<IdentifiantEvaluation>(tentative.evaluationId),
+        evaluationTitre: tentative.evaluation.titre,
+        etablissementId: tentative.etablissementId,
+        questions,
+      }
+    },
+
+    async enregistrerNotes({ tentativeId, statut, score, scoreMax, notes }) {
+      // Transaction : une copie dont les notes sont écrites mais dont le statut
+      // reste « en attente » repartirait dans la pile, et l'enseignant la
+      // corrigerait deux fois.
+      await prisma.$transaction([
+        ...notes.map((note) =>
+          prisma.reponse.update({
+            where: {
+              tentativeId_questionId: { tentativeId, questionId: note.questionId },
+            },
+            data: { score: note.score, commentaire: note.commentaire },
+          }),
+        ),
+        prisma.tentative.update({
+          where: { id: tentativeId },
+          data: { statut, score, scoreMax },
+        }),
+      ])
     },
 
     async derniereTentative(evaluationId, apprenantId) {

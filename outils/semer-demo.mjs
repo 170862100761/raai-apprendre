@@ -531,6 +531,21 @@ async function semerEcheances(q, CH1, CH2) {
     )
   }
 
+  // Le devoir porte une question rédigée : c'est ce qui fait exister la pile de
+  // correction. Sans elle, `attente_correction` reste un état que rien ne
+  // produit, et l'écran de l'enseignant est vide en démonstration.
+  await q(
+    `INSERT INTO raai_apprendre.question
+       (id, evaluation_id, type, enonce, options, corrige, bareme, ordre)
+     VALUES ($1, $2, 'texte_long', $3, '{}', '{}', 20, 1)`,
+    [
+      id(244),
+      DEVOIR,
+      "Décris les trois règles à respecter avant d'intervenir entre un tracteur " +
+        "et son outil, et explique pourquoi la première prime sur les autres.",
+    ],
+  )
+
   // Léa a rendu le devoir en retard, Thomas et Inès non : le même écran ne
   // raconte pas la même chose selon l'élève, ce qui est tout l'intérêt d'avoir
   // trois comptes de démonstration.
@@ -540,6 +555,34 @@ async function semerEcheances(q, CH1, CH2) {
         score_max, duree_secondes, soumise_le)
      VALUES ($1, $2, $3, $4, 'corrigee', 14, 20, 1820, now() - interval '2 days')`,
     [id(243), DEVOIR, id(40), id(3)],
+  )
+
+  // Thomas a rendu, mais sa copie attend un enseignant : score NULL, et c'est
+  // précisément ce NULL que la pile de correction va chercher.
+  await q(
+    `INSERT INTO raai_apprendre.tentative
+       (id, evaluation_id, apprenant_id, etablissement_id, statut, score,
+        score_max, duree_secondes, soumise_le)
+     VALUES ($1, $2, $3, $4, 'attente_correction', 0, 20, 1450,
+             now() - interval '3 days')`,
+    [id(245), DEVOIR, id(47), id(3)],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.reponse (id, tentative_id, question_id, valeur, score)
+     VALUES ($1, $2, $3, $4, NULL)`,
+    [
+      id(246),
+      id(245),
+      id(244),
+      JSON.stringify({
+        type: 'texte_long',
+        texte:
+          "Il faut couper le moteur, ne pas se mettre entre le tracteur et l'outil, " +
+          'et vérifier que les crochets sont bien verrouillés avant de relever. ' +
+          "La première prime parce que tant que le moteur tourne, l'hydraulique " +
+          'peut bouger toute seule.',
+      }),
+    ],
   )
 }
 

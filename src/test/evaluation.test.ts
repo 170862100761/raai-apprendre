@@ -9,11 +9,14 @@ import { identifiant } from '@/noyau/identifiants'
 import type {
   IdentifiantApprenant,
   IdentifiantEvaluation,
+  IdentifiantTentative,
 } from '@/noyau/identifiants'
 import {
   chargerEcheances,
   demarrerOuReprendre,
   depotEvaluationPrisma,
+  listerCopiesEnAttente,
+  noterCopie,
   soumettre,
 } from '@/domaines/evaluation'
 import { depotProgressionPrisma, enregistrerResultat } from '@/domaines/progression'
@@ -34,6 +37,11 @@ const INES = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-00000000
 /** Léa a rendu le devoir en retard, Inès non — le jeu de démonstration le pose. */
 const LEA = identifiant<IdentifiantApprenant>('00000000-0000-4000-8000-000000000040')
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
+/** La question rédigée du devoir : celle qui crée la pile de correction. */
+const QUESTION_REDIGEE = '00000000-0000-4000-8000-000000000244'
+const COPIE_DE_THOMAS = identifiant<IdentifiantTentative>(
+  '00000000-0000-4000-8000-000000000245',
+)
 
 let prisma: PrismaClient
 let depot: ReturnType<typeof depotEvaluationPrisma>
@@ -67,6 +75,20 @@ afterAll(async () => {
   if (disponible) {
     await prisma.tentative.deleteMany({ where: { apprenantId: INES } })
     await prisma.acquisCompetence.deleteMany({ where: { apprenantId: INES } })
+
+    // La copie de Thomas est SEMÉE, pas créée par le test : la supprimer
+    // laisserait la pile de correction vide à la deuxième exécution. On la
+    // remet dans son état d'origine — c'est ce qui rend la suite rejouable,
+    // et l'absence de cette remise se paie exactement comme les gardes
+    // silencieux corrigés plus tôt aujourd'hui.
+    await prisma.reponse.updateMany({
+      where: { tentativeId: COPIE_DE_THOMAS },
+      data: { score: null, commentaire: '' },
+    })
+    await prisma.tentative.update({
+      where: { id: COPIE_DE_THOMAS },
+      data: { statut: 'attente_correction', score: 0 },
+    })
   }
   await prisma?.$disconnect()
 })
@@ -151,6 +173,91 @@ describe('échéances', () => {
 
     const tableau = await chargerEcheances(INES, depot)
     expect(tableau.affichees.every((e) => e.chapitre.length > 0)).toBe(true)
+  })
+})
+
+describe('correction par un enseignant', () => {
+  const COPIE = COPIE_DE_THOMAS
+
+  it('remonte la copie de Thomas dans la pile de l’établissement', async () => {
+    if (!disponible) return
+
+    const pile = await listerCopiesEnAttente(ETABLISSEMENT, depot)
+    const copie = pile.find((c) => c.tentativeId === COPIE)
+
+    expect(copie).toBeDefined()
+    expect(copie?.prenom).toBe('Thomas')
+    expect(copie?.aNoter).toBe(1)
+    // Prénom et initiale, jamais le nom complet — il n'existe pas en mode
+    // minimal, et l'écran doit se comporter pareil dans les deux modes.
+    expect(Object.keys(copie ?? {})).not.toContain('nom')
+  })
+
+  it('refuse une note hors barème sans rien écrire en base', async () => {
+    if (!disponible) return
+
+    const r = await noterCopie(
+      COPIE,
+      [{ questionId: QUESTION_REDIGEE, score: 200, commentaire: '' }],
+      depot,
+    )
+
+    expect(r.ok).toBe(false)
+    // La copie doit être restée intacte : le domaine tranche AVANT la base.
+    const tentative = await prisma.tentative.findUnique({ where: { id: COPIE } })
+    expect(tentative?.statut).toBe('attente_correction')
+  })
+
+  it('note la copie, la clôt, et enregistre le commentaire', async () => {
+    if (!disponible) return
+
+    const r = await noterCopie(
+      COPIE,
+      [
+        {
+          questionId: QUESTION_REDIGEE,
+          score: 15,
+          commentaire: 'Les trois règles y sont. Le « pourquoi » est juste.',
+        },
+      ],
+      depot,
+    )
+
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.valeur.close).toBe(true)
+    expect(r.valeur.score).toBe(15)
+    expect(r.valeur.sansCommentaire).toEqual([])
+
+    const tentative = await prisma.tentative.findUnique({ where: { id: COPIE } })
+    expect(tentative?.statut).toBe('corrigee')
+    expect(Number(tentative?.score)).toBe(15)
+
+    const reponse = await prisma.reponse.findFirst({ where: { tentativeId: COPIE } })
+    expect(Number(reponse?.score)).toBe(15)
+    expect(reponse?.commentaire).toContain('trois règles')
+  })
+
+  it('sort la copie de la pile une fois corrigée', async () => {
+    if (!disponible) return
+    const pile = await listerCopiesEnAttente(ETABLISSEMENT, depot)
+    expect(pile.map((c) => c.tentativeId)).not.toContain(COPIE)
+  })
+
+  it('refuse de rouvrir une copie close', async () => {
+    if (!disponible) return
+
+    // L'immuabilité d'une tentative corrigée vaut aussi contre la base : une
+    // note ne change pas sans trace.
+    const r = await noterCopie(
+      COPIE,
+      [{ questionId: QUESTION_REDIGEE, score: 20, commentaire: 'Finalement…' }],
+      depot,
+    )
+
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.erreur.code).toBe('conflit')
   })
 })
 

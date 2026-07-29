@@ -33,9 +33,25 @@ export {
 } from './domaine/echeance'
 
 export {
+  appliquerNotes,
+  noteRecevable,
+  sansRetour,
+  type CopieACorriger,
+  type CopieCorrigee,
+  type NoteEnseignant,
+} from './domaine/correction'
+
+export {
   chargerEcheances,
   type TableauDEcheances,
 } from './application/echeances-a-venir'
+
+export {
+  chargerCopie,
+  listerCopiesEnAttente,
+  noterCopie,
+  type CopieNotee,
+} from './application/corriger-copies'
 
 export {
   demarrerOuReprendre,
@@ -45,8 +61,12 @@ export {
 } from './application/passer-evaluation'
 
 export type {
+  CopieEnAttente,
+  CopiePourCorrection,
+  DepotCorrection,
   DepotEvaluation,
   EvaluationPourEleve,
+  QuestionCorrigeable,
   QuestionPourEleve,
   TentativeStockee,
 } from './ports/depot-evaluation'

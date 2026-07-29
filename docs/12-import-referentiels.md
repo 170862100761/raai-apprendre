@@ -160,11 +160,19 @@ tous les Bac Pro agricoles. Elles s'importent **une seule fois** et se partagent
 entre tous les diplômes. Le modèle national du document 03 le permet déjà ; il
 faut simplement que l'import ne les duplique pas par diplôme.
 
-## 8. Fichiers de travail
+## 8. Où vit l'outil
 
-Le prototype et les extractions sont dans le répertoire de travail temporaire de
-cette session (`extraire-ref.mjs`, `ref-ae-new.txt`, `referentiel-ae.json`). À
-reprendre dans `outils/import-referentiel/` au démarrage du développement.
+Le prototype de cette étude a été repris dans **`outils/import-referentiel/`**,
+couvert par six tests. Il s'invoque depuis la racine :
+
+```bash
+npm run referentiel:importer -- <url-chlorofil|chemin.pdf> [--json sortie.json]
+```
+
+**Il n'écrit rien en base**, par construction : la validation humaine du §5 reste
+obligatoire, et l'écran de validation côte à côte n'est pas écrit. Les six tests
+s'abstiennent **visiblement** quand `pdftotext` est absent de la machine — une
+abstention annoncée, jamais un vert silencieux.
 
 ---
 

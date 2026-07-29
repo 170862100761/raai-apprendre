@@ -4,13 +4,21 @@
 
 | Env. | Branche | Base | Données | Usage |
 |---|---|---|---|---|
-| Local | — | Postgres Docker | Jeu de test | Développement |
+| Local | — | PGlite, port 5433 | Jeu de démonstration | Développement |
 | Aperçu | toute PR | Branche Supabase éphémère | Jeu de test | Revue |
 | Recette | `recette` | Projet Supabase dédié | Anonymisées | Validation établissement pilote |
 | Production | `main` | Projet Supabase prod | Réelles | `raai-apprendre.vercel.app` |
 
 Aucune donnée réelle en aperçu ni en recette. L'anonymisation est un script du
 dépôt, exécuté à la copie, pas une opération manuelle.
+
+**Le local ne demande ni Docker ni PostgreSQL installé** : `npm run bd:locale`
+monte PGlite, applique les migrations et sème le jeu de démonstration. C'est un
+choix, pas une commodité — un environnement qui exige une mise en place préalable
+est un environnement où l'on ne lance pas l'application « juste pour vérifier ».
+Deux limites propres à PGlite, absentes en production : une seule connexion à la
+fois, et des requêtes préparées non conservées (d'où `pgbouncer=true` dans
+`DATABASE_URL`, que Supabase impose de toute façon derrière son pooler).
 
 ## 2. Pipeline
 

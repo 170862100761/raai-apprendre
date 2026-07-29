@@ -83,11 +83,11 @@ Points d'attention :
 ```mermaid
 erDiagram
     DIPLOME ||--o{ VERSION_REFERENTIEL : "est décrit par"
-    VERSION_REFERENTIEL ||--o{ BLOC_COMPETENCE : structure
-    BLOC_COMPETENCE ||--o{ COMPETENCE : regroupe
-    COMPETENCE ||--o{ CAPACITE : "se décompose en"
-    CAPACITE ||--o{ OBJECTIF : vise
-    OBJECTIF ||--o{ SAVOIR : mobilise
+    VERSION_REFERENTIEL ||--o{ COMPETENCE : structure
+    COMPETENCE ||--o{ COMPETENCE : "se décompose en (rang 1 → rang 2)"
+    COMPETENCE ||--o{ SAVOIR : mobilise
+    COMPETENCE ||--o{ ADAPTATION_LOCALE : "peut être adaptée"
+    COMPETENCE ||--o{ COMPETENCE_EQUIVALENCE : "se reporte d'une version à l'autre"
     VERSION_REFERENTIEL ||--o{ MODALITE_EVALUATION : "définit (CCF, ponctuel)"
 
     DIPLOME {
@@ -108,24 +108,33 @@ erDiagram
     }
     COMPETENCE {
         uuid id PK
-        uuid bloc_id FK
-        text code "C1.2"
+        uuid version_id FK
+        text code "C5 au rang 1, C5.1 au rang 2"
+        text code_bloc "B5 — NULL si pas de bloc numéroté"
         text intitule
+        uuid parent_id FK "NULL au rang 1"
         int ordre
+        boolean adaptable_localement
     }
 ```
 
-Aucun `etablissement_id` dans ce sous-schéma. C'est vérifié par un test.
+Aucun `etablissement_id` dans ce sous-schéma, à l'exception documentée ci-dessous.
+C'est vérifié par un test.
 
-> **À corriger avant écriture du schéma** — l'analyse d'un référentiel réel
-> ([12](12-import-referentiels.md#3-structure-réelle-du-référentiel-rénové)) montre deux écarts :
-> 1. `BLOC_COMPETENCE` et `COMPETENCE` sont en relation **1–1**, pas 1–n : le
->    référentiel pose « chaque capacité globale correspond à un bloc de
->    compétences ». Les deux tables doivent fusionner.
+> **Corrigé au schéma, avant la première migration.** L'analyse d'un référentiel
+> réel ([12](12-import-referentiels.md#3-structure-réelle-du-référentiel-rénové))
+> avait montré deux écarts avec l'ERD ci-dessus, tous deux tranchés :
+> 1. `BLOC_COMPETENCE` et `COMPETENCE` étaient donnés en relation 1–n. Ils sont en
+>    relation **1–1** : le référentiel pose « chaque capacité globale correspond à
+>    un bloc de compétences ». Le schéma retenu va plus loin que la simple fusion —
+>    **une seule table `competence`, auto-référencée** par `parent_id`, porte les
+>    deux rangs : `C5` au rang 1 (`parent_id` nul), `C5.1` au rang 2. Le bloc
+>    devient une colonne, `code_bloc`, nulle pour une capacité sans bloc numéroté.
 > 2. La dernière capacité (module d'adaptation professionnelle) est **définie
->    régionalement**. Elle impose une table `adaptation_locale` portant, elle, un
->    `etablissement_id` — seule exception admise à la règle ci-dessus, et à
->    exclure explicitement du test.
+>    régionalement**. D'où le drapeau `adaptable_localement` sur la capacité, et la
+>    table `adaptation_locale` qui porte, elle, un `etablissement_id` — **seule
+>    exception admise** à la règle ci-dessus, et explicitement exclue du test qui
+>    la vérifie.
 
 Une `VERSION_REFERENTIEL` publiée est **immuable**. Corriger une coquille impose
 une nouvelle version, et une table de correspondance `competence_equivalence`

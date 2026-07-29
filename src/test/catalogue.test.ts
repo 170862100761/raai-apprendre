@@ -32,7 +32,6 @@ const URL_TEST =
     '?schema=raai_apprendre&connection_limit=1&pgbouncer=true'
 
 const LECON_HYDRAULIQUE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000204')
-const LECON_SECURITE = identifiant<IdentifiantLecon>('00000000-0000-4000-8000-000000000205')
 // Le semoir puise dans la même suite pour les apprenants, leurs inscriptions et
 // leurs acquis : les élèves sont 40, 47 et 54, pas 40, 41 et 42. L'ancienne
 // valeur (42) désignait une ligne d'acquis de Léa, donc aucun élève.
@@ -139,12 +138,17 @@ describe('chargement d’une leçon', () => {
   })
 })
 
+// Ces tests avançaient dans le parcours de Thomas leçon par leçon, en comptant
+// sur un jeu de démonstration à deux leçons. Il en compte dix depuis qu'on peut
+// en faire une démonstration, et il en comptera davantage. Ce qu'ils doivent
+// vérifier, c'est l'enchaînement — première, suivante, plus rien — pas la
+// longueur du programme.
 describe('parcours d’un apprenant', () => {
   it('propose la première leçon à un élève qui n’a rien commencé', async () => {
     if (!disponible) return
 
     const parcours = await chargerParcours(THOMAS, depot)
-    expect(parcours.lecons).toHaveLength(2)
+    expect(parcours.lecons.length).toBeGreaterThan(0)
     expect(parcours.terminees).toBe(0)
     // Ordre du programme : module puis chapitre. L'hydraulique vient d'abord.
     expect(parcours.prochaine?.id).toBe(LECON_HYDRAULIQUE)
@@ -153,21 +157,29 @@ describe('parcours d’un apprenant', () => {
   it('passe à la suivante une fois la première terminée', async () => {
     if (!disponible) return
 
+    const avant = await chargerParcours(THOMAS, depot)
     await enregistrerLecture(prisma, THOMAS, LECON_HYDRAULIQUE, ETABLISSEMENT, 3, true)
 
     const parcours = await chargerParcours(THOMAS, depot)
     expect(parcours.terminees).toBe(1)
-    expect(parcours.prochaine?.id).toBe(LECON_SECURITE)
+    // Elle avance, et elle n'avance pas au hasard : c'est la leçon suivante
+    // dans l'ordre du programme.
+    expect(parcours.prochaine?.id).not.toBe(LECON_HYDRAULIQUE)
+    expect(parcours.prochaine?.id).toBe(avant.lecons[1]?.id)
   })
 
   it('ne propose plus rien quand tout est terminé', async () => {
     if (!disponible) return
 
-    await enregistrerLecture(prisma, THOMAS, LECON_SECURITE, ETABLISSEMENT, 1, true)
-
     const parcours = await chargerParcours(THOMAS, depot)
-    expect(parcours.terminees).toBe(2)
-    expect(parcours.prochaine).toBeNull()
+    for (const lecon of parcours.lecons) {
+      if (lecon.terminee) continue
+      await enregistrerLecture(prisma, THOMAS, lecon.id, ETABLISSEMENT, 1, true)
+    }
+
+    const apres = await chargerParcours(THOMAS, depot)
+    expect(apres.terminees).toBe(apres.lecons.length)
+    expect(apres.prochaine).toBeNull()
   })
 
   it('une leçon terminée ne se « dé-termine » pas quand on la relit', async () => {

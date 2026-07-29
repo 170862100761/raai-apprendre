@@ -55,10 +55,20 @@ describe('grille de la classe', () => {
     if (!suivi.ok) return
 
     expect(suivi.valeur.nomClasse).toBe('TAE 2026')
-    expect(suivi.valeur.grille.apprenants).toHaveLength(3)
-    // Les cinq capacités professionnelles semées, pas tout le catalogue
+
+    // Compté en base plutôt qu'écrit en dur : le jeu de démonstration grossit,
+    // et ce test doit vérifier que la grille liste les inscrits — pas combien
+    // il y en a ce mois-ci.
+    const inscrits = await prisma.inscription.count({
+      where: { classeId: CLASSE, statut: 'active' },
+    })
+    expect(suivi.valeur.grille.apprenants).toHaveLength(inscrits)
+    expect(inscrits).toBeGreaterThan(0)
+
+    // Seules les capacités du diplôme de la classe, pas tout le catalogue
     // national : une grille de 200 colonnes ne se lit pas.
-    expect(suivi.valeur.grille.competences).toHaveLength(5)
+    const capacites = await prisma.competence.count()
+    expect(suivi.valeur.grille.competences).toHaveLength(capacites)
   })
 
   it('trie les élèves par prénom, à la française', async () => {
@@ -66,12 +76,13 @@ describe('grille de la classe', () => {
     const suivi = await suivreClasse(CLASSE, depot)
     if (!suivi.ok) return
 
-    // « Inès » avant « Léa » : un tri ASCII placerait les accents en dernier.
-    expect(suivi.valeur.grille.apprenants.map((a) => a.prenom)).toEqual([
-      'Inès',
-      'Léa',
-      'Thomas',
-    ])
+    const prenoms = suivi.valeur.grille.apprenants.map((a) => a.prenom)
+
+    // « Inès » avant « Léa » avant « Thomas » : un tri ASCII placerait les
+    // accents en dernier. Comparé au tri français plutôt qu'à une liste figée.
+    const attendu = [...prenoms].sort((a, b) => a.localeCompare(b, 'fr'))
+    expect(prenoms).toEqual(attendu)
+    expect(prenoms).toContain('Inès')
   })
 
   it('restitue les acquis semés', async () => {

@@ -180,10 +180,16 @@ describe('échéances', () => {
     const tableau = await chargerEcheances(INES, depot)
 
     expect(tableau.affichees.length).toBeGreaterThan(0)
-    expect(tableau.affichees[0]?.evaluationId).toBe(DEVOIR_EN_RETARD)
-    // Ordonné du plus pressant au moins pressant, jusqu'en base.
-    const dates = tableau.affichees.map((e) => e.echeanceLe.getTime())
+
+    // Ordonné du plus pressant au moins pressant, jusqu'en base. C'est LA
+    // propriété : quelle échéance arrive en tête dépend du jeu de
+    // démonstration, qui grossit — le tri, lui, ne doit jamais céder.
+    const dates = [...tableau.affichees, ...tableau.reste].map((e) => e.echeanceLe.getTime())
     expect([...dates].sort((a, b) => a - b)).toEqual(dates)
+
+    // Et le devoir en retard est bien dans la liste, pas noyé.
+    const toutes = [...tableau.affichees, ...tableau.reste].map((e) => e.evaluationId)
+    expect(toutes).toContain(DEVOIR_EN_RETARD)
   })
 
   it('n’affiche pas une évaluation sans date de rendu', async () => {

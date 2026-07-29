@@ -131,14 +131,272 @@ export async function semer(bd) {
   const imageId = await semerImage(q)
   const modeleId = await semerModele3d(q)
   await semerCours(q, competences, imageId, modeleId)
+  const promotion = await semerPromotion(q, competences)
 
   console.log('\n  Jeu de démonstration semé :')
   console.log('    MFR Escatalens · Bac Pro Agroéquipement · TAE 2026')
   for (const [prenom, , identifiant, code] of ELEVES) {
     console.log(`    ${prenom.padEnd(7)} ${identifiant.padEnd(20)} code ${code}`)
   }
+  console.log(`    + ${promotion} élèves de démonstration (code 1234)`)
   console.log('    Formateur  marc@mfr-escatalens.fr       mot de passe formateur2026')
   console.log('    Direction  direction@mfr-escatalens.fr  mot de passe direction2026')
+}
+
+/**
+ * De quoi tenir une démonstration de vingt minutes.
+ *
+ * Deux leçons et un quiz prouvent que le logiciel fonctionne ; ils ne
+ * permettent pas de juger le produit. Un formateur de MFR regarde une grille
+ * de suivi et cherche trois choses : qui décroche, sur quelle compétence la
+ * classe bloque, et si le référentiel est couvert. Aucune des trois ne se voit
+ * sur trois élèves.
+ *
+ * D'où une promotion entière, avec des trajectoires qui ne se ressemblent pas
+ * — dont un élève jamais connecté et un décrocheur, parce que ce sont
+ * précisément les cas que l'écran doit rendre visibles.
+ *
+ * Les identifiants partent de 400 : en dessous vit le jeu minimal, auquel les
+ * tests d'intégration se réfèrent nommément. Le grossir ne doit pas le
+ * déplacer.
+ */
+async function semerPromotion(q, competences) {
+  let n = 400
+
+  // --- Deux chapitres de plus, pour que le programme ait une suite ---------
+  const CH3 = id(n++)
+  const CH4 = id(n++)
+  await q(
+    `INSERT INTO raai_apprendre.chapitre (id, module_id, titre, ordre)
+     VALUES ($1,$2,'Transmission et prise de force',3)`,
+    [CH3, id(201)],
+  )
+  await q(
+    `INSERT INTO raai_apprendre.chapitre (id, module_id, titre, ordre)
+     VALUES ($1,$2,'Réglage et entretien des matériels',4)`,
+    [CH4, id(201)],
+  )
+
+  // Le contenu est court mais réel : une leçon en lorem ipsum ne se démontre
+  // pas, l'interlocuteur lit le texte avant de regarder l'écran.
+  const LECONS = [
+    [id(202), 'Lire un schéma hydraulique ISO 1219', 10, competences[2],
+      "Un schéma hydraulique se lit comme un circuit électrique : des sources, des " +
+      "récepteurs, des organes de commande. La norme ISO 1219 fixe les symboles, ce qui " +
+      "rend un schéma allemand lisible par un mécanicien français.\n\n" +
+      "Trois symboles suffisent pour 80 % des schémas d'agroéquipement : le triangle plein " +
+      "d'une pompe, le rectangle divisé d'un distributeur, et le vérin représenté par son " +
+      "corps et sa tige. Le sens du triangle indique le sens du débit."],
+    [id(202), 'Diagnostiquer une perte de puissance hydraulique', 14, competences[4],
+      "Un relevage qui peine ne manque pas forcément de pression. La méthode tient en trois " +
+      "mesures, dans cet ordre : niveau et état de l'huile, pression au manomètre en bout de " +
+      "circuit, puis débit réel.\n\n" +
+      "Une huile mousseuse signale une prise d'air à l'aspiration — le défaut le plus " +
+      "fréquent, et le seul qui s'aggrave si on continue à travailler. Une pression correcte " +
+      "avec un débit faible oriente vers la pompe ; l'inverse, vers une fuite interne."],
+    [id(203), 'Le cardan : protecteurs et points d’écrasement', 8, competences[3],
+      "Le cardan transmet la puissance du tracteur à l'outil. C'est aussi la pièce qui a " +
+      "causé le plus d'amputations en agriculture.\n\n" +
+      "Le protecteur n'est pas un accessoire réglementaire : c'est ce qui sépare un vêtement " +
+      "qui frôle l'arbre d'un vêtement qui s'enroule. Un protecteur fendu, même " +
+      "légèrement, ne protège plus — il tourne avec l'arbre au lieu de rester immobile.\n\n" +
+      "Règle simple : moteur coupé, on doit pouvoir faire tourner le protecteur à la main " +
+      "sans que l'arbre bouge."],
+    [id(203), 'Circuler sur route avec un outil porté', 11, competences[3],
+      "Un outil porté déporte le centre de gravité vers l'arrière et allège l'avant du " +
+      "tracteur. À vide, la direction devient floue ; au freinage, elle peut disparaître.\n\n" +
+      "Le lestage avant se calcule, il ne s'estime pas : on vise au moins 20 % de la masse " +
+      "totale sur l'essieu avant. La signalisation — gyrophare, panneaux, largeur — relève " +
+      "du code de la route, et son absence engage le conducteur, pas l'employeur."],
+    [CH3, 'Prise de force : régimes 540 et 1000 tr/min', 12, competences[2],
+      "Deux régimes normalisés, deux cannelures différentes : 6 cannelures pour le 540, " +
+      "21 pour le 1000. L'incompatibilité mécanique est volontaire — elle empêche de " +
+      "brancher un outil prévu pour 540 sur une sortie qui tourne à 1000.\n\n" +
+      "Le régime moteur correspondant est repéré sur le compte-tours. Travailler en dessous " +
+      "fait patiner et chauffer ; au-dessus, on casse. Le régime « économique » (540E) donne " +
+      "le même régime de prise de force à un régime moteur plus bas : moins de carburant, " +
+      "moins de bruit, à condition que l'outil ne demande pas toute la puissance."],
+    [CH3, 'Transmission par courroie : tension et alignement', 9, competences[4],
+      "Une courroie trop tendue détruit les roulements ; trop lâche, elle patine et brûle. " +
+      "La règle du pouce : une flèche d'environ 1 cm par mètre d'entraxe, sous une pression " +
+      "modérée du doigt.\n\n" +
+      "L'alignement compte autant que la tension. Un défaut d'alignement de 2 mm sur 500 mm " +
+      "d'entraxe divise la durée de vie par deux. Il se contrôle à la règle posée sur les " +
+      "deux poulies, jamais à l'œil."],
+    [CH4, 'Graissage : points, périodicité, produits', 10, competences[4],
+      "Le graissage est la maintenance la moins chère et la plus souvent oubliée. Un " +
+      "graisseur négligé coûte une articulation ; une articulation coûte une journée de " +
+      "chantier en pleine campagne.\n\n" +
+      "Trois familles de produits, non interchangeables : graisse au lithium pour l'usage " +
+      "général, graisse au calcium là où il y a de l'eau, graisse graphitée sous forte " +
+      "charge et faible vitesse. Mélanger une graisse au lithium et une graisse au calcium " +
+      "les fait toutes deux couler."],
+    [CH4, 'Contrôle avant campagne : la checklist', 13, competences[4],
+      "Une panne en pleine moisson coûte bien plus qu'une heure d'atelier en février. Le " +
+      "contrôle avant campagne suit toujours le même ordre : sécurité, puis fonctions, puis " +
+      "réglages.\n\n" +
+      "Sécurité d'abord — protecteurs, éclairage, freins — parce que c'est le seul poste où " +
+      "l'on ne peut pas décider de « faire avec ». Les réglages en dernier : ils dépendent " +
+      "de la parcelle et se refont de toute façon sur place."],
+  ]
+
+  for (const [chapitreId, titre, duree, competenceId, texte] of LECONS) {
+    const leconId = id(n++)
+    await q(
+      `INSERT INTO raai_apprendre.lecon
+         (id, chapitre_id, etablissement_id, titre, statut, duree_estimee_min, publiee_le)
+       VALUES ($1,$2,$3,$4,'publiee',$5,now())`,
+      [leconId, chapitreId, id(3), titre, duree],
+    )
+    await q(
+      `INSERT INTO raai_apprendre.lien_competence (id, lecon_id, competence_id)
+       VALUES ($1,$2,$3)`,
+      [id(n++), leconId, competenceId],
+    )
+    await q(
+      `INSERT INTO raai_apprendre.bloc_contenu (id, lecon_id, type, contenu, ordre)
+       VALUES ($1,$2,'texte',$3,1)`,
+      [id(n++), leconId, JSON.stringify({ type: 'texte', texte })],
+    )
+  }
+
+  // --- Neuf élèves de plus, aux trajectoires distinctes --------------------
+  //
+  // `jamais` : inscrit, jamais connecté — relève de la mise en route, pas du
+  // décrochage, et l'écran les signale séparément.
+  // `vuIlYa` : jours depuis la dernière visite. 14 est le seuil d'alerte.
+  const PROMO = [
+    ['Maxime', 'B', 9, ['acquise', 'acquise', 'acquise', 'maitrisee', 'en_cours']],
+    ['Chloé', 'D', 1, ['acquise', 'maitrisee', 'acquise', 'acquise', 'acquise']],
+    ['Yanis', 'F', 3, ['acquise', 'en_cours', 'en_cours', 'non_abordee', 'non_abordee']],
+    ['Camille', 'G', 2, ['acquise', 'acquise', 'en_cours', 'en_cours', 'non_abordee']],
+    ['Enzo', 'H', 21, ['en_cours', 'non_abordee', 'non_abordee', 'non_abordee', 'non_abordee']],
+    ['Sarah', 'L', 4, ['acquise', 'acquise', 'acquise', 'en_cours', 'en_cours']],
+    ['Nolan', 'P', 32, ['non_abordee', 'non_abordee', 'non_abordee', 'non_abordee', 'non_abordee']],
+    ['Jade', 'R', 6, ['acquise', 'en_cours', 'acquise', 'en_cours', 'non_abordee']],
+    ['Ilyes', 'S', null, []],
+  ]
+
+  const hash1234 = await bcrypt.hash('1234', 10)
+  let inscrits = 0
+
+  for (const [prenom, initiale, vuIlYa, niveaux] of PROMO) {
+    const eid = id(n++)
+    // Même règle que la mise en route : sans accent ni majuscule, parce que
+    // l'identifiant est dicté par un formateur et recopié par un élève.
+    const sansAccent = prenom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const login = `${sansAccent}.escatalens`
+
+    await q(
+      `INSERT INTO raai_apprendre.apprenant
+         (id, etablissement_id, prenom, initiale_nom, identifiant, code_hash, vu_le)
+       VALUES ($1,$2,$3,$4,$5,$6,
+               CASE WHEN $7::int IS NULL THEN NULL
+                    ELSE now() - ($7::int || ' days')::interval END)`,
+      [eid, id(3), prenom, initiale, login, hash1234, vuIlYa],
+    )
+    await q(
+      `INSERT INTO raai_apprendre.inscription
+         (id, apprenant_id, classe_id, etablissement_id, debut, statut)
+       VALUES ($1,$2,$3,$4,'2026-09-01','active')`,
+      [id(n++), eid, id(9), id(3)],
+    )
+
+    for (const [i, niveau] of niveaux.entries()) {
+      await q(
+        `INSERT INTO raai_apprendre.acquis_competence
+           (id, apprenant_id, competence_id, version_referentiel_id, etablissement_id,
+            niveau, origine)
+         VALUES ($1,$2,$3,$4,$5,$6,'evaluation')`,
+        [id(n++), eid, competences[i], id(6), id(3), niveau],
+      )
+    }
+    inscrits += 1
+  }
+
+  // Léa et Thomas sont actifs ; Inès n'est jamais venue — c'est déjà ce que
+  // disent leurs acquis. Sans `vu_le`, les trois comptes de démonstration
+  // remontaient comme « jamais connectés », ce qui noyait le seul signal que
+  // l'écran doit rendre lisible.
+  await q(
+    `UPDATE raai_apprendre.apprenant SET vu_le = now() - interval '1 day' WHERE id = $1`,
+    [id(40)],
+  )
+  await q(
+    `UPDATE raai_apprendre.apprenant SET vu_le = now() - interval '5 days' WHERE id = $1`,
+    [id(47)],
+  )
+
+  await semerEvaluationsDuTrimestre(q, CH3, CH4, n)
+
+  return inscrits
+}
+
+/**
+ * Des échéances réparties, pour que « À rendre » ait quelque chose à ordonner.
+ *
+ * Un trimestre réel n'a pas une seule date : il en a une passée que certains
+ * n'ont pas rendue, une proche qui presse, et une lointaine dont on ne parle
+ * pas encore. Les trois cas doivent être à l'écran en même temps, sinon la
+ * hiérarchisation du tableau de bord ne se démontre pas.
+ */
+async function semerEvaluationsDuTrimestre(q, CH3, CH4, depart) {
+  let n = depart + 100
+
+  const QUIZ_PDF = id(n++)
+  const DEVOIR_ENTRETIEN = id(n++)
+  const QUIZ_SCHEMA = id(n++)
+
+  const EVALUATIONS = [
+    [QUIZ_PDF, CH3, 'Prise de force : régimes et sécurité', 'quiz', "now() - interval '6 days'", 15],
+    [DEVOIR_ENTRETIEN, CH4, "Plan d'entretien avant campagne", 'devoir', "now() + interval '3 days'", null],
+    [QUIZ_SCHEMA, id(202), 'Lecture d’un schéma ISO 1219', 'quiz', "now() + interval '10 days'", 20],
+  ]
+
+  for (const [evalId, chapitreId, titre, type, echeance, duree] of EVALUATIONS) {
+    await q(
+      `INSERT INTO raai_apprendre.evaluation
+         (id, chapitre_id, etablissement_id, titre, type, statut, duree_max_min, echeance_le)
+       VALUES ($1,$2,$3,$4,$5,'publiee',$6,${echeance})`,
+      [evalId, chapitreId, id(3), titre, type, duree],
+    )
+  }
+
+  const QUESTIONS = [
+    [QUIZ_PDF, 'qcm', 'À quel régime tourne une prise de force à 6 cannelures ?',
+      { propositions: ['540 tr/min', '1000 tr/min', '2000 tr/min', 'Variable selon le tracteur'] },
+      { bonnes: [0] }, 3],
+    [QUIZ_PDF, 'vrai_faux',
+      'Un protecteur de cardan fendu protège encore, tant qu’il reste en place.',
+      {}, { bonne: false }, 2],
+    [DEVOIR_ENTRETIEN, 'texte_long',
+      "Rédige le plan d'entretien d'un semoir avant la campagne : dans quel ordre, " +
+      'et pourquoi cet ordre-là.',
+      {}, {}, 20],
+    [QUIZ_SCHEMA, 'qcm', 'Que représente un triangle plein sur un schéma ISO 1219 ?',
+      { propositions: ['Une pompe', 'Un vérin', 'Un filtre', 'Un réservoir'] },
+      { bonnes: [0] }, 2],
+  ]
+
+  for (const [i, [evalId, type, enonce, options, corrige, bareme]] of QUESTIONS.entries()) {
+    await q(
+      `INSERT INTO raai_apprendre.question
+         (id, evaluation_id, type, enonce, options, corrige, bareme, ordre)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [id(n++), evalId, type, enonce, JSON.stringify(options), JSON.stringify(corrige), bareme, i + 1],
+    )
+  }
+
+  // Inès a rendu le quiz dont l'échéance est passée. C'est ce qui garde son
+  // tableau de bord lisible — et ce qui montre qu'une copie rendue sort de la
+  // liste même quand la date est dépassée.
+  await q(
+    `INSERT INTO raai_apprendre.tentative
+       (id, evaluation_id, apprenant_id, etablissement_id, statut, score, score_max,
+        duree_secondes, soumise_le)
+     VALUES ($1,$2,$3,$4,'corrigee_auto',4,5,540, now() - interval '7 days')`,
+    [id(n++), QUIZ_PDF, id(54), id(3)],
+  )
 }
 
 /**

@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { prisma } from '@/noyau/prisma'
 import { COOKIE_COMPTE, OPTIONS_COOKIE, signerJeton } from '@/noyau/cookie-session'
 import { auditerAnonyme } from '../_audit'
+import { destination } from '../_destination'
 import {
   depotIdentitePrisma,
   DUREE_SESSION_COMPTE_JOURS,
@@ -19,6 +20,7 @@ export type EtatConnexion = { readonly erreur?: string }
 const Entree = z.object({
   email: z.string().email('Adresse e-mail invalide.'),
   motDePasse: z.string().min(1, 'Saisis ton mot de passe.'),
+  suite: z.string().optional(),
 })
 
 export async function connecterFormateur(
@@ -28,6 +30,7 @@ export async function connecterFormateur(
   const entree = Entree.safeParse({
     email: donnees.get('email'),
     motDePasse: donnees.get('motDePasse'),
+    suite: donnees.get('suite') ?? undefined,
   })
   if (!entree.success) return { erreur: 'Adresse e-mail ou mot de passe incorrect.' }
 
@@ -58,7 +61,7 @@ export async function connecterFormateur(
 
   await auditerAnonyme('connexion.reussie', { type: 'compte' })
 
-  redirect('/formateur')
+  redirect(destination(entree.data.suite, '/formateur'))
 }
 
 export async function deconnecterFormateur(): Promise<void> {

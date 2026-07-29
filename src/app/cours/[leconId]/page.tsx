@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
@@ -10,6 +11,31 @@ import { MarqueurDeLecture } from './marqueur-de-lecture'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * `generateMetadata` et la page ont besoin de la même leçon. Sans mémoïsation,
+ * ouvrir un cours coûterait deux lectures au lieu d'une — à 9 h, quand des
+ * milliers de classes ouvrent la même page, on ne double pas une requête pour
+ * un titre d'onglet.
+ */
+const chargerLecon = cache(async (leconId: string) =>
+  depotCataloguePrisma(prisma).chargerLecon(identifiant<IdentifiantLecon>(leconId)),
+)
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ leconId: string }>
+}) {
+  const { leconId } = await params
+  const lecon = await chargerLecon(leconId)
+
+  // Une leçon non publiée ou hors périmètre ne donne pas son titre : l'onglet
+  // ne doit pas révéler ce que la page elle-même refuse d'afficher.
+  if (!lecon || lecon.statut !== 'publiee') return { title: 'RAAI Apprendre' }
+
+  return { title: `${lecon.titre} — RAAI Apprendre` }
+}
+
 export default async function PageLecon({
   params,
 }: {
@@ -20,9 +46,7 @@ export default async function PageLecon({
 
   if (!peut(session, 'lecon.lire').autorise) redirect('/connexion')
 
-  const lecon = await depotCataloguePrisma(prisma).chargerLecon(
-    identifiant<IdentifiantLecon>(leconId),
-  )
+  const lecon = await chargerLecon(leconId)
 
   // La RLS a déjà écarté ce qui est hors périmètre. `notFound` couvre donc
   // aussi bien « n'existe pas » que « pas pour toi » — et c'est délibéré :

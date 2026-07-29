@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
@@ -15,6 +16,29 @@ import { Grille } from './grille'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Le suivi d'une classe est la lecture la plus lourde de l'application — douze
+ * élèves croisés avec leurs acquis. La mémoïsation garantit que le titre de
+ * l'onglet ne la déclenche pas une seconde fois.
+ */
+const chargerSuivi = cache(async (classeId: string) =>
+  suivreClasse(identifiant<IdentifiantClasse>(classeId), depotProgressionPrisma(prisma)),
+)
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ classeId: string }>
+}) {
+  const { classeId } = await params
+  const suivi = await chargerSuivi(classeId)
+
+  // Le nom de la classe seul — jamais un nom d'élève dans un titre d'onglet,
+  // qui se retrouve dans l'historique du navigateur et les captures d'écran.
+  if (!suivi.ok) return { title: 'RAAI Apprendre' }
+  return { title: `${suivi.valeur.nomClasse} — Suivi — RAAI Apprendre` }
+}
+
 export default async function PageSuiviClasse({
   params,
 }: {
@@ -28,7 +52,7 @@ export default async function PageSuiviClasse({
     redirect('/formateur')
   }
 
-  const suivi = await suivreClasse(id, depotProgressionPrisma(prisma))
+  const suivi = await chargerSuivi(classeId)
   if (!suivi.ok) notFound()
 
   const { nomClasse, grille, index, couverture, bloquantes, aRelancer, jamaisVenus } =

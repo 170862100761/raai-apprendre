@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/noyau/prisma'
@@ -8,6 +9,23 @@ import { exigerSession } from '../../../_session'
 import { Editeur } from './editeur'
 
 export const dynamic = 'force-dynamic'
+
+/** Mémoïsé : la page et `generateMetadata` lisent la même leçon, une seule fois. */
+const chargerLecon = cache(async (leconId: string) =>
+  depotCataloguePrisma(prisma).chargerLecon(identifiant<IdentifiantLecon>(leconId)),
+)
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ leconId: string }>
+}) {
+  const { leconId } = await params
+  const lecon = await chargerLecon(leconId)
+
+  if (!lecon) return { title: 'RAAI Apprendre' }
+  return { title: `${lecon.titre} — Édition — RAAI Apprendre` }
+}
 
 export default async function PageEdition({
   params,
@@ -22,7 +40,7 @@ export default async function PageEdition({
 
   const depot = depotCataloguePrisma(prisma)
   const [lecon, competences] = await Promise.all([
-    depot.chargerLecon(identifiant<IdentifiantLecon>(leconId)),
+    chargerLecon(leconId),
     depot.competencesDuDiplome(session.etablissementId),
   ])
 

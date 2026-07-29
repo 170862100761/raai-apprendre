@@ -6,7 +6,13 @@ import { FormulaireFormateur } from './formulaire'
 export const metadata = { title: 'Espace formateur — RAAI Apprendre' }
 export const dynamic = 'force-dynamic'
 
-export default async function PageConnexionFormateur() {
+export default async function PageConnexionFormateur({
+  searchParams,
+}: {
+  searchParams: Promise<{ suite?: string }>
+}) {
+  const { suite } = await searchParams
+
   const session = await sessionCourante()
   if (session.origine === 'compte') redirect('/formateur')
 
@@ -20,7 +26,7 @@ export default async function PageConnexionFormateur() {
         </p>
       </header>
 
-      <FormulaireFormateur />
+      <FormulaireFormateur {...(suite ? { suite } : {})} />
 
       {/* La phrase renvoyait les élèves « à la page d'accueil » sans lien : un
           élève arrivé ici par erreur devait deviner. */}

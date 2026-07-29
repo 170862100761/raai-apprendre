@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { COOKIE_APPRENANT, COOKIE_COMPTE, verifierJeton } from '@/noyau/cookie-session'
+import { ecranDeConnexion } from './app/_destination'
 
 /**
  * Le middleware s'exécute sur l'Edge : **pas de Prisma ici.**
@@ -62,8 +63,11 @@ export async function middleware(requete: NextRequest) {
       return new NextResponse(null, { status: 404 })
     }
 
-    const versConnexion = new URL('/connexion', requete.url)
-    // Pour revenir où l'élève voulait aller après s'être identifié.
+    // L'écran dépend de l'espace demandé : un formateur dont la session a
+    // expiré sur la grille de suivi atterrissait devant le formulaire élève,
+    // tutoyé, avec un champ à quatre chiffres où son mot de passe n'entre pas.
+    const versConnexion = new URL(ecranDeConnexion(pathname), requete.url)
+    // Pour revenir où la personne voulait aller après s'être identifiée.
     versConnexion.searchParams.set('suite', pathname)
 
     const reponse = NextResponse.redirect(versConnexion)

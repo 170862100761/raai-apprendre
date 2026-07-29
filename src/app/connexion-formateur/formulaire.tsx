@@ -18,11 +18,12 @@ function Bouton() {
   )
 }
 
-export function FormulaireFormateur() {
+export function FormulaireFormateur({ suite }: { suite?: string }) {
   const [etat, action] = useActionState<EtatConnexion, FormData>(connecterFormateur, {})
 
   return (
     <form action={action} className="flex flex-col gap-5">
+      {suite ? <input type="hidden" name="suite" value={suite} /> : null}
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
           Adresse e-mail

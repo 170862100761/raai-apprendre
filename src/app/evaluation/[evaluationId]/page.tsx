@@ -10,6 +10,26 @@ import { Copie } from './copie'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Le titre passe par `chargerPourEleve`, et surtout PAS par
+ * `demarrerOuReprendre` : celui-ci écrit — il ouvrirait une tentative pour
+ * afficher un nom d'onglet. La projection élève est en lecture seule et, par
+ * construction, ne lit pas la colonne `corrige`.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ evaluationId: string }>
+}) {
+  const { evaluationId } = await params
+  const evaluation = await depotEvaluationPrisma(prisma).chargerPourEleve(
+    identifiant<IdentifiantEvaluation>(evaluationId),
+  )
+
+  if (!evaluation) return { title: 'RAAI Apprendre' }
+  return { title: `${evaluation.titre} — RAAI Apprendre` }
+}
+
 export default async function PageEvaluation({
   params,
 }: {

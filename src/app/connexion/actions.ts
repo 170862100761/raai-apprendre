@@ -10,6 +10,7 @@ import {
   signerJeton,
 } from '@/noyau/cookie-session'
 import { auditerAnonyme } from '../_audit'
+import { destination } from '../_destination'
 import {
   depotIdentitePrisma,
   hachageBcrypt,
@@ -28,12 +29,6 @@ const Entree = z.object({
   code: z.string().regex(/^\d{4}$/, 'Le code comporte 4 chiffres.'),
   suite: z.string().optional(),
 })
-
-/** Ne suit que des chemins internes : `suite` vient de l'URL, donc de l'extérieur. */
-function destination(suite: string | undefined): string {
-  if (!suite || !suite.startsWith('/') || suite.startsWith('//')) return '/aujourdhui'
-  return suite
-}
 
 export async function connecter(
   _precedent: EtatConnexion,
@@ -99,7 +94,7 @@ export async function connecter(
   // 6. Auditer
   await auditerAnonyme('connexion.reussie', { type: 'apprenant' })
 
-  redirect(destination(entree.data.suite))
+  redirect(destination(entree.data.suite, '/aujourdhui'))
 }
 
 export async function deconnecter(): Promise<void> {

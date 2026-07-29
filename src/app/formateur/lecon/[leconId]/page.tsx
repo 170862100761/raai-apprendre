@@ -30,7 +30,7 @@ export default async function PageEdition({
   if (!lecon) notFound()
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10">
       <nav className="flex items-center gap-4">
         <Link href="/formateur" className="text-sm text-mine-doux underline">
           ← Mes leçons

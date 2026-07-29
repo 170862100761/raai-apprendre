@@ -34,6 +34,7 @@ Plateforme pédagogique nationale pour l'enseignement agricole et technique.
 | 11 | [Roadmap](11-roadmap.md) | MVP → V1 → V2 → V3, jalons, critères de sortie |
 | 12 | [Import des référentiels](12-import-referentiels.md) | Source ChloroFil, faisabilité mesurée, chiffrage |
 | 13 | [Bascule vers Supabase](13-bascule-supabase.md) | Clés à renseigner, migration des comptes, retrait du transitoire |
+| 14 | [Accessibilité](14-accessibilite.md) | RGAA : contrastes mesurés, acquis, et ce qui reste à auditer |
 
 ## Ordre de lecture conseillé
 

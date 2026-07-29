@@ -59,7 +59,7 @@ export default async function PageJournal() {
   const journees = parJournee(lignes)
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-10">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-10">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Journal</h1>
         <p className="text-mine-doux">

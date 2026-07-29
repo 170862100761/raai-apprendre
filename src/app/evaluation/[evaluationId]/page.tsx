@@ -34,7 +34,7 @@ export default async function PageEvaluation({
   const { evaluation } = ouverture.valeur
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
       <nav>
         <Link href="/aujourdhui" className="text-sm text-mine-doux underline">
           ← Aujourd’hui

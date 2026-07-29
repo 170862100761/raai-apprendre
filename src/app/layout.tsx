@@ -19,7 +19,15 @@ export const viewport: Viewport = {
 export default function RacineLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {/* Premier élément focusable de la page : il permet de sauter les
+            en-têtes répétés plutôt que de les retraverser à chaque écran.
+            La cible est le `<main>` que porte chaque page. */}
+        <a href="#contenu" className="lien-evitement">
+          Aller au contenu
+        </a>
+        {children}
+      </body>
     </html>
   )
 }

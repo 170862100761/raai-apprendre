@@ -20,7 +20,7 @@ export default async function PageConnexion({
   if (session.sujetId !== null) redirect('/formateur')
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-6 py-12">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-6 py-12">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Connexion</h1>
         <p className="text-mine-doux">

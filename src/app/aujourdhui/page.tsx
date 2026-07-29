@@ -37,7 +37,7 @@ export default async function PageAujourdhui() {
   })
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="text-2xl font-semibold">
           Bonjour {apprenant?.prenom ?? ''}

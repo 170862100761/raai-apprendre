@@ -12,6 +12,11 @@
   --color-surface: oklch(99% 0.004 95);
   --color-surface-2: oklch(96.5% 0.006 95);
   --color-bordure: oklch(89% 0.008 95);
+  /* Bordure des CHAMPS DE SAISIE, distincte des séparateurs décoratifs.
+     WCAG 1.4.11 : quand un champ n'est délimité que par sa bordure, celle-ci
+     doit atteindre 3:1 avec le fond. À 89 % de clarté on était à 1,35 — sur un
+     écran de salle informatique, l'élève ne voit pas où taper. 60 % donne 3,83. */
+  --color-bordure-champ: oklch(60% 0.012 95);
   --color-mine: oklch(28% 0.012 95);
   --color-mine-doux: oklch(52% 0.012 95);
 
@@ -34,6 +39,8 @@
     --color-surface: oklch(21% 0.012 95);
     --color-surface-2: oklch(25% 0.012 95);
     --color-bordure: oklch(33% 0.012 95);
+    /* 58 % donne 4,0 sur le fond sombre. */
+    --color-bordure-champ: oklch(58% 0.012 95);
     --color-mine: oklch(95% 0.006 95);
     --color-mine-doux: oklch(72% 0.010 95);
     --color-accent: oklch(72% 0.14 145);
@@ -64,6 +71,27 @@
     border-radius: 4px;
   }
 
+  /* Lien d'évitement (RGAA 12.7) : caché tant qu'il n'a pas le focus, il est
+     le premier arrêt du clavier et de la synthèse vocale. `sr-only` seul ne
+     suffirait pas — il faut qu'il DEVIENNE visible, sans quoi un élève voyant
+     qui navigue au clavier ne saurait pas où il est. */
+  .lien-evitement {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 50;
+  }
+
+  .lien-evitement:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-mine);
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-carte);
+    padding: 0.5rem 1rem;
+  }
+
   /* Respecte les réglages système : certains élèves sont sujets au mal des
      transports numérique. */
   @media (prefers-reduced-motion: reduce) {
@@ -74,4 +102,27 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+/*
+  Bordure des champs de saisie — RÈGLE HORS COUCHE, et c'est délibéré.
+
+  Les utilitaires Tailwind vivent dans une couche (`@layer utilities`) ; une
+  règle non calquée l'emporte sur toute couche, quelle que soit sa spécificité.
+  Un `border-bordure` posé sur un champ ne peut donc pas repasser sous le seuil
+  de contraste.
+
+  L'alternative — reprendre les 43 champs un par un — garantissait surtout d'en
+  oublier un, et que le prochain formulaire écrit soit non conforme sans que
+  personne ne le remarque. Ici la conformité est acquise par défaut.
+*/
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+textarea,
+select {
+  border-color: var(--color-bordure-champ);
+}
+
+/* Un champ en erreur reprend la main : le signalement prime sur l'uniformité. */
+[aria-invalid='true'] {
+  border-color: var(--color-alerte);
 }

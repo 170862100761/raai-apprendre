@@ -13,11 +13,7 @@ export function depotMediathequePrisma(prisma: PrismaClient): DepotMediatheque {
           typeMime: entree.typeMime,
           cheminStockage: entree.cheminStockage,
           tailleOctets: BigInt(entree.tailleOctets),
-          // Le transcodage vidéo et la pré-tessellation 3D arriveront avec
-          // leurs jobs ; en attendant, un fichier déposé est utilisable tel
-          // quel, et le dire évite un statut « en attente » qui ne bougerait
-          // jamais.
-          statutTraitement: 'pret',
+          statutTraitement: entree.statutTraitement,
         },
         select: { id: true },
       })
@@ -33,6 +29,7 @@ export function depotMediathequePrisma(prisma: PrismaClient): DepotMediatheque {
           nom: true,
           typeMime: true,
           cheminStockage: true,
+          cheminApercu: true,
           tailleOctets: true,
           statutTraitement: true,
         },
@@ -47,9 +44,27 @@ export function depotMediathequePrisma(prisma: PrismaClient): DepotMediatheque {
         nom: ressource.nom,
         typeMime: ressource.typeMime,
         cheminStockage: ressource.cheminStockage,
+        cheminApercu: ressource.cheminApercu,
         tailleOctets: Number(ressource.tailleOctets),
         statutTraitement: ressource.statutTraitement,
       }
+    },
+
+    async enregistrerApercu(id, cheminApercu) {
+      // Chemin et statut dans la même écriture : un aperçu enregistré sans
+      // passer à « prêt » resterait invisible, et un « prêt » sans chemin
+      // promettrait un fichier absent.
+      await prisma.ressource.update({
+        where: { id },
+        data: { cheminApercu, statutTraitement: 'pret' },
+      })
+    },
+
+    async marquerTraitement(id, statut) {
+      await prisma.ressource.update({
+        where: { id },
+        data: { statutTraitement: statut },
+      })
     },
   }
 }

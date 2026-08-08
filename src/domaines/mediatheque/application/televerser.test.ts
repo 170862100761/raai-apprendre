@@ -3,7 +3,12 @@ import { identifiant } from '@/noyau/identifiants'
 import type { IdentifiantEtablissement } from '@/noyau/identifiants'
 import { servirMedia, televerser } from './televerser'
 import { TYPES_ACCEPTES } from '../domaine/type-fichier'
-import type { DepotMediatheque, RessourceStockee, StockageObjet } from '../ports/stockage'
+import type {
+  DepotMediatheque,
+  RessourceStockee,
+  StatutTraitement,
+  StockageObjet,
+} from '../ports/stockage'
 
 const ETAB = identifiant<IdentifiantEtablissement>('etab-a')
 
@@ -32,11 +37,21 @@ class DepotDouble implements DepotMediatheque {
 
   async enregistrer(entree: Parameters<DepotMediatheque['enregistrer']>[0]) {
     const id = `ressource-${++this.compteur}`
-    this.ressources.set(id, { id, statutTraitement: 'pret', ...entree })
+    this.ressources.set(id, { id, cheminApercu: null, ...entree })
     return id
   }
   async charger(id: string) {
     return this.ressources.get(id) ?? null
+  }
+  async enregistrerApercu(id: string, cheminApercu: string) {
+    const ressource = this.ressources.get(id)
+    if (!ressource) throw new Error(`Ressource inconnue : ${id}`)
+    this.ressources.set(id, { ...ressource, cheminApercu, statutTraitement: 'pret' })
+  }
+  async marquerTraitement(id: string, statutTraitement: StatutTraitement) {
+    const ressource = this.ressources.get(id)
+    if (!ressource) throw new Error(`Ressource inconnue : ${id}`)
+    this.ressources.set(id, { ...ressource, statutTraitement })
   }
 }
 
@@ -154,6 +169,7 @@ describe('service des médias', () => {
       typeMime: 'image/png',
       cheminStockage: 'etab-a/absent',
       tailleOctets: 10,
+      statutTraitement: 'pret',
     })
     const r = await servirMedia(id, { depot, stockage }, affichable)
     expect(r.ok).toBe(false)

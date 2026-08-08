@@ -62,7 +62,7 @@ const configuration = [
 
   {
     // Les outils en ligne de commande PARLENT : c'est leur seule sortie.
-    files: ['outils/**/*.mjs', '*.config.mjs', '.dependency-cruiser.cjs'],
+    files: ['outils/**/*.mjs', 'outils/**/*.ts', '*.config.mjs', '.dependency-cruiser.cjs'],
     rules: { 'no-console': 'off' },
   },
 ]

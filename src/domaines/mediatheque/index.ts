@@ -24,7 +24,33 @@ export {
   type Televersement,
 } from './application/televerser'
 
-export type { DepotMediatheque, RessourceStockee, StockageObjet } from './ports/stockage'
+export {
+  aBesoinDApercu3d,
+  BUDGET_TRIANGLES,
+  cheminApercu,
+  DEFLEXIONS,
+  MIME_APERCU_3D,
+  nombreDeTriangles,
+  tientDansLeBudget,
+} from './domaine/apercu-3d'
+
+export { ecrireGlb, type MaillageTessele } from './domaine/glb'
+
+export {
+  preparerApercu3d,
+  servirApercu3d,
+  type Apercu3dServi,
+  type ApercuPrepare,
+} from './application/preparer-apercu-3d'
+
+export type {
+  DepotMediatheque,
+  RessourceStockee,
+  StatutTraitement,
+  StockageObjet,
+} from './ports/stockage'
+export type { TessellateurStep } from './ports/tessellation'
 
 export { depotMediathequePrisma } from './infrastructure/depot-mediatheque-prisma'
 export { stockageDisque } from './infrastructure/stockage-disque'
+export { tessellateurOcct } from './infrastructure/tessellateur-occt'

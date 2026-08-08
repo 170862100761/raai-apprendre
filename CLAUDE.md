@@ -72,7 +72,7 @@ ajouter `raai_apprendre` et `raai_apprendre_ref`. Jamais l'audit.
 
 ```bash
 npm run verifier      # types + lint + architecture + tests — doit rester vert
-npm test              # 31 tests, dont 25 de permissions (bloquants)
+npm test              # 390 tests, dont 35 de permissions (bloquants)
 npm run architecture  # matrice de dépendances
 ```
 
@@ -129,6 +129,11 @@ Comptes de démonstration : `lea.escatalens` / `4271`, `thomas.escatalens` /
 `8305`, `ines.escatalens` / `6194`. Trois états de progression différents, pour
 que la démonstration ne montre pas qu'un seul cas.
 Formateur : `marc@mfr-escatalens.fr` / `formateur2026`, sur `/connexion-formateur`.
+
+Le jeu de démonstration dépose un STEP **sans son aperçu**, volontairement : la
+leçon montre d'abord le cas « pas d'aperçu, télécharge le fichier », puis le
+bouton 3D après `npm run medias:apercus`. Les deux états sont réels, et une
+démonstration qui ne montre que le cas heureux ne prépare personne à l'autre.
 
 PGlite est fragile sous usage soutenu : si l'application affiche « Can't reach
 database server », relancer `npm run bd:locale`. Les données sont en mémoire,
@@ -261,9 +266,40 @@ non partagé — cet adaptateur n'a rien à y faire. Seul ce fichier changera.
 
 ## Visionneuse 3D
 
-GLB et STL. **Le STEP n'est pas lu dans le navigateur** : sa tessellation
-appartient à un travail serveur (doc 02 §5). Charger OpenCascade sur un
-Chromebook de MFR reviendrait à promettre ce qu'on ne peut pas tenir.
+GLB et STL directement. **Le STEP n'est jamais lu dans le navigateur** : sa
+tessellation appartient à un travail serveur (doc 02 §5). Charger OpenCascade —
+7,6 Mo de WebAssembly — sur un Chromebook de MFR reviendrait à promettre ce
+qu'on ne peut pas tenir.
+
+Le serveur en produit donc un GLB allégé, servi par
+`/api/v1/medias/[id]/apercu-3d`. L'URL du média rend toujours l'original : un
+enseignant qui télécharge un STEP reçoit son STEP, pas une approximation
+triangulée.
+
+`occt-import-js` n'est **jamais importé statiquement** — c'est le pendant
+serveur de la règle sur Three.js. Derrière un `import()` réservé à l'appel, les
+7,6 Mo ne se chargent que dans le processus qui tessellerait vraiment ; en
+import statique, ils entreraient dans le graphe de tout ce qui touche à la
+médiathèque.
+
+La conversion ne bloque jamais le dépôt : le fichier est écrit, la ressource
+créée, et c'est `statut_traitement` qui porte le verdict. Un STEP que nous ne
+savons pas lire reste téléchargeable — même logique que le journal d'audit, où
+une panne d'observabilité ne devient pas une panne de service.
+
+Deux chemins de déclenchement, un seul cas d'usage (`preparerApercu3d`) :
+`after()` de Next après un téléversement, et `npm run medias:apercus` pour le
+rattrapage (`-- --echoues` reprend les échecs). Le jour où une file de travaux
+existe, seul le déclenchement change.
+
+Budget de 300 000 triangles, avec quatre déflexions de plus en plus grossières.
+Le budget est un objectif, pas un interdit : le dernier maillage est gardé même
+s'il dépasse encore, parce qu'un assemblage lourd mais affichable vaut mieux
+qu'un écran qui annonce un échec.
+
+La visionneuse demande au serveur, en `HEAD`, si l'aperçu existe avant de
+proposer le bouton. Proposer d'afficher un modèle puis échouer est pire que ne
+rien proposer.
 
 Three.js n'est importé que par `_composants/moteur-3d.ts`, chargé
 dynamiquement **au clic de l'élève**. La page de cours reste à 108 kB : une

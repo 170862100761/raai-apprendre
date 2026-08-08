@@ -12,14 +12,18 @@ export interface StockageObjet {
   supprimer(chemin: string): Promise<void>
 }
 
+export type StatutTraitement = 'en_attente' | 'en_cours' | 'pret' | 'echoue'
+
 export type RessourceStockee = {
   readonly id: string
   readonly etablissementId: IdentifiantEtablissement | null
   readonly nom: string
   readonly typeMime: string
   readonly cheminStockage: string
+  /** Chemin du GLB pré-tessellé. `null` tant qu'il n'existe pas. */
+  readonly cheminApercu: string | null
   readonly tailleOctets: number
-  readonly statutTraitement: string
+  readonly statutTraitement: StatutTraitement
 }
 
 export interface DepotMediatheque {
@@ -29,8 +33,23 @@ export interface DepotMediatheque {
     typeMime: string
     cheminStockage: string
     tailleOctets: number
+    /**
+     * `en_attente` quand un aperçu reste à produire, `pret` sinon. C'est
+     * l'appelant qui tranche, parce que lui seul sait si un travail suivra —
+     * un statut « en attente » que rien ne fait avancer est pire qu'absent.
+     */
+    statutTraitement: StatutTraitement
   }): Promise<string>
 
   /** `null` si inconnue ou hors périmètre — la RLS ne distingue pas les deux. */
   charger(id: string): Promise<RessourceStockee | null>
+
+  /** Aperçu produit : chemin et statut changent d'un seul mouvement. */
+  enregistrerApercu(id: string, cheminApercu: string): Promise<void>
+
+  /**
+   * Aperçu impossible. La ressource reste téléchargeable : un STEP que nous ne
+   * savons pas tesseller garde toute sa valeur ouvert dans un logiciel de CAO.
+   */
+  marquerTraitement(id: string, statut: StatutTraitement): Promise<void>
 }

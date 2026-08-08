@@ -7,7 +7,7 @@
  */
 import bcrypt from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { deflateSync } from 'node:zlib'
 
@@ -130,7 +130,8 @@ export async function semer(bd) {
   await semerFormateur(q)
   const imageId = await semerImage(q)
   const modeleId = await semerModele3d(q)
-  await semerCours(q, competences, imageId, modeleId)
+  const modeleStepId = await semerModeleStep(q)
+  await semerCours(q, competences, imageId, modeleId, modeleStepId)
   const promotion = await semerPromotion(q, competences)
 
   console.log('\n  Jeu de démonstration semé :')
@@ -436,7 +437,7 @@ async function semerImage(q) {
  * Le contenu est écrit, pas inventé au hasard : une démonstration qui affiche
  * du faux-texte ne dit rien de ce que verra un enseignant.
  */
-async function semerCours(q, competences, imageId, modeleId) {
+async function semerCours(q, competences, imageId, modeleId, modeleStepId) {
   const M = id(200) // matière
   const MOD = id(201)
   const CH1 = id(202)
@@ -509,6 +510,18 @@ async function semerCours(q, competences, imageId, modeleId) {
             'avec une collerette de fixation en pied. Le piston et la tige ne ' +
             'sont pas représentés.',
           format: 'stl',
+        },
+        {
+          // Un STEP : c'est le format que les enseignants reçoivent des
+          // constructeurs, et le seul qui passe par une conversion serveur.
+          type: 'modele3d',
+          ressourceId: modeleStepId,
+          titre: 'Platine de fixation (fichier STEP de constructeur)',
+          description:
+            'Platine rectangulaire de 40 mm sur 20, épaisse de 10 mm, telle ' +
+            'qu’elle sort d’un logiciel de CAO. Le fichier STEP est converti ' +
+            'par le serveur avant d’être affiché.',
+          format: 'step',
         },
         {
           type: 'bibliographie',
@@ -731,6 +744,42 @@ function engendrerStl(segments = 48) {
   }
 
   return tampon
+}
+
+/**
+ * Dépose un fichier STEP, volontairement laissé « en attente ».
+ *
+ * C'est ce qui rend la pré-tessellation visible en démonstration : au premier
+ * démarrage, la leçon annonce qu'il n'y a pas d'aperçu et propose le
+ * téléchargement. Après `npm run medias:apercus`, le même bloc offre le bouton
+ * d'affichage 3D. Les deux états sont réels, et il faut pouvoir montrer les
+ * deux — un jeu de démonstration qui ne montre que le cas heureux ne prépare
+ * personne à l'autre.
+ *
+ * La pièce est celle des tests, engendrée par un script du dépôt : pas de
+ * modèle tiers, donc pas de question de licence.
+ */
+async function semerModeleStep(q) {
+  const source = join(process.cwd(), 'src', 'test', 'fichiers', 'piece-essai.stp')
+  const step = await readFile(source)
+
+  const etablissement = id(3)
+  const chemin = `${etablissement}/${randomUUID()}`
+  const destination = join(process.cwd(), 'outils', 'medias-locaux', chemin)
+
+  await mkdir(dirname(destination), { recursive: true })
+  await writeFile(destination, step)
+
+  const ressourceId = id(213)
+  await q(
+    `INSERT INTO raai_apprendre.ressource
+       (id, etablissement_id, nom, type_mime, chemin_stockage, taille_octets,
+        statut_traitement)
+     VALUES ($1, $2, 'platine-de-fixation.stp', 'model/step', $3, $4, 'en_attente')`,
+    [ressourceId, etablissement, chemin, step.byteLength],
+  )
+
+  return ressourceId
 }
 
 /** Dépose le STL et renvoie l'identifiant de ressource. */

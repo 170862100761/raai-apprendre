@@ -1,5 +1,6 @@
 import type { IdentifiantEtablissement } from '@/noyau/identifiants'
 import { echec, succes, type Resultat } from '@/noyau/resultat'
+import { aBesoinDApercu3d } from '../domaine/apercu-3d'
 import { OCTETS_DE_TETE, validerTeleversement } from '../domaine/televersement'
 import type { DepotMediatheque, StockageObjet } from '../ports/stockage'
 
@@ -13,6 +14,12 @@ export type RessourceCreee = {
   readonly ressourceId: string
   readonly nom: string
   readonly typeMime: string
+  /**
+   * Vrai quand un aperçu 3D reste à produire. L'appelant enchaîne sur
+   * `preparerApercu3d` — c'est ce qui évite un statut « en attente » que rien
+   * ne ferait avancer.
+   */
+  readonly apercuAProduire: boolean
 }
 
 /**
@@ -53,15 +60,21 @@ export async function televerser(
 
   await stockage.ecrire(chemin, entree.contenu, type.mime)
 
+  const apercuAProduire = aBesoinDApercu3d(type.mime)
+
   const ressourceId = await depot.enregistrer({
     etablissementId: entree.etablissementId,
     nom,
     typeMime: type.mime,
     cheminStockage: chemin,
     tailleOctets: entree.contenu.byteLength,
+    // Un fichier sans conversion à faire est utilisable tel quel : le dire
+    // `pret` évite un « en attente » perpétuel. Le STEP, lui, attend vraiment
+    // quelque chose.
+    statutTraitement: apercuAProduire ? 'en_attente' : 'pret',
   })
 
-  return succes({ ressourceId, nom, typeMime: type.mime })
+  return succes({ ressourceId, nom, typeMime: type.mime, apercuAProduire })
 }
 
 export type MediaServi = {

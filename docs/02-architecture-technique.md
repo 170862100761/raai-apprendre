@@ -6,7 +6,7 @@
 flowchart TB
     subgraph Client
         NAV["Navigateur<br/>React 19 · Tailwind · shadcn/ui · Framer Motion"]
-        V3D["Visionneuse 3D<br/>Three.js · OpenCascade WASM (Worker)"]
+        V3D["Visionneuse 3D<br/>Three.js — GLB et STL uniquement"]
         SW["Service Worker<br/>cache hors ligne"]
     end
 
@@ -65,7 +65,8 @@ flowchart TB
 | Hébergement | Vercel, région `cdg1` | Latence FR, RGPD |
 | Paiement | Stripe | Abonnements par sièges |
 | Emails | Resend | Transactionnel ; jamais vers un mineur en mode minimal |
-| 3D | Three.js + OpenCascade WASM | Seule voie viable pour lire du STEP dans le navigateur |
+| 3D, navigateur | Three.js | GLB et STL. Le STEP arrive déjà tessellé |
+| 3D, serveur | OpenCascade WASM (`occt-import-js`, LGPL-2.1) | Tessellation du STEP au dépôt. 7,6 Mo : indéfendable dans un navigateur |
 
 ## 3. Organisation Supabase
 
@@ -113,32 +114,59 @@ différence entre « ça marche » et « c'est inutilisable ».
 
 ## 5. Visionneuse 3D
 
+Deux temps, et ils ne se passent ni au même moment ni sur la même machine : la
+conversion au dépôt, l'affichage à la lecture.
+
+```mermaid
+sequenceDiagram
+    participant E as Enseignant
+    participant A as Serveur
+    participant O as OpenCascade WASM
+    participant S as Storage
+
+    E->>A: Dépose un fichier STEP
+    A->>S: Écrit l'original — statut « en attente »
+    A-->>E: Ressource créée (sans attendre la conversion)
+    Note over A,O: after() — l'enseignant n'attend pas
+    A->>O: Tessellation (déflexion allégée tant que le budget est dépassé)
+    O-->>A: Maillages
+    A->>S: Écrit le GLB — statut « prêt »
+```
+
 ```mermaid
 sequenceDiagram
     participant U as Élève
     participant P as Page
-    participant W as Web Worker
-    participant O as OpenCascade WASM
-    participant S as Storage
+    participant A as Serveur
 
     U->>P: Ouvre une leçon avec modèle STEP
-    P->>S: URL signée (lecture, 15 min)
-    P->>W: Démarre le worker (chargement paresseux)
-    W->>S: Télécharge le fichier
-    W->>O: Charge le WASM (~8 Mo, mis en cache par le SW)
-    O-->>W: Tessellation → maillage
-    W-->>P: Transfert du buffer (transferable, zéro copie)
+    P->>A: HEAD /apercu-3d — l'aperçu existe-t-il ?
+    A-->>P: 200, ou 404 si conversion absente ou échouée
+    Note over P: Sans aperçu, aucun bouton : seulement le téléchargement
+    U->>P: Clique « Afficher le modèle en 3D »
+    P->>P: Charge Three.js (import dynamique)
+    P->>A: GET /apercu-3d
+    A-->>P: GLB allégé
     P->>P: Rendu Three.js
 ```
 
 Règles :
 
-- **Le WASM ne bloque jamais le fil principal.** Tout se passe dans un Worker.
+- **Aucun WebAssembly dans le navigateur.** La version d'origine de ce document
+  plaçait OpenCascade dans un Worker, et le STEP intégral « chargé à la demande
+  explicite ». L'écart est délibéré : 7,6 Mo de WebAssembly ne sont pas
+  défendables sur le parc réel des établissements, et un Worker ne rend pas ce
+  téléchargement gratuit — il le rend seulement non bloquant. La tessellation
+  est donc entièrement serveur, et le STEP intégral se télécharge pour être
+  ouvert dans un logiciel de CAO.
 - **Chargement paresseux** : le bundle 3D n'est jamais dans le bundle initial.
-  Une leçon sans modèle 3D ne paie rien.
-- **Pré-tessellation côté serveur** : à l'import, un job produit une version GLB
-  allégée. Le STEP intégral n'est chargé qu'à la demande explicite
-  (« voir le modèle exact »). C'est ce qui rend la 3D utilisable sur tablette.
+  Une leçon sans modèle 3D ne paie rien. La même règle vaut côté serveur pour
+  `occt-import-js`, jamais importé statiquement.
+- **Pré-tessellation côté serveur** : au dépôt, un travail produit une version
+  GLB allégée. C'est ce qui rend la 3D utilisable sur tablette.
+- **La conversion ne fait jamais échouer le dépôt.** Le fichier est écrit, la
+  ressource créée, et `statut_traitement` porte le verdict. Un STEP illisible
+  reste téléchargeable.
 - **Formats propriétaires** (SLDPRT, CATPart) : jamais parsés dans le navigateur.
   Stockés comme fichiers téléchargeables, avec conversion hors ligne vers STEP/GLB
   quand elle est possible. Ne pas promettre plus.
@@ -159,7 +187,7 @@ Règles :
 
 Service Worker, stratégie ciblée — on ne tente pas de tout rendre disponible :
 
-- **Cache-first** : coquille applicative, polices, icônes, WASM.
+- **Cache-first** : coquille applicative, polices, icônes.
 - **Stale-while-revalidate** : leçons déjà consultées.
 - **File d'attente** : réponses de quiz saisies hors ligne, rejouées à la
   reconnexion, avec résolution de conflit « le serveur gagne sur les notes ».

@@ -19,12 +19,22 @@ import { useEffect, useRef, useState } from 'react'
  *
  * Le STEP n'est PAS lu ici : sa tessellation appartient à un travail serveur
  * (doc 02 §5). Charger OpenCascade dans le navigateur d'un Chromebook de MFR
- * reviendrait à promettre ce qu'on ne peut pas tenir.
+ * reviendrait à promettre ce qu'on ne peut pas tenir. Le serveur en produit un
+ * GLB allégé au dépôt du fichier, et c'est ce GLB que la visionneuse affiche —
+ * le STEP, lui, reste téléchargeable tel quel.
  */
 
 export type Format = 'glb' | 'stl' | 'step'
 
 type Etat = 'repos' | 'chargement' | 'pret' | 'echec' | 'sans-webgl'
+
+/**
+ * Existence de l'aperçu converti, pour le seul cas du STEP.
+ *
+ * `inconnu` le temps de la question au serveur : afficher le bouton d'emblée
+ * puis le retirer ferait sauter la mise en page sous le doigt de l'élève.
+ */
+type Apercu = 'inconnu' | 'disponible' | 'absent'
 
 /** Détection réelle, pas une supposition sur le navigateur. */
 function webglDisponible(): boolean {
@@ -52,10 +62,33 @@ export function Visionneuse3d({
   format: Format
 }) {
   const [etat, setEtat] = useState<Etat>('repos')
+  const [apercu, setApercu] = useState<Apercu>(format === 'step' ? 'inconnu' : 'absent')
   const conteneur = useRef<HTMLDivElement>(null)
   const nettoyer = useRef<(() => void) | null>(null)
 
   useEffect(() => () => nettoyer.current?.(), [])
+
+  // Le STEP ne s'affiche que si le serveur a réussi sa tessellation. On le
+  // demande — `HEAD`, donc sans télécharger le modèle — plutôt que de proposer
+  // un bouton qui échouerait. Une conversion peut aussi être encore en cours :
+  // pour l'élève, c'est la même chose qu'un aperçu absent.
+  useEffect(() => {
+    if (format !== 'step') return
+
+    const abandon = new AbortController()
+
+    fetch(`/api/v1/medias/${ressourceId}/apercu-3d`, {
+      method: 'HEAD',
+      signal: abandon.signal,
+    })
+      .then((reponse) => setApercu(reponse.ok ? 'disponible' : 'absent'))
+      // Réseau coupé : on ne promet rien. Le lien de téléchargement reste.
+      .catch(() => {
+        if (!abandon.signal.aborted) setApercu('absent')
+      })
+
+    return () => abandon.abort()
+  }, [format, ressourceId])
 
   const ouvrir = async () => {
     if (!webglDisponible()) {
@@ -74,8 +107,13 @@ export function Visionneuse3d({
       const { afficherModele } = await import('./moteur-3d')
       nettoyer.current = await afficherModele({
         conteneur: cible,
-        url: `/api/v1/medias/${ressourceId}`,
-        format: format === 'glb' ? 'glb' : 'stl',
+        // Le STEP passe par son aperçu converti ; les deux autres formats sont
+        // servis tels quels.
+        url:
+          format === 'step'
+            ? `/api/v1/medias/${ressourceId}/apercu-3d`
+            : `/api/v1/medias/${ressourceId}`,
+        format: format === 'stl' ? 'stl' : 'glb',
       })
       setEtat('pret')
     } catch (erreur) {
@@ -86,9 +124,8 @@ export function Visionneuse3d({
     }
   }
 
-  // Le STEP n'a pas de visionneuse tant que la conversion serveur n'existe pas.
-  // On le dit, plutôt que d'afficher un bouton qui échouerait.
-  const affichable = format === 'glb' || format === 'stl'
+  const affichable =
+    format === 'glb' || format === 'stl' || (format === 'step' && apercu === 'disponible')
 
   return (
     <figure className="flex flex-col gap-3 rounded-carte border border-bordure p-4">
@@ -153,12 +190,16 @@ export function Visionneuse3d({
         </p>
       ) : null}
 
-      {!affichable ? (
+      {/* Rien tant que la réponse du serveur n'est pas là : annoncer « pas
+          d'aperçu » pour se corriger un instant plus tard ferait sauter la mise
+          en page sous le doigt de l'élève. */}
+      {format === 'step' && apercu === 'absent' ? (
         <p className="text-sm text-mine-doux">
-          Format {format.toUpperCase()} : à télécharger et à ouvrir dans un
-          logiciel de CAO.
+          Ce modèle n’a pas d’aperçu affichable. Tu peux télécharger le fichier
+          STEP et l’ouvrir dans un logiciel de CAO.
         </p>
       ) : null}
+
 
       <a
         href={`/api/v1/medias/${ressourceId}`}

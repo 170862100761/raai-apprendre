@@ -21,6 +21,7 @@
     "bd:migrer": "node outils/migrer.mjs",
     "bd:deployer": "prisma migrate deploy",
     "referentiel:importer": "node outils/import-referentiel/importer.mjs",
+    "medias:apercus": "tsx outils/preparer-apercus-3d.ts",
     "verifier": "npm run types && npm run lint && npm run architecture && npm run test"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@supabase/supabase-js": "^2.48.0",
     "bcryptjs": "^2.4.3",
     "next": "^15.1.6",
+    "occt-import-js": "^0.0.23",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
@@ -50,6 +52,7 @@
     "pg": "^8.13.1",
     "prisma": "^6.3.0",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.23.11",
     "typescript": "^5.7.3",
     "vitest": "^3.0.4"
   }

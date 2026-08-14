@@ -45,6 +45,7 @@ export {
 
 export type {
   DepotMediatheque,
+  RessourceListee,
   RessourceStockee,
   StatutTraitement,
   StockageObjet,

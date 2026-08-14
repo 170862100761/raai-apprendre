@@ -43,6 +43,13 @@ class DepotDouble implements DepotMediatheque {
   async charger(id: string) {
     return this.ressources.get(id) ?? null
   }
+  async ressourcesDeLEtablissement() {
+    return [...this.ressources.values()].map(({ id, nom, typeMime }) => ({
+      id,
+      nom,
+      typeMime,
+    }))
+  }
   async enregistrerApercu(id: string, cheminApercu: string) {
     const ressource = this.ressources.get(id)
     if (!ressource) throw new Error(`Ressource inconnue : ${id}`)

@@ -63,6 +63,14 @@ class DepotEnMemoire implements DepotMediatheque {
     return this.ressources.get(id) ?? null
   }
 
+  async ressourcesDeLEtablissement() {
+    return [...this.ressources.values()].map(({ id, nom, typeMime }) => ({
+      id,
+      nom,
+      typeMime,
+    }))
+  }
+
   async enregistrerApercu(id: string, chemin: string): Promise<void> {
     const ressource = this.ressources.get(id)
     if (!ressource) throw new Error(`Ressource inconnue : ${id}`)

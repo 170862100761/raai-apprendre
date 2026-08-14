@@ -26,7 +26,18 @@ export type RessourceStockee = {
   readonly statutTraitement: StatutTraitement
 }
 
+export type RessourceListee = {
+  readonly id: string
+  readonly nom: string
+  readonly typeMime: string
+}
+
 export interface DepotMediatheque {
+  /** Les ressources d'un établissement, pour la recherche et la médiathèque. */
+  ressourcesDeLEtablissement(
+    etablissementId: IdentifiantEtablissement,
+  ): Promise<readonly RessourceListee[]>
+
   enregistrer(entree: {
     etablissementId: IdentifiantEtablissement
     nom: string

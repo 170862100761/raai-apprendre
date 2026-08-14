@@ -5,6 +5,14 @@ import type { DepotMediatheque, RessourceStockee } from '../ports/stockage'
 
 export function depotMediathequePrisma(prisma: PrismaClient): DepotMediatheque {
   return {
+    async ressourcesDeLEtablissement(etablissementId) {
+      return prisma.ressource.findMany({
+        where: { etablissementId },
+        select: { id: true, nom: true, typeMime: true },
+        orderBy: { nom: 'asc' },
+      })
+    },
+
     async enregistrer(entree) {
       const ressource = await prisma.ressource.create({
         data: {

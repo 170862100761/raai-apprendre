@@ -71,12 +71,17 @@ export default async function PageSuiviClasse({
 
       <header className="flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="text-2xl font-semibold">{nomClasse}</h1>
-        <a
-          href={`/api/v1/exports/classe/${classeId}`}
-          className="rounded-carte border border-bordure px-4 py-2 text-sm"
-        >
-          Exporter en CSV
-        </a>
+        <div className="flex gap-2" role="group" aria-label="Exporter la grille">
+          {(['csv', 'xlsx', 'pdf'] as const).map((format) => (
+            <a
+              key={format}
+              href={`/api/v1/exports/classe/${classeId}?format=${format}`}
+              className="rounded-carte border border-bordure px-4 py-2 text-sm"
+            >
+              Exporter en {format.toUpperCase()}
+            </a>
+          ))}
+        </div>
       </header>
 
       {/* Les deux signalements passent AVANT la grille : ce sont eux qui

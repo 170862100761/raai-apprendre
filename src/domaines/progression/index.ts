@@ -28,6 +28,14 @@ export {
   LIBELLES_NIVEAU,
 } from './domaine/export-csv'
 
+export { grilleEnXlsx, MIME_XLSX } from './domaine/export-xlsx'
+
+export {
+  ABREVIATIONS_NIVEAU,
+  grilleEnPdf,
+  MIME_PDF,
+} from './domaine/export-pdf'
+
 export {
   avancement,
   cle,

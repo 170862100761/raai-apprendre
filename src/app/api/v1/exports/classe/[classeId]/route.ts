@@ -5,6 +5,10 @@ import type { IdentifiantClasse } from '@/noyau/identifiants'
 import {
   depotProgressionPrisma,
   grilleEnCsv,
+  grilleEnPdf,
+  grilleEnXlsx,
+  MIME_PDF,
+  MIME_XLSX,
   nomFichierSur,
   suivreClasse,
 } from '@/domaines/progression'
@@ -26,11 +30,35 @@ import { auditer } from '../../../../../_audit'
 
 export const runtime = 'nodejs'
 
+/** Trois formats, une seule route : même périmètre, même trace d'audit. */
+const FORMATS = {
+  csv: {
+    typeMime: 'text/csv; charset=utf-8',
+    extension: 'csv',
+  },
+  xlsx: {
+    typeMime: MIME_XLSX,
+    extension: 'xlsx',
+  },
+  pdf: {
+    typeMime: MIME_PDF,
+    extension: 'pdf',
+  },
+} as const
+
+type Format = keyof typeof FORMATS
+
 export async function GET(
-  _requete: NextRequest,
+  requete: NextRequest,
   { params }: { params: Promise<{ classeId: string }> },
 ) {
   const { classeId } = await params
+
+  const demande = requete.nextUrl.searchParams.get('format') ?? 'csv'
+  // 404 et non 400 : un format inventé ne mérite pas plus d'explication
+  // qu'une classe inventée.
+  if (!(demande in FORMATS)) return new NextResponse(null, { status: 404 })
+  const format = demande as Format
 
   const session = await sessionCourante()
   if (session.sujetId === null) return new NextResponse(null, { status: 404 })
@@ -52,13 +80,20 @@ export async function GET(
   // manquait — l'export sortait sans laisser de trace.
   await auditer('export.produit', session, { type: 'classe', id: classeId })
 
-  // La mise en forme vit dans le domaine : séparateur, BOM et neutralisation
-  // des formules sont des règles, pas de la plomberie HTTP — et elles se
-  // testent sans démarrer de serveur.
-  return new NextResponse(grilleEnCsv(grille, index), {
+  // La mise en forme vit dans le domaine : séparateur, BOM, neutralisation
+  // des formules, pagination PDF sont des règles, pas de la plomberie HTTP —
+  // et elles se testent sans démarrer de serveur.
+  const corps =
+    format === 'csv'
+      ? grilleEnCsv(grille, index)
+      : Buffer.from(
+          format === 'xlsx' ? grilleEnXlsx(grille, index) : grilleEnPdf(grille, index, nomClasse),
+        )
+
+  return new NextResponse(corps, {
     headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="suivi-${nomFichierSur(nomClasse)}.csv"`,
+      'Content-Type': FORMATS[format].typeMime,
+      'Content-Disposition': `attachment; filename="suivi-${nomFichierSur(nomClasse)}.${FORMATS[format].extension}"`,
       // Une note d'élève ne se met jamais en cache partagé.
       'Cache-Control': 'no-store',
     },

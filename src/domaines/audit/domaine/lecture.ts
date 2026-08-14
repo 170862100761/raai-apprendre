@@ -53,6 +53,9 @@ const LIBELLES: Record<ActionAuditee, string> = {
   'donnees.consultees': 'Données personnelles consultées',
   'apprenant.efface': 'Élève effacé (droit à l’effacement)',
 
+  'abonnement.souscrit': 'Souscription d’un abonnement',
+  'abonnement.gere': 'Ouverture du portail d’abonnement',
+
   'session.impersonnee': 'Connexion au nom d’un autre compte',
 }
 

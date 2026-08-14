@@ -62,6 +62,9 @@ const Schema = z.object({
 
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  /** Le tarif « siège » (`price_…`) du tableau de bord Stripe. Pas un secret,
+   *  mais il va avec les deux autres : les trois ensemble, ou aucun. */
+  STRIPE_PRIX_SIEGE: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
 })
@@ -73,7 +76,14 @@ export type Environnement = z.infer<typeof Schema>
  *  environnement complet. */
 export type SourceEnvironnement = Readonly<Record<string, string | undefined>>
 
-export function lireEnvironnement(source: SourceEnvironnement = process.env): Environnement {
+export function lireEnvironnement(brut: SourceEnvironnement = process.env): Environnement {
+  // Un `.env` d'exemple pose `VARIABLE=""` : pour nous, vide veut dire absent.
+  // Sans cette ligne, la coquille vide échoue à la validation d'URL et le
+  // message accuse une variable que personne n'a jamais renseignée.
+  const source = Object.fromEntries(
+    Object.entries(brut).map(([nom, valeur]) => [nom, valeur === '' ? undefined : valeur]),
+  )
+
   const exposes = verifierAucunSecretExpose(source)
   if (exposes.length > 0) {
     throw new Error(
@@ -96,6 +106,19 @@ export function lireEnvironnement(source: SourceEnvironnement = process.env): En
     const manquantes = supabase.filter((nom) => !source[nom])
     throw new Error(
       `Configuration Supabase incomplète : ${manquantes.join(', ')}. ` +
+        `Renseigne les trois variables, ou aucune.`,
+    )
+  }
+
+  // Même logique que Supabase : une facturation à moitié configurée créerait
+  // des sessions de paiement dont les webhooks ne seraient jamais vérifiés.
+  const stripe = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRIX_SIEGE']
+  const stripeRemplies = stripe.filter((nom) => source[nom])
+
+  if (stripeRemplies.length > 0 && stripeRemplies.length < stripe.length) {
+    const manquantes = stripe.filter((nom) => !source[nom])
+    throw new Error(
+      `Configuration Stripe incomplète : ${manquantes.join(', ')}. ` +
         `Renseigne les trois variables, ou aucune.`,
     )
   }

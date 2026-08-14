@@ -40,6 +40,9 @@ export default async function PageAdministration() {
         <Link href="/administration/rgpd" className="text-sm underline">
           Demandes RGPD
         </Link>
+        <Link href="/administration/abonnement" className="text-sm underline">
+          Abonnement
+        </Link>
       </nav>
     </main>
   )

@@ -39,6 +39,9 @@ export type ActionAuditee =
   | 'donnees.consultees'
   /** Droit à l'effacement : anonymisation d'un élève, irréversible. */
   | 'apprenant.efface'
+  // Facturation — qui engage l'établissement financièrement, et quand
+  | 'abonnement.souscrit'
+  | 'abonnement.gere'
   // Support
   | 'session.impersonnee'
 

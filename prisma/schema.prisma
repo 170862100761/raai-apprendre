@@ -1010,3 +1010,48 @@ model QuotaIa {
   @@map("quota_ia")
   @@schema("raai_apprendre")
 }
+
+// ===========================================================================
+// FACTURATION
+// ===========================================================================
+
+/// Abonnement Stripe d'un établissement, par sièges (doc 03 §catalogue).
+/// Une ligne par établissement : Stripe est la source de vérité du paiement,
+/// cette table n'en est que la projection — elle ne s'écrit que depuis le
+/// webhook ou la création du client, jamais depuis un écran.
+model Abonnement {
+  id                  String    @id @default(uuid()) @db.Uuid
+  etablissementId     String    @unique @map("etablissement_id") @db.Uuid
+  /// Identifiant client Stripe (`cus_…`). Posé à la première session de paiement.
+  stripeClientId      String?   @unique @map("stripe_client_id")
+  /// Identifiant d'abonnement Stripe (`sub_…`). NULL tant que rien n'est souscrit.
+  stripeAbonnementId  String?   @unique @map("stripe_abonnement_id")
+  statut              StatutAbonnement @default(inexistant)
+  sieges              Int       @default(0)
+  periodeFinLe        DateTime? @map("periode_fin_le") @db.Timestamptz(6)
+  majLe               DateTime  @updatedAt @map("maj_le") @db.Timestamptz(6)
+
+  @@map("abonnement")
+  @@schema("raai_apprendre")
+}
+
+enum StatutAbonnement {
+  inexistant
+  active
+  impayee
+  annulee
+
+  @@map("statut_abonnement")
+  @@schema("raai_apprendre")
+}
+
+/// Événements Stripe déjà traités. Stripe rejoue ses webhooks — c'est normal —
+/// et cette table est ce qui rend le traitement idempotent (doc 06 §échanges).
+model EvenementPaiement {
+  /// L'identifiant Stripe de l'événement (`evt_…`) : la clé d'idempotence.
+  id     String   @id
+  recuLe DateTime @default(now()) @map("recu_le") @db.Timestamptz(6)
+
+  @@map("evenement_paiement")
+  @@schema("raai_apprendre")
+}

@@ -54,4 +54,5 @@ export type { TessellateurStep } from './ports/tessellation'
 
 export { depotMediathequePrisma } from './infrastructure/depot-mediatheque-prisma'
 export { stockageDisque } from './infrastructure/stockage-disque'
+export { stockageSupabase } from './infrastructure/stockage-supabase'
 export { tessellateurOcct } from './infrastructure/tessellateur-occt'

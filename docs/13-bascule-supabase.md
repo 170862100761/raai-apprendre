@@ -128,9 +128,11 @@ le premier jour.
 éphémère et non partagé entre instances** : un fichier déposé disparaît au
 redéploiement et n'est pas visible des autres instances.
 
-Créer un bucket privé `medias`, puis remplacer le seul fichier
-`mediatheque/infrastructure/stockage-disque.ts` par un adaptateur Supabase
-Storage. Le port `StockageObjet` ne bouge pas.
+L'adaptateur existe : `mediatheque/infrastructure/stockage-supabase.ts`, et la
+sélection est automatique (`app/_stockage.ts`, même bascule que la connexion
+adulte — l'outil `medias:apercus` fait le même choix de son côté). Il reste
+**une action manuelle** : créer le bucket **privé** `medias` dans le tableau
+de bord Supabase. Le port `StockageObjet` n'a pas bougé.
 
 Les médias doivent à terme être servis depuis un **domaine distinct** de
 l'application : tant que ce n'est pas le cas, les en-têtes de

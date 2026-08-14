@@ -25,6 +25,7 @@ import {
   depotMediathequePrisma,
   preparerApercu3d,
   stockageDisque,
+  stockageSupabase,
   tessellateurOcct,
 } from '../src/domaines/mediatheque/index'
 
@@ -42,16 +43,21 @@ import {
  * la locale d'abord, là où `--env-file` de Node retiendrait la dernière,
  * c'est-à-dire la production.
  */
-function lireUrl(): string | null {
+function lireVariable(nom: string): string | null {
   for (const fichier of ['.env.local', '.env']) {
     if (!existsSync(fichier)) continue
     const ligne = readFileSync(fichier, 'utf8')
       .split(/\r?\n/)
-      .find((l) => l.startsWith('DATABASE_URL='))
-    if (ligne) return ligne.slice('DATABASE_URL='.length).replace(/^"|"$/g, '')
+      .find((l) => l.startsWith(`${nom}=`))
+    if (ligne) {
+      const valeur = ligne.slice(nom.length + 1).replace(/^"|"$/g, '')
+      if (valeur) return valeur
+    }
   }
-  return process.env.DATABASE_URL ?? null
+  return process.env[nom] || null
 }
+
+const lireUrl = () => lireVariable('DATABASE_URL')
 
 const url = lireUrl()
 if (!url) {
@@ -90,6 +96,16 @@ async function principal() {
   console.log(`${enAttente.length} fichier(s) STEP à convertir.`)
 
   const depot = depotMediathequePrisma(prisma)
+
+  // Même bascule que `app/_stockage.ts` : Supabase configuré, c'est Supabase
+  // Storage ; sinon le disque local transitoire.
+  const urlSupabase = lireVariable('NEXT_PUBLIC_SUPABASE_URL')
+  const cleServiceRole = lireVariable('SUPABASE_SERVICE_ROLE_KEY')
+  const stockage =
+    urlSupabase && cleServiceRole
+      ? stockageSupabase({ url: urlSupabase, cleServiceRole })
+      : stockageDisque
+
   let reussis = 0
 
   for (const ressource of enAttente) {
@@ -99,7 +115,7 @@ async function principal() {
     // établissement, et c'est le serveur qui tombe.
     const resultat = await preparerApercu3d(ressource.id, {
       depot,
-      stockage: stockageDisque,
+      stockage,
       tessellateur: tessellateurOcct,
     })
 

@@ -4,9 +4,9 @@ import {
   depotMediathequePrisma,
   MIME_APERCU_3D,
   servirApercu3d,
-  stockageDisque,
 } from '@/domaines/mediatheque'
 import { sessionCourante } from '../../../../../_session'
+import { stockage } from '../../../../../_stockage'
 
 /**
  * Service de l'aperçu 3D pré-tessellé.
@@ -38,7 +38,7 @@ async function repondre(ressourceId: string, avecCorps: boolean) {
 
   const resultat = await servirApercu3d(ressourceId, {
     depot: depotMediathequePrisma(prisma),
-    stockage: stockageDisque,
+    stockage: stockage(),
   })
 
   // 404 et non 403 : distinguer confirmerait l'existence d'un média appartenant

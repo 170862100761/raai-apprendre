@@ -4,9 +4,9 @@ import {
   depotMediathequePrisma,
   servirMedia,
   TYPES_ACCEPTES,
-  stockageDisque,
 } from '@/domaines/mediatheque'
 import { sessionCourante } from '../../../../_session'
+import { stockage } from '../../../../_stockage'
 
 /**
  * Service des médias.
@@ -48,7 +48,7 @@ export async function GET(
 
   const resultat = await servirMedia(
     ressourceId,
-    { depot: depotMediathequePrisma(prisma), stockage: stockageDisque },
+    { depot: depotMediathequePrisma(prisma), stockage: stockage() },
     (mime) => AFFICHABLES.has(mime),
   )
 

@@ -85,13 +85,14 @@ describe('chargement d’une leçon', () => {
     expect(lecon).not.toBeNull()
     expect(lecon!.titre).toBe('Débit, pression et puissance hydraulique')
     expect(lecon!.matiere).toBe('Agroéquipement')
-    // Les cinq blocs semés, dans l'ordre. L'image et le modèle 3D sont arrivés
-    // avec la médiathèque et la visionneuse ; cette attente en était restée à
-    // trois, sans que personne ne le voie — la suite ne s'exécutait plus.
+    // Les six blocs semés, dans l'ordre. Deux modèles 3D et non un : le STL
+    // avec aperçu ET le STEP de constructeur sans aperçu — la démonstration
+    // montre les deux états, et cette attente avait un modèle de retard.
     expect(lecon!.blocs.map((b) => b.contenu.type)).toEqual([
       'texte',
       'image',
       'lien',
+      'modele3d',
       'modele3d',
       'bibliographie',
     ])

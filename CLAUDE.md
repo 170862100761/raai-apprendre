@@ -94,6 +94,20 @@ fichier ne fait pas foi** : sur ChloroFil, `bac-pro-ae-ref-en-vigueur.pdf`
 contient l'arrêté de 2010 alors que celui de 2023 s'applique. La référence
 d'arrêté se lit dans le contenu, et son absence est signalée.
 
+## Reprise RAAI-Formation
+
+```bash
+npm run formation:importer -- [--source D:/RAAI/RAAI-Formation] [--uai 0820001A]
+```
+
+Convertit les 51 cours JSON de l'ancien projet en leçons à blocs typés — le
+HTML source est réduit en texte, les liens deviennent des blocs `lien`, les
+images sans fichier deviennent des notes « Illustration à prévoir ». Tout
+arrive en **brouillon** : rien ne part vers les élèves sans relecture.
+Idempotent (UUID dérivés de la source) ; une leçon passée en relecture ou
+publiée n'est plus jamais écrasée. Arrêter `npm run dev` avant (PGlite,
+une seule connexion).
+
 ## Conventions
 
 Commentaires : expliquent *pourquoi*, pas *quoi*. Un commentaire qui paraphrase

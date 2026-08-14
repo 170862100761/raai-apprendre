@@ -13,3 +13,4 @@ coverage/
 /outils/import-referentiel/travail/
 outils/medias-locaux/
 .env.local.sauvegarde
+.env.supabase

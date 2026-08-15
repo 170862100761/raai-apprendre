@@ -64,6 +64,8 @@ export { depotIdentitePrisma } from './infrastructure/depot-identite-prisma'
 export {
   compteDepuisSupabase,
   configurationSupabase,
+  connecterCompteSupabase,
+  deconnecterCompteSupabase,
   type ConfigurationSupabase,
 } from './infrastructure/supabase-auth'
 export { genererCode, hachageBcrypt } from './infrastructure/hachage-bcrypt'

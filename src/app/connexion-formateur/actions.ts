@@ -8,6 +8,9 @@ import { COOKIE_COMPTE, OPTIONS_COOKIE, signerJeton } from '@/noyau/cookie-sessi
 import { auditerAnonyme } from '../_audit'
 import { destination } from '../_destination'
 import {
+  configurationSupabase,
+  connecterCompteSupabase,
+  deconnecterCompteSupabase,
   depotIdentitePrisma,
   DUREE_SESSION_COMPTE_JOURS,
   hachageBcrypt,
@@ -23,6 +26,8 @@ const Entree = z.object({
   suite: z.string().optional(),
 })
 
+type OptionsCookie = NonNullable<Parameters<Awaited<ReturnType<typeof cookies>>['set']>[2]>
+
 export async function connecterFormateur(
   _precedent: EtatConnexion,
   donnees: FormData,
@@ -33,6 +38,34 @@ export async function connecterFormateur(
     suite: donnees.get('suite') ?? undefined,
   })
   if (!entree.success) return { erreur: 'Adresse e-mail ou mot de passe incorrect.' }
+
+  // Même bascule que `sessionCourante()` : Supabase configuré, c'est lui qui
+  // authentifie ET qui pose ses cookies. Une connexion par le chemin
+  // transitoire poserait un cookie que la lecture de session ignorerait —
+  // l'utilisateur se connecterait « avec succès » dans une boucle sans fin.
+  const configuration = configurationSupabase()
+
+  if (configuration) {
+    const bocal = await cookies()
+    const compteId = await connecterCompteSupabase(
+      configuration,
+      { email: entree.data.email, motDePasse: entree.data.motDePasse },
+      {
+        lire: () => bocal.getAll().map((c) => ({ name: c.name, value: c.value })),
+        poser: (aPoser) => {
+          for (const c of aPoser) bocal.set(c.name, c.value, (c.options ?? {}) as OptionsCookie)
+        },
+      },
+    )
+
+    if (!compteId) {
+      await auditerAnonyme('connexion.echouee', { type: 'compte' })
+      return { erreur: 'Adresse e-mail ou mot de passe incorrect.' }
+    }
+
+    await auditerAnonyme('connexion.reussie', { type: 'compte' })
+    redirect(destination(entree.data.suite, '/formateur'))
+  }
 
   const resultat = await ouvrirSessionCompte(entree.data, {
     depot: depotIdentitePrisma(prisma),
@@ -66,6 +99,19 @@ export async function connecterFormateur(
 
 export async function deconnecterFormateur(): Promise<void> {
   const bocal = await cookies()
+
+  // Révoquer la session Supabase, pas seulement effacer nos cookies : un JWT
+  // encore valide dans un onglet oublié resterait une session ouverte.
+  const configuration = configurationSupabase()
+  if (configuration) {
+    await deconnecterCompteSupabase(configuration, {
+      lire: () => bocal.getAll().map((c) => ({ name: c.name, value: c.value })),
+      poser: (aPoser) => {
+        for (const c of aPoser) bocal.set(c.name, c.value, (c.options ?? {}) as OptionsCookie)
+      },
+    })
+  }
+
   bocal.delete(COOKIE_COMPTE)
   redirect('/connexion-formateur')
 }

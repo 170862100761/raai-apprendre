@@ -73,3 +73,55 @@ export async function compteDepuisSupabase(
 
   return identifiant<IdentifiantCompte>(data.user.id)
 }
+
+/**
+ * Connexion d'un adulte par Supabase Auth — le pendant écriture de
+ * `compteDepuisSupabase`. Les cookies de session Supabase sont posés via
+ * `poser`, qui DOIT être fourni ici : une connexion qui ne peut pas écrire
+ * ses cookies ne connecte personne.
+ *
+ * `null` en cas d'échec, sans distinguer « e-mail inconnu » de « mot de passe
+ * faux » : la distinction ne sert qu'à l'attaquant.
+ */
+export async function connecterCompteSupabase(
+  configuration: ConfigurationSupabase,
+  identifiants: { readonly email: string; readonly motDePasse: string },
+  cookies: {
+    lire: () => readonly Cookie[]
+    poser: (cookies: readonly (Cookie & { options?: Record<string, unknown> })[]) => void
+  },
+): Promise<IdentifiantCompte | null> {
+  const client = createServerClient(configuration.url, configuration.cleAnonyme, {
+    cookies: {
+      getAll: () => [...cookies.lire()],
+      setAll: (aPoser: readonly (Cookie & { options?: Record<string, unknown> })[]) =>
+        cookies.poser(aPoser),
+    },
+  })
+
+  const { data, error } = await client.auth.signInWithPassword({
+    email: identifiants.email,
+    password: identifiants.motDePasse,
+  })
+  if (error || !data.user) return null
+
+  return identifiant<IdentifiantCompte>(data.user.id)
+}
+
+/** Déconnexion Supabase : révoque la session côté serveur, pas seulement le cookie. */
+export async function deconnecterCompteSupabase(
+  configuration: ConfigurationSupabase,
+  cookies: {
+    lire: () => readonly Cookie[]
+    poser: (cookies: readonly (Cookie & { options?: Record<string, unknown> })[]) => void
+  },
+): Promise<void> {
+  const client = createServerClient(configuration.url, configuration.cleAnonyme, {
+    cookies: {
+      getAll: () => [...cookies.lire()],
+      setAll: (aPoser: readonly (Cookie & { options?: Record<string, unknown> })[]) =>
+        cookies.poser(aPoser),
+    },
+  })
+  await client.auth.signOut()
+}

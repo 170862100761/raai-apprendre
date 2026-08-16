@@ -53,7 +53,17 @@ export async function middleware(requete: NextRequest) {
     requete.cookies.get(COOKIE_APPRENANT)?.value,
     secret,
   )
-  const aUnCompte = requete.cookies.has(COOKIE_COMPTE)
+  // Deux preuves possibles pour un adulte : le cookie transitoire, ou les
+  // cookies de session Supabase (`sb-<ref>-auth-token`, éventuellement
+  // découpés en `.0`, `.1`…). Présence seulement — la validité se juge en
+  // aval, comme pour le reste. Oublier Supabase ici créait une boucle : le
+  // middleware renvoyait vers la connexion, qui voyait la session et
+  // renvoyait vers l'espace formateur, sans fin.
+  const aUnCompte =
+    requete.cookies.has(COOKIE_COMPTE) ||
+    requete.cookies
+      .getAll()
+      .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'))
 
   if (!jetonApprenant && !aUnCompte) {
     // Une route d'API ne se redirige pas vers une page de connexion : un

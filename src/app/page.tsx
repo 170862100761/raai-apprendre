@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 
 export const metadata = {
   title: 'RAAI Apprendre — plateforme pédagogique agricole et technique',
@@ -130,8 +130,8 @@ export default function Accueil() {
         </p>
         <p className="text-sm text-mine-doux">
           Contact et démonstration guidée :{' '}
-          <a href="mailto:contact@raai.fr" className="underline">
-            contact@raai.fr
+          <a href="mailto:raphael.lapeze@gmail.com" className="underline">
+            raphael.lapeze@gmail.com
           </a>
         </p>
       </section>

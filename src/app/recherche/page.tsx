@@ -63,7 +63,7 @@ export default async function PageRecherche({
         titre: lecon.titre,
         chapitre: lecon.chapitre,
         detail: `${lecon.chapitre} · ${lecon.dureeEstimeeMin} min`,
-        lien: `/lecon/${lecon.id}`,
+        lien: `/cours/${lecon.id}`,
       })
     }
   } else if (session.etablissementId) {

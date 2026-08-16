@@ -143,11 +143,20 @@ export default function Accueil() {
         </p>
       </section>
 
-      <footer className="border-t border-bordure pt-6 text-sm text-mine-doux">
+      <footer className="flex flex-col gap-3 border-t border-bordure pt-6 text-sm text-mine-doux">
         <p>
           RAAI Apprendre — accessibilité RGAA, données hébergées en Union
           européenne, journal d’audit opposable. Les élèves ne sont jamais
           suivis à la page lue : ce qui n’est pas collecté ne peut pas fuir.
+        </p>
+        <p>
+          <Link href="/offre" className="underline">
+            L’offre et les tarifs
+          </Link>{' '}
+          ·{' '}
+          <Link href="/mentions-legales" className="underline">
+            Mentions légales
+          </Link>
         </p>
       </footer>
     </main>

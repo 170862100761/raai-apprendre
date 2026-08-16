@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import { Logo } from './_composants/logo'
 
 export const metadata = {
   title: 'RAAI Apprendre — plateforme pédagogique agricole et technique',
@@ -54,9 +55,15 @@ export default function Accueil() {
     <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-3xl flex-col gap-16 px-6 py-16">
       {/* — Proposition ------------------------------------------------------ */}
       <header className="flex flex-col gap-5">
-        <p className="text-sm font-medium uppercase tracking-wide text-mine-doux">
-          MFR · Lycées professionnels · CFA
-        </p>
+        <div className="flex items-center gap-4">
+          <Logo taille={56} />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium uppercase tracking-wide text-mine-doux">
+              MFR · Lycées professionnels · CFA
+            </p>
+            <p className="text-xl font-semibold">RAAI Apprendre</p>
+          </div>
+        </div>
         <h1 className="text-4xl font-semibold leading-tight">
           La plateforme pédagogique de l’enseignement agricole et technique
         </h1>

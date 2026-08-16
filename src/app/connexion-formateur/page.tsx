@@ -1,4 +1,5 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
+import { Logo } from '../_composants/logo'
 import { redirect } from 'next/navigation'
 import { sessionCourante } from '../_session'
 import { FormulaireFormateur } from './formulaire'
@@ -19,6 +20,7 @@ export default async function PageConnexionFormateur({
   return (
     <main id="contenu" tabIndex={-1} className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-6 py-12">
       <header className="flex flex-col gap-2">
+        <Logo taille={44} />
         <h1 className="text-2xl font-semibold">Espace formateur</h1>
         <p className="text-mine-doux">
           Connexion des enseignants, formateurs et personnels de direction, par

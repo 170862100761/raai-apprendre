@@ -60,13 +60,25 @@ export {
   type ResultatSoumission,
 } from './application/passer-evaluation'
 
+export {
+  creerEvaluation,
+  depublierEvaluation,
+  enregistrerEvaluation,
+  publierEvaluation,
+  type QuestionSaisie,
+} from './application/editer-evaluation'
+
 export type {
   CopieEnAttente,
   CopiePourCorrection,
   DepotCorrection,
   DepotEvaluation,
+  EvaluationEditable,
+  EvaluationEnEdition,
   EvaluationPourEleve,
+  QuestionAEnregistrer,
   QuestionCorrigeable,
+  QuestionEnEdition,
   QuestionPourEleve,
   TentativeStockee,
 } from './ports/depot-evaluation'

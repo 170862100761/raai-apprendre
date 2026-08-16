@@ -98,6 +98,80 @@ export interface DepotEvaluation extends DepotCorrection {
     evaluationId: IdentifiantEvaluation,
     apprenantId: IdentifiantApprenant,
   ): Promise<(TentativeStockee & { score: number | null; scoreMax: number | null }) | null>
+
+  // --- Édition (enseignant) ------------------------------------------------
+
+  evaluationsDeLEtablissement(
+    etablissementId: string,
+  ): Promise<readonly EvaluationEditable[]>
+
+  /**
+   * `null` si inexistante ou hors établissement — le cloisonnement se joue
+   * ICI, pas dans l'écran : le dépôt ne passe pas par la RLS. Le corrigé y
+   * figure : c'est l'auteur qui édite, pas l'élève qui passe.
+   */
+  chargerPourEdition(
+    id: IdentifiantEvaluation,
+    etablissementId: string,
+  ): Promise<EvaluationEnEdition | null>
+
+  creerEvaluation(entree: {
+    chapitreId: string
+    etablissementId: string
+    titre: string
+    type: string
+  }): Promise<IdentifiantEvaluation>
+
+  modifierEvaluation(
+    id: IdentifiantEvaluation,
+    etablissementId: string,
+    titre: string,
+  ): Promise<void>
+
+  /** Remplace la totalité des questions — l'éditeur envoie l'état complet. */
+  remplacerQuestions(
+    id: IdentifiantEvaluation,
+    etablissementId: string,
+    questions: readonly QuestionAEnregistrer[],
+  ): Promise<void>
+
+  changerStatutEvaluation(
+    id: IdentifiantEvaluation,
+    etablissementId: string,
+    statut: 'brouillon' | 'publiee',
+  ): Promise<void>
+}
+
+export type EvaluationEditable = {
+  readonly id: IdentifiantEvaluation
+  readonly titre: string
+  readonly type: string
+  readonly statut: string
+  readonly chapitre: string
+  readonly nombreQuestions: number
+}
+
+export type QuestionEnEdition = {
+  readonly intitule: string
+  readonly enonce: Enonce
+  readonly corrige: Corrige
+  readonly bareme: number
+}
+
+export type EvaluationEnEdition = {
+  readonly id: IdentifiantEvaluation
+  readonly titre: string
+  readonly type: string
+  readonly statut: string
+  readonly chapitre: string
+  readonly questions: readonly QuestionEnEdition[]
+}
+
+export type QuestionAEnregistrer = {
+  readonly intitule: string
+  readonly enonce: Enonce
+  readonly corrige: Corrige
+  readonly bareme: number
 }
 
 /**

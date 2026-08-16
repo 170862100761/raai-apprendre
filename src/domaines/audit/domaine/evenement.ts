@@ -33,6 +33,8 @@ export type ActionAuditee =
   // Contenu
   | 'lecon.publiee'
   | 'lecon.depubliee'
+  | 'evaluation.publiee'
+  | 'evaluation.depubliee'
   | 'ressource.deposee'
   // Données personnelles
   | 'export.produit'

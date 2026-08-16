@@ -326,6 +326,116 @@ export function depotEvaluationPrisma(prisma: PrismaClient): DepotEvaluation {
         scoreMax: tentative.scoreMax === null ? null : Number(tentative.scoreMax),
       }
     },
+
+    // --- Édition (enseignant) ----------------------------------------------
+
+    async evaluationsDeLEtablissement(etablissementId) {
+      const lignes = await prisma.evaluation.findMany({
+        where: { etablissementId },
+        orderBy: [{ statut: 'asc' }, { creeLe: 'desc' }],
+        select: {
+          id: true,
+          titre: true,
+          type: true,
+          statut: true,
+          chapitre: { select: { titre: true } },
+          _count: { select: { questions: true } },
+        },
+      })
+      return lignes.map((l) => ({
+        id: identifiant<IdentifiantEvaluation>(l.id),
+        titre: l.titre,
+        type: l.type,
+        statut: l.statut,
+        chapitre: l.chapitre.titre,
+        nombreQuestions: l._count.questions,
+      }))
+    },
+
+    async chargerPourEdition(id, etablissementId) {
+      const evaluation = await prisma.evaluation.findFirst({
+        where: { id, etablissementId },
+        select: {
+          id: true,
+          titre: true,
+          type: true,
+          statut: true,
+          chapitre: { select: { titre: true } },
+          questions: {
+            orderBy: { ordre: 'asc' },
+            select: { enonce: true, type: true, options: true, corrige: true, bareme: true },
+          },
+        },
+      })
+      if (!evaluation) return null
+
+      return {
+        id: identifiant<IdentifiantEvaluation>(evaluation.id),
+        titre: evaluation.titre,
+        type: evaluation.type,
+        statut: evaluation.statut,
+        chapitre: evaluation.chapitre.titre,
+        // Une question au contenu illisible est écartée de l'édition plutôt
+        // que de faire tomber l'écran — même règle que côté élève.
+        questions: evaluation.questions.flatMap((q) => {
+          const enonce = lireEnonce({ type: q.type, ...(q.options as object) })
+          const corrige = lireCorrige({ type: q.type, ...(q.corrige as object) })
+          if (!enonce || !corrige) return []
+          return [{ intitule: q.enonce, enonce, corrige, bareme: Number(q.bareme) }]
+        }),
+      }
+    },
+
+    async creerEvaluation(entree) {
+      const evaluation = await prisma.evaluation.create({
+        data: {
+          chapitreId: entree.chapitreId,
+          etablissementId: entree.etablissementId,
+          titre: entree.titre,
+          type: entree.type as 'quiz',
+          statut: 'brouillon',
+        },
+        select: { id: true },
+      })
+      return identifiant<IdentifiantEvaluation>(evaluation.id)
+    },
+
+    async modifierEvaluation(id, etablissementId, titre) {
+      await prisma.evaluation.updateMany({ where: { id, etablissementId }, data: { titre } })
+    },
+
+    async remplacerQuestions(id, etablissementId, questions) {
+      // Le filtre d'établissement sur la suppression : sans lui, un identifiant
+      // deviné suffirait à vider le quiz d'un autre établissement.
+      const possedee = await prisma.evaluation.findFirst({
+        where: { id, etablissementId },
+        select: { id: true },
+      })
+      if (!possedee) return
+
+      await prisma.$transaction([
+        prisma.question.deleteMany({ where: { evaluationId: id } }),
+        prisma.question.createMany({
+          data: questions.map((q, rang) => {
+            const { type, ...options } = q.enonce
+            const { type: _, ...corrige } = q.corrige
+            return {
+              evaluationId: id,
+              type,
+              enonce: q.intitule,
+              options,
+              corrige,
+              bareme: q.bareme,
+              ordre: rang + 1,
+            }
+          }),
+        }),
+      ])
+    },
+
+    async changerStatutEvaluation(id, etablissementId, statut) {
+      await prisma.evaluation.updateMany({ where: { id, etablissementId }, data: { statut } })
+    },
   }
 }
 

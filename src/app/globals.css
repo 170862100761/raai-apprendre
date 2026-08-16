@@ -1,66 +1,66 @@
 @import 'tailwindcss';
 
 /*
-  Jetons repris de RAAI-Formation : couleurs en oklch, ombres quasi absentes
-  (une seule, pour les panneaux flottants), bordures fines partout ailleurs.
+  Jetons hérités de RAAI-Formation, revus pour une identité plus chaleureuse :
+  un fond papier légèrement chamois, des cartes blanches qui s'en détachent par
+  une ombre discrète plutôt que par la seule bordure, un vert agricole un peu
+  plus riche, et des titres en serif.
 
-  Le thème clair et le thème sombre sont tous deux traités : les salles de
-  classe sont éclairées au néon, les révisions se font le soir.
+  Le thème est CLAIR PAR DÉFAUT, quel que soit le réglage système. Le sombre
+  automatique donnait l'impression d'un produit éteint à tous les utilisateurs
+  dont l'OS est en sombre — c'est-à-dire beaucoup. Il reviendra le jour où il
+  sera un choix de l'utilisateur dans l'application, pas une surprise.
 */
 
 @theme {
-  --color-surface: oklch(99% 0.004 95);
-  --color-surface-2: oklch(96.5% 0.006 95);
-  --color-bordure: oklch(89% 0.008 95);
+  /* Le fond de page (papier chamois) et la surface des cartes (blanc cassé)
+     sont distincts : c'est ce contraste qui donne de la profondeur sans
+     multiplier les ombres. */
+  --color-fond: oklch(96.5% 0.009 85);
+  --color-surface: oklch(99.3% 0.004 90);
+  --color-surface-2: oklch(95.5% 0.008 88);
+  --color-bordure: oklch(90% 0.010 88);
   /* Bordure des CHAMPS DE SAISIE, distincte des séparateurs décoratifs.
      WCAG 1.4.11 : quand un champ n'est délimité que par sa bordure, celle-ci
-     doit atteindre 3:1 avec le fond. À 89 % de clarté on était à 1,35 — sur un
-     écran de salle informatique, l'élève ne voit pas où taper. 60 % donne 3,83. */
-  --color-bordure-champ: oklch(60% 0.012 95);
-  --color-mine: oklch(28% 0.012 95);
-  --color-mine-doux: oklch(52% 0.012 95);
+     doit atteindre 3:1 avec le fond. 60 % de clarté donne 3,8. */
+  --color-bordure-champ: oklch(60% 0.014 88);
+  --color-mine: oklch(26% 0.014 90);
+  --color-mine-doux: oklch(48% 0.016 90);
 
-  /* Vert agricole, désaturé : présent sans être décoratif. */
-  --color-accent: oklch(52% 0.13 145);
-  --color-accent-doux: oklch(94% 0.03 145);
-  --color-accent-contraste: oklch(99% 0.004 95);
+  /* Vert agricole, un ton plus profond et plus présent qu'avant. */
+  --color-accent: oklch(48% 0.14 148);
+  --color-accent-doux: oklch(93% 0.035 148);
+  --color-accent-contraste: oklch(99% 0.004 90);
 
-  --color-alerte: oklch(52% 0.17 27);
+  --color-alerte: oklch(50% 0.17 27);
   --color-alerte-douce: oklch(95% 0.03 27);
 
   --radius-carte: 0.75rem;
+  --shadow-carte: 0 1px 2px oklch(30% 0.02 90 / 0.05), 0 4px 12px oklch(30% 0.02 90 / 0.05);
   --shadow-panneau: 0 1px 2px oklch(28% 0.012 95 / 0.06), 0 8px 24px oklch(28% 0.012 95 / 0.08);
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-surface: oklch(21% 0.012 95);
-    --color-surface-2: oklch(25% 0.012 95);
-    --color-bordure: oklch(33% 0.012 95);
-    /* 58 % donne 4,0 sur le fond sombre. */
-    --color-bordure-champ: oklch(58% 0.012 95);
-    --color-mine: oklch(95% 0.006 95);
-    --color-mine-doux: oklch(72% 0.010 95);
-    --color-accent: oklch(72% 0.14 145);
-    --color-accent-doux: oklch(30% 0.05 145);
-    --color-accent-contraste: oklch(18% 0.012 95);
-    --color-alerte: oklch(72% 0.15 27);
-    --color-alerte-douce: oklch(30% 0.06 27);
-  }
+  --font-titre: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
 }
 
 @layer base {
   html {
-    color-scheme: light dark;
+    color-scheme: light;
   }
 
   body {
-    background: var(--color-surface);
+    background: var(--color-fond);
     color: var(--color-mine);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Les titres portent l'identité : serif posé, jamais criard. */
+  h1,
+  h2 {
+    font-family: var(--font-titre);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   /* Le focus visible n'est pas une option : une partie des élèves navigue au
@@ -105,21 +105,28 @@
 }
 
 /*
+  Les cartes : toute boîte qui combine `rounded-carte` et `bg-surface` reçoit
+  l'ombre douce, sans reprendre les composants un à un. Même logique que la
+  bordure des champs plus bas — la cohérence acquise par défaut vaut mieux que
+  quarante-trois retouches dont une oubliée.
+*/
+.rounded-carte.bg-surface {
+  box-shadow: var(--shadow-carte);
+}
+
+/*
   Bordure des champs de saisie — RÈGLE HORS COUCHE, et c'est délibéré.
 
   Les utilitaires Tailwind vivent dans une couche (`@layer utilities`) ; une
   règle non calquée l'emporte sur toute couche, quelle que soit sa spécificité.
   Un `border-bordure` posé sur un champ ne peut donc pas repasser sous le seuil
   de contraste.
-
-  L'alternative — reprendre les 43 champs un par un — garantissait surtout d'en
-  oublier un, et que le prochain formulaire écrit soit non conforme sans que
-  personne ne le remarque. Ici la conformité est acquise par défaut.
 */
 input:not([type='checkbox']):not([type='radio']):not([type='range']),
 textarea,
 select {
   border-color: var(--color-bordure-champ);
+  background: var(--color-surface);
 }
 
 /* Un champ en erreur reprend la main : le signalement prime sur l'uniformité. */

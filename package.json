@@ -22,6 +22,7 @@
     "bd:deployer": "prisma migrate deploy",
     "referentiel:importer": "node outils/import-referentiel/importer.mjs",
     "formation:importer": "node outils/importer-formation.mjs",
+    "formation:publier-selection": "node outils/publier-selection-formation.mjs",
     "medias:apercus": "tsx outils/preparer-apercus-3d.ts",
     "verifier": "npm run types && npm run lint && npm run architecture && npm run test"
   },

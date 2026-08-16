@@ -23,6 +23,7 @@
     "referentiel:importer": "node outils/import-referentiel/importer.mjs",
     "formation:importer": "node outils/importer-formation.mjs",
     "formation:publier-selection": "node outils/publier-selection-formation.mjs",
+    "formation:semer-quiz": "node outils/semer-quiz-formation.mjs",
     "medias:apercus": "tsx outils/preparer-apercus-3d.ts",
     "medias:pousser": "node outils/pousser-medias-locaux.mjs",
     "verifier": "npm run types && npm run lint && npm run architecture && npm run test"

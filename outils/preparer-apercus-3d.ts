@@ -44,6 +44,14 @@ import {
  * c'est-à-dire la production.
  */
 function lireVariable(nom: string): string | null {
+  // Canal d'override EXPLICITE, préfixé : `CIBLE_DATABASE_URL=… npm run
+  // medias:apercus` vise une autre base que celle des fichiers .env — le
+  // rattrapage après une bascule Supabase, typiquement. Un préfixe dédié, et
+  // non `process.env[nom]` en premier : Prisma précharge `.env` dans
+  // l'environnement avant ce code, et gagnerait sinon en silence.
+  const explicite = process.env[`CIBLE_${nom}`]
+  if (explicite) return explicite
+
   for (const fichier of ['.env.local', '.env']) {
     if (!existsSync(fichier)) continue
     const ligne = readFileSync(fichier, 'utf8')

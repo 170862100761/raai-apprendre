@@ -105,13 +105,37 @@ for (const a of ADULTES) {
     [userId, email, a.nom, a.prenom],
   )
   const etabId = a.portee === 'etablissement' ? etab.id : null
-  const membre = (await q(
-    `INSERT INTO raai_apprendre.membre (id, compte_id, etablissement_id, role)
-     VALUES ($1,$2,$3,$4::raai_apprendre.role)
-     ON CONFLICT (compte_id, role, etablissement_id, academie_id) DO UPDATE SET expire_le = NULL
-     RETURNING id`,
-    [randomUUID(), userId, etabId, a.role],
+  // La contrainte d'unicité ne joue pas quand etablissement_id ou academie_id
+  // est NULL (deux NULL ne sont jamais égaux en SQL) : on cherche avant d'insérer.
+  let membre = (await q(
+    `SELECT id FROM raai_apprendre.membre
+     WHERE compte_id = $1 AND role = $2::raai_apprendre.role AND etablissement_id IS NOT DISTINCT FROM $3 AND academie_id IS NULL
+     ORDER BY cree_le LIMIT 1`,
+    [userId, a.role, etabId],
   ))[0]
+  if (membre) {
+    await q(`UPDATE raai_apprendre.membre SET expire_le = NULL WHERE id = $1`, [membre.id])
+    // Les doublons laissés par les anciennes exécutions : leurs affectations
+    // rejoignent la ligne conservée avant qu'ils ne disparaissent.
+    await q(
+      `UPDATE raai_apprendre.affectation SET membre_id = $4
+       WHERE membre_id IN (
+         SELECT id FROM raai_apprendre.membre
+         WHERE compte_id = $1 AND role = $2::raai_apprendre.role AND etablissement_id IS NOT DISTINCT FROM $3 AND academie_id IS NULL AND id <> $4)`,
+      [userId, a.role, etabId, membre.id],
+    )
+    await q(
+      `DELETE FROM raai_apprendre.membre
+       WHERE compte_id = $1 AND role = $2::raai_apprendre.role AND etablissement_id IS NOT DISTINCT FROM $3 AND academie_id IS NULL AND id <> $4`,
+      [userId, a.role, etabId, membre.id],
+    )
+  } else {
+    membre = (await q(
+      `INSERT INTO raai_apprendre.membre (id, compte_id, etablissement_id, role)
+       VALUES ($1,$2,$3,$4::raai_apprendre.role) RETURNING id`,
+      [randomUUID(), userId, etabId, a.role],
+    ))[0]
+  }
   if (a.role === 'enseignant' && classe) {
     const deja = await q(`SELECT 1 FROM raai_apprendre.affectation WHERE membre_id = $1 AND classe_id = $2`, [membre.id, classe.id])
     if (!deja.length) await q(`INSERT INTO raai_apprendre.affectation (id, membre_id, classe_id) VALUES ($1,$2,$3)`, [randomUUID(), membre.id, classe.id])

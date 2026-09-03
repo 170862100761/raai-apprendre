@@ -23,10 +23,33 @@ const idStable = (...parties) => {
 
 const ETABLISSEMENT = '00000000-0000-4000-8000-000000000003'
 
-/** Raccourcis de rédaction. */
-const qcm = (enonce, propositions, bonnes, bareme = 2) => ({
-  type: 'qcm', enonce, options: { propositions }, corrige: { bonnes }, bareme,
-})
+/**
+ * Raccourcis de rédaction.
+ *
+ * Les QCM sont écrits bonne réponse en tête, c'est plus lisible à relire ;
+ * mais servis ainsi, un élève qui coche toujours la première case a 100 %.
+ * On mélange donc les propositions — de façon DÉTERMINISTE (graine = énoncé),
+ * pour que relancer le semis ne change pas l'ordre d'un quiz déjà vu.
+ */
+function melanger(propositions, enonce) {
+  const graine = createHash('sha256').update(enonce).digest()
+  const ordre = propositions.map((_, i) => i)
+  for (let i = ordre.length - 1; i > 0; i--) {
+    const j = graine[i % graine.length] % (i + 1)
+    ;[ordre[i], ordre[j]] = [ordre[j], ordre[i]]
+  }
+  return ordre
+}
+const qcm = (enonce, propositions, bonnes, bareme = 2) => {
+  const ordre = melanger(propositions, enonce)
+  return {
+    type: 'qcm',
+    enonce,
+    options: { propositions: ordre.map((i) => propositions[i]) },
+    corrige: { bonnes: bonnes.map((b) => ordre.indexOf(b)) },
+    bareme,
+  }
+}
 const vf = (enonce, bonne, bareme = 1) => ({
   type: 'vrai_faux', enonce, options: {}, corrige: { bonne }, bareme,
 })

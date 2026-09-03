@@ -17,7 +17,7 @@ import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import dotenv from 'dotenv'
 import pg from 'pg'
-import { semer } from './semer-demo.mjs'
+import { semer, semerQuestionsEcheances } from './semer-demo.mjs'
 
 const env = dotenv.parse(readFileSync(process.argv[2] ?? '.env.local'))
 const url = env.DIRECT_URL ?? env.DATABASE_URL
@@ -28,7 +28,11 @@ console.log(`semis vers ${new URL(url).hostname}`)
 const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
 const deja = await client.query(`SELECT 1 FROM raai_apprendre.etablissement WHERE uai = '0820001A'`)
 if (deja.rowCount) {
-  console.log('MFR Escatalens existe déjà : le jeu de démonstration est en place, rien à semer.')
+  console.log('MFR Escatalens existe déjà : le jeu de démonstration est en place.')
+  // Les compléments idempotents du semis : ce qui a été ajouté après coup
+  // (questions du TP et de l'entraînement) rejoint une base déjà semée.
+  await semerQuestionsEcheances((sql, params = []) => client.query(sql, params))
+  console.log('Compléments appliqués (questions des évaluations).')
 } else {
   const substitutions = new Map()
   const bd = {

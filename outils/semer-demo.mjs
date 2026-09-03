@@ -811,8 +811,8 @@ async function semerModele3d(q) {
  * se voir en démonstration : le retard, l'urgent, le lointain — et l'exercice
  * d'entraînement qui n'a pas d'échéance et ne doit donc apparaître nulle part.
  *
- * Aucune question n'est attachée : ces évaluations servent l'affichage des
- * échéances, pas la passation. Le quiz d'hydraulique reste le seul complet.
+ * Le TP et l'entraînement portent leurs questions (`semerQuestionsEcheances`) :
+ * une évaluation publiée sans question menait l'élève sur une copie vide.
  */
 async function semerEcheances(q, CH1, CH2) {
   const DEVOIR = id(240)
@@ -891,6 +891,73 @@ async function semerEcheances(q, CH1, CH2) {
       }),
     ],
   )
+
+  await semerQuestionsEcheances(q)
+}
+
+/**
+ * Les questions du TP et de l'entraînement. Séparées et idempotentes
+ * (`ON CONFLICT DO NOTHING`) : une base déjà semée sans elles les reçoit par
+ * `semer-production.mjs` sans rien rejouer d'autre.
+ *
+ * Elles portent sur ce que disent les leçons du chapitre d'hydraulique :
+ * P (kW) = p (bar) × Q (L/min) / 600, et la lecture d'un manomètre.
+ */
+export async function semerQuestionsEcheances(q) {
+  const TP = id(241)
+  const ENTRAINEMENT = id(242)
+  const questions = [
+    // TP — Relevé de pression sur banc : ce qu'on note, ce qu'on calcule, ce qu'on conclut.
+    [id(247), TP, 1, 'qcm',
+      'Avant de lire la pression sur le banc, que faut-il vérifier en premier ?',
+      { propositions: [
+        'Que le manomètre est à zéro moteur arrêté',
+        'Que le réservoir est plein à ras bord',
+        'Que le flexible est le plus court possible',
+        'Que la température extérieure dépasse 20 °C',
+      ] },
+      { bonnes: [0] }, 2],
+    [id(248), TP, 2, 'numerique',
+      'Le manomètre indique 150 bars et le débitmètre 48 L/min. Quelle puissance hydraulique le banc fournit-il ?',
+      { unite: 'kW' }, { valeur: 12, tolerance: 0.5 }, 3],
+    [id(249), TP, 3, 'vrai_faux',
+      'Si la pression monte mais que le vérin ne bouge pas, la pompe est forcément en cause.',
+      {}, { bonne: false }, 2],
+    [id(250), TP, 4, 'texte_long',
+      "Rédige le compte rendu de ton relevé : valeurs mesurées, puissance calculée, et ce que tu en conclus sur l'état du circuit.",
+      {}, {}, 8],
+    // S'entraîner : calculs de puissance — trois applications de la même formule, puis l'unité.
+    [id(251), ENTRAINEMENT, 1, 'numerique',
+      'Une pompe débite 30 L/min sous 200 bars. Quelle puissance développe-t-elle ?',
+      { unite: 'kW' }, { valeur: 10, tolerance: 0.5 }, 2],
+    [id(252), ENTRAINEMENT, 2, 'numerique',
+      'Un moteur hydraulique reçoit 90 L/min sous 120 bars. Quelle puissance lui arrive-t-il ?',
+      { unite: 'kW' }, { valeur: 18, tolerance: 0.5 }, 2],
+    [id(253), ENTRAINEMENT, 3, 'numerique',
+      'Pour obtenir 15 kW avec une pompe de 50 L/min, quelle pression faut-il ?',
+      { unite: 'bar' }, { valeur: 180, tolerance: 5 }, 3],
+    [id(254), ENTRAINEMENT, 4, 'qcm',
+      'Dans la formule P = p × Q / 600, à quoi sert le 600 ?',
+      { propositions: [
+        'À convertir les bars et les litres par minute en kilowatts',
+        'À tenir compte du rendement de la pompe',
+        'À convertir les minutes en heures',
+        'C’est la pression maximale admissible',
+      ] },
+      { bonnes: [0] }, 2],
+    [id(255), ENTRAINEMENT, 5, 'texte_court',
+      'Quelle grandeur mesure un manomètre ?',
+      {}, { acceptees: ['la pression', 'pression', 'une pression', 'la pression hydraulique'] }, 1],
+  ]
+  for (const [qid, evaluationId, ordre, type, enonce, options, corrige, bareme] of questions) {
+    await q(
+      `INSERT INTO raai_apprendre.question
+         (id, evaluation_id, type, enonce, options, corrige, bareme, ordre)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO NOTHING`,
+      [qid, evaluationId, type, enonce, JSON.stringify(options), JSON.stringify(corrige), bareme, ordre],
+    )
+  }
 }
 
 /**

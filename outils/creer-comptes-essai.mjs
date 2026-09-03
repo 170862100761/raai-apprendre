@@ -55,7 +55,14 @@ await bd.connect()
 const q = async (sql, params = []) => (await bd.query(sql, params)).rows
 
 // --- Structure d'accueil : un établissement, une classe si elle existe -----
-let etab = (await q(`SELECT id, nom, uai FROM raai_apprendre.etablissement WHERE actif ORDER BY cree_le LIMIT 1`))[0]
+// L'établissement qui a des classes d'abord (la MFR de démonstration) : un
+// enseignant rattaché à un établissement vide voit « Aucune leçon ».
+let etab = (await q(
+  `SELECT e.id, e.nom, e.uai FROM raai_apprendre.etablissement e
+   WHERE e.actif
+   ORDER BY (SELECT count(*) FROM raai_apprendre.classe c WHERE c.etablissement_id = e.id AND NOT c.archivee) DESC, e.cree_le
+   LIMIT 1`,
+))[0]
 if (!etab) {
   let pays = (await q(`SELECT id FROM raai_apprendre.pays WHERE code = 'FR'`))[0]
   if (!pays) pays = (await q(`INSERT INTO raai_apprendre.pays (id, code, nom) VALUES ($1,'FR','France') RETURNING id`, [randomUUID()]))[0]

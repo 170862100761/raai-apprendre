@@ -116,7 +116,15 @@ for (const a of ADULTES) {
     const deja = await q(`SELECT 1 FROM raai_apprendre.affectation WHERE membre_id = $1 AND classe_id = $2`, [membre.id, classe.id])
     if (!deja.length) await q(`INSERT INTO raai_apprendre.affectation (id, membre_id, classe_id) VALUES ($1,$2,$3)`, [randomUUID(), membre.id, classe.id])
   }
-  resultats.push({ type: a.role, page: '/connexion-formateur', identifiant: email, secret: mdp })
+  // Vérification : la connexion telle que le site la fait (clé anonyme,
+  // e-mail + mot de passe). Si elle échoue ici, elle échouera à l'écran.
+  const verification = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+  const essai = await verification.auth.signInWithPassword({ email, password: mdp })
+  const etat = essai.error ? `ÉCHEC : ${essai.error.message}` : 'connexion vérifiée'
+  if (!essai.error) await verification.auth.signOut()
+  resultats.push({ type: a.role, page: '/connexion-formateur', identifiant: email, secret: mdp, etat })
 }
 
 // --- Élève : identifiant + code à 4 chiffres ---------------------------------
@@ -150,4 +158,4 @@ await bd.end()
 console.log(`\nÉtablissement : ${etab.nom} (UAI ${etab.uai})`)
 console.log(classe ? `Classe : ${classe.nom} (code de rattachement ${classe.code_rattachement})` : `Aucune classe : l'enseignant et l'élève n'y sont pas rattachés.`)
 console.log("\nComptes d'essai — à noter maintenant, rien n'est conservé :\n")
-for (const r of resultats) console.log(`  ${r.type.padEnd(24)} ${r.page.padEnd(22)} ${r.identifiant.padEnd(40)} ${r.secret}`)
+for (const r of resultats) console.log(`  ${r.type.padEnd(24)} ${r.page.padEnd(22)} ${r.identifiant.padEnd(44)} ${r.secret.padEnd(20)} ${r.etat ?? ''}`)

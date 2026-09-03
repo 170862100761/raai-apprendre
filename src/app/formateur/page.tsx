@@ -19,7 +19,29 @@ const LIBELLES: Record<string, string> = {
 export default async function PageFormateur() {
   const session = await exigerSession()
 
-  if (!peut(session, 'lecon.ecrire').autorise) redirect('/aujourdhui')
+  if (!peut(session, 'lecon.ecrire').autorise) {
+    // Un élève a son tableau de bord. Un adulte sans droit d'écriture —
+    // administrateur national, parent — n'a pas encore d'écran : le renvoyer
+    // vers `/aujourdhui`, qui le renvoyait ici, faisait boucler le navigateur
+    // sans fin. On le lui dit, et on lui laisse la porte de sortie.
+    if (session.origine !== 'compte') redirect('/aujourdhui')
+    const roles = session.attributions.map((a) => a.role).join(', ') || 'aucun rôle'
+    return (
+      <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-xl flex-col gap-6 px-6 py-16">
+        <h1 className="text-2xl font-semibold">Pas encore d'espace pour ce compte</h1>
+        <p className="text-mine-doux">
+          Ce compte est connecté avec le rôle <strong>{roles}</strong>. L'espace formateur
+          est réservé aux enseignants, responsables pédagogiques et administrateurs
+          d'établissement ; les écrans nationaux et parents arriveront ensuite.
+        </p>
+        <form action={deconnecterFormateur}>
+          <button type="submit" className="text-sm underline">
+            Se déconnecter
+          </button>
+        </form>
+      </main>
+    )
+  }
   if (!session.etablissementId) redirect('/connexion-formateur')
 
   const lecons = await depotCataloguePrisma(prisma).leconsDeLEtablissement(

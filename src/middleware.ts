@@ -32,7 +32,12 @@ function estPublic(chemin: string): boolean {
     PUBLIC.includes(chemin) ||
     chemin.startsWith('/_next') ||
     chemin.startsWith('/api/v1/webhooks') ||
-    chemin === '/favicon.ico'
+    // Les icônes servies par l'App Router (`app/icon.svg`, `app/apple-icon.*`)
+    // et les fichiers de `public/` : un favicon redirigé vers /connexion
+    // laisse l'onglet sans icône.
+    chemin === '/favicon.ico' ||
+    /^\/(icon|apple-icon|opengraph-image|twitter-image)\d*\.[a-z]+$/.test(chemin) ||
+    /\.(svg|png|ico|webmanifest|txt|xml)$/.test(chemin)
   )
 }
 

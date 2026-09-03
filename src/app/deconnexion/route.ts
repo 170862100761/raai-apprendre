@@ -21,6 +21,13 @@ export async function GET(requete: NextRequest) {
 
   reponse.cookies.delete(COOKIE_APPRENANT)
   reponse.cookies.delete(COOKIE_COMPTE)
+  // Les cookies de session Supabase (`sb-<ref>-auth-token`, parfois découpés
+  // en `.0`, `.1`…) : sans eux, la sortie ne sortait pas un adulte Supabase.
+  for (const cookie of requete.cookies.getAll()) {
+    if (cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token')) {
+      reponse.cookies.delete(cookie.name)
+    }
+  }
 
   return reponse
 }

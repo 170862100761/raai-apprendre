@@ -1,0 +1,262 @@
+{
+  "diplome": {
+    "code": "BACPRO-AE",
+    "intitule": "Baccalauréat professionnel Agroéquipement",
+    "ministere": "MASA",
+    "niveauEuropeen": 4,
+    "version": "2024",
+    "referenceArrete": "Arrêté du 21 mars 2023",
+    "source": "bacpro-ae-ref-2024.pdf (ChloroFil) — tableaux « Capacité évaluée / Critères d'évaluation / Savoirs mobilisés / Disciplines », conditions d'atteinte et attendus de la formation, transcrits le 3 septembre 2026",
+    "avertissement": "Transcription du référentiel officiel, relue mais non validée par un enseignant d'agroéquipement. À faire valider avant tout usage certificatif."
+  },
+  "blocs": [
+    {
+      "code": "B1", "capacite": "C1", "type": "generale", "module": "MG1 — Construction du raisonnement autour des enjeux du monde actuel",
+      "libelle": "Construire son raisonnement autour des enjeux du monde actuel",
+      "capacites": [
+        {
+          "code": "C1.1", "libelle": "Interpréter des faits en s'appuyant sur une démarche scientifique",
+          "criteres": ["Appropriation, à partir d'un contexte, d'un problème ou de questionnements", "Raisonnement scientifique pour proposer une stratégie de résolution", "Réalisation de la démarche retenue", "Exploitation de données et de résultats"],
+          "savoirs": ["Techniques de laboratoire et de terrain", "Écosystème", "Ressources naturelles communes", "Enjeux énergétiques"],
+          "disciplines": ["Biologie-Écologie", "Physique-Chimie"],
+          "conditionAtteinte": "L'apprenant interprète des faits en s'appuyant sur une démarche scientifique : il met en œuvre tout ou partie des étapes de la démarche dans une situation contextualisée liée aux enjeux du monde actuel (santé, alimentation, eau, énergie, biodiversité).",
+          "attendus": ["Reformulation, explicitation d'un problème ou de questionnements", "Recherche d'analogies avec des situations similaires", "Formulation d'hypothèses, proposition d'une méthode de résolution", "Proposition d'un protocole, choix et argumentation des modalités retenues", "Mise en œuvre d'un protocole expérimental en respectant les règles de sécurité", "Tri sélectif des déchets chimiques et biologiques", "Analyse critique des résultats obtenus et des conclusions émises", "Compte rendu du travail expérimental et des résultats"]
+        },
+        {
+          "code": "C1.2", "libelle": "Étudier un phénomène social ou professionnel à l'aide de données notamment en nombre",
+          "criteres": ["Analyse du contexte et de la problématique", "Traitement des données adapté au contexte et à la problématique étudiée", "Exposition des données adaptée au contexte et représentative de la problématique"],
+          "savoirs": ["Collecte, stockage, organisation des données en toute sécurité", "Traitement analytique (tableur)", "Représentation et communication (grapheur, SIG, tableaux de bord)"],
+          "disciplines": ["TIM", "Mathématiques"],
+          "conditionAtteinte": "Face à une question sociale ou technique, l'apprenant recherche des sources ou produit des données, les sélectionne, les traite avec un logiciel adapté et représente les résultats pour aider à la décision.",
+          "attendus": ["Recherche des données brutes conformes à la législation", "Mise en qualité des données", "Utilisation d'indicateurs statistiques de position et de dispersion", "Utilisation avancée du tableur et d'outils externes", "Graphiques simples et complexes", "Cartes de données spatialisées", "Tableaux de bord"]
+        },
+        {
+          "code": "C1.3", "libelle": "Exploiter la modélisation d'un phénomène",
+          "criteres": ["Analyse d'un phénomène dans son contexte", "Utilisation d'un ou plusieurs modèles adaptés au phénomène étudié", "Validation d'une conjecture ou d'une théorie", "Communication / diffusion de la réponse"],
+          "savoirs": ["Phénomènes biologiques et écologiques", "Modélisation d'un phénomène", "Argumentation de la réponse apportée"],
+          "disciplines": ["Mathématiques", "Biologie-Écologie"],
+          "conditionAtteinte": "À partir d'un contexte, l'apprenant utilise une modélisation adaptée pour répondre à un questionnement, porte un regard critique sur les résultats et explique ses réponses.",
+          "attendus": ["Traduction du phénomène en langage mathématique", "Situations de proportionnalité", "Représentations géométriques", "Suites arithmétiques et géométriques", "Ajustements affines et fonctions", "Modèles probabilistes", "Pertinence du modèle, interprétation et conclusion", "Représentation et restitution"]
+        }
+      ]
+    },
+    {
+      "code": "B2", "capacite": "C2", "type": "generale", "module": "MG2 — L'exercice du débat à l'ère de la mondialisation",
+      "libelle": "Débattre à l'ère de la mondialisation",
+      "capacites": [
+        {
+          "code": "C2.1", "libelle": "Analyser l'information",
+          "criteres": ["Caractérisation et traitement de l'information", "Contextualisation de l'information"],
+          "savoirs": ["Information et document", "Évaluation de l'information", "Paysage informationnel", "Repères, acteurs et notions historiques et géographiques"],
+          "disciplines": ["Documentation", "Histoire-Géographie-EMC"],
+          "conditionAtteinte": "L'apprenant sait caractériser une information, la traiter et la contextualiser, c'est-à-dire disposer des repères pour se l'approprier et la mettre en perspective.",
+          "attendus": ["Information et document : définitions, typologies, rôles", "Sélection, appropriation et utilisation de l'information par une recherche documentaire raisonnée", "Construction d'une culture de l'information", "Vivre en France en démocratie depuis 1945", "L'accès aux ressources pour produire, consommer, se loger et se déplacer"]
+        },
+        {
+          "code": "C2.2", "libelle": "Élaborer une pensée construite",
+          "criteres": ["Mobilisation de repères, acteurs, notions pertinents au regard du questionnement", "Analyse de faits et de documents", "Structuration de la démarche"],
+          "savoirs": ["Repères, acteurs et notions historiques et géographiques", "Méthodes et démarches historiques et géographiques"],
+          "disciplines": ["Histoire-Géographie-EMC"],
+          "conditionAtteinte": "L'apprenant mobilise les notions pertinentes pour analyser et confronter des faits et documents de périodes et territoires variés, et structure un raisonnement autonome pour se forger une opinion étayée.",
+          "attendus": ["Guerres européennes, guerres mondiales, guerres totales (1914-1945)", "Le jeu des puissances dans les relations internationales depuis 1945", "Des réseaux de production et d'échanges mondialisés", "Une circulation croissante et diverse des personnes à l'échelle mondiale"]
+        },
+        {
+          "code": "C2.3", "libelle": "Formuler un point de vue argumenté et nuancé",
+          "criteres": ["Interprétation de l'œuvre littéraire", "Adaptation de la stratégie argumentative à la situation de communication et à la visée", "Mobilisation d'arguments et de procédés adaptés à la visée", "Maîtrise de la langue"],
+          "savoirs": ["Littérature et autres arts", "Stratégies de lecture diverses", "Argumentation", "Expression"],
+          "disciplines": ["Lettres"],
+          "conditionAtteinte": "L'apprenant interprète une œuvre littéraire, en perçoit le sens, les enjeux et la dimension esthétique, pour formuler un point de vue argumenté et nuancé selon une stratégie adaptée.",
+          "attendus": ["Culture littéraire et artistique, genres, formes, registres", "Démarches de lectures actives, écrits et oraux d'appropriation", "Dimensions pragmatique et dialogique de l'argumentation", "Respect des codes de l'écrit et de l'oral, précision du lexique"]
+        }
+      ]
+    },
+    {
+      "code": "B3", "capacite": "C3", "type": "generale", "module": "MG3 — Construction et expressions des identités culturelles et professionnelles",
+      "libelle": "Développer son identité culturelle",
+      "capacites": [
+        {
+          "code": "C3.1", "libelle": "Exprimer ses aspirations dans une culture commune",
+          "criteres": ["Engagement dans une production personnelle", "Prise en compte du destinataire dans ses intentions", "Mobilisation du champ médiatique", "Mobilisation de références littéraires, artistiques et culturelles", "Qualité de l'expression artistique", "Défense d'un point de vue", "Maîtrise de la langue orale"],
+          "savoirs": ["Composantes de l'identité culturelle", "Réalisation artistique", "Valorisation et médiatisation de la création", "Éloquence"],
+          "disciplines": ["Lettres", "ESC"],
+          "conditionAtteinte": "L'apprenant mobilise des références littéraires, artistiques et culturelles pour s'engager dans une production personnelle, s'interroge sur ses intentions et défend son point de vue devant un public.",
+          "attendus": ["Éléments constitutifs de l'appartenance à un groupe", "Facteurs endogènes et exogènes de la construction de l'identité", "Confrontation au processus créatif contemporain", "Contexte culturel et artistique du médium retenu", "Maîtrise technique du médium mobilisé"]
+        },
+        {
+          "code": "C3.2", "libelle": "Positionner son projet professionnel",
+          "criteres": ["Identification des potentiels", "Identification des opportunités", "Projection vers une identité professionnelle"],
+          "savoirs": ["Connaissance de soi", "Aptitudes socio-professionnelles", "Compétences professionnelles en fonction des métiers visés", "Dimension sociale de l'engagement professionnel", "Mise en valeur de l'ensemble de ses potentiels"],
+          "disciplines": ["ESC", "EIE"],
+          "conditionAtteinte": "L'apprenant définit et valorise son positionnement vis-à-vis du métier ou du champ professionnel visé grâce à la connaissance de ses aptitudes et du contexte professionnel.",
+          "attendus": ["Cartographie de l'intime, réflexion sur soi et à travers les autres", "Autonomie, sens des responsabilités, mobilité", "Formulation claire du projet professionnel", "Cadre juridique et réglementaire, voies de formation", "Valeurs personnelles, responsabilité citoyenne et engagement professionnel"]
+        },
+        {
+          "code": "C3.3", "libelle": "Communiquer avec le monde",
+          "criteres": ["Communication orale en langue étrangère", "Communication écrite en langue étrangère"],
+          "savoirs": ["Culture et langue étrangères à visée sociale et professionnelle"],
+          "disciplines": ["Langue vivante"],
+          "conditionAtteinte": "L'apprenant mobilise des savoirs langagiers et culturels pour communiquer en langue étrangère dans les cinq activités langagières ; niveau B1+ du CECRL.",
+          "attendus": ["Progressivité des apprentissages et jalons du CECRL", "Cinq activités langagières", "Approche actionnelle par tâches", "Contextualisation dans la vie personnelle, sociale, culturelle et professionnelle"]
+        }
+      ]
+    },
+    {
+      "code": "B4", "capacite": "C4", "type": "generale", "module": "MG4 — Actions et engagements individuels et collectifs dans des situations sociales",
+      "libelle": "Agir collectivement dans des situations sociales et professionnelles",
+      "capacites": [
+        {
+          "code": "C4.1", "libelle": "Développer un mode de vie actif et solidaire",
+          "criteres": ["Engagement autour d'expériences motrices variées", "Mobilisation de ressources motrices et méthodologiques", "Mobilisation de ressources relationnelles et sociales"],
+          "savoirs": ["Habiletés motrices au service de l'efficacité dans les APSA", "Entretien de soi", "Méthodes d'observation, d'appréciation, de gestion de l'activité physique", "Attitudes et méthodes coopératives et collaboratives", "Expression orale sur les expériences vécues"],
+          "disciplines": ["EPS"],
+          "conditionAtteinte": "L'apprenant organise sa pratique physique au bénéfice de son efficacité motrice, de sa santé et de son bien-être, et crée des liens engageant des responsabilités et des intérêts communs.",
+          "attendus": ["AFLP 1 — Efficacité motrice dans les projets de performance", "AFLP 2 — Savoir s'entraîner, s'entretenir, habitudes de santé", "AFLP 3 — S'investir dans différents rôles sociaux au sein d'un collectif"]
+        },
+        {
+          "code": "C4.2", "libelle": "Mettre en œuvre un projet collectif",
+          "criteres": ["Prise en compte de la commande", "Appropriation du projet et implication", "Adaptation aux imprévus", "Coopération au sein d'un collectif"],
+          "savoirs": ["Connaissance de l'environnement social, culturel et professionnel", "Méthodologie du projet en mode coopératif", "Fonctionnement des groupes et modalités de prise de décision", "Connaissance de soi pour agir dans un projet coopératif"],
+          "disciplines": ["ESC", "Histoire-Géographie-EMC", "EIE"],
+          "conditionAtteinte": "L'apprenant participe activement, par une stratégie de coopération, à une démarche de projet collectif répondant à une commande.",
+          "attendus": ["Identification des opportunités locales et des partenaires", "Co-construction d'un cahier des charges", "Organisation et planification coopératives", "Dynamique de groupe, écoute active, remédiation aux blocages", "Principes du fonctionnement démocratique, résolution collective de problèmes"]
+        },
+        {
+          "code": "C4.3", "libelle": "Conduire une analyse réflexive de son action au sein d'un collectif",
+          "criteres": ["Positionnement dans une action collective", "Retour objectif sur son action", "Projection et transfert dans une situation sociale ou professionnelle future"],
+          "savoirs": ["Observation du groupe et de la conduite de l'action", "Identification des compétences psycho-sociales sollicitées ou acquises", "Auto-évaluation continue"],
+          "disciplines": ["ESC", "EIE"],
+          "conditionAtteinte": "L'apprenant prend position de manière objective sur la conduite d'un projet (méthode, réponse à la commande, organisation) et tire parti de cette expérience dans d'autres situations.",
+          "attendus": ["Construction d'un positionnement évolutif", "Grille de lecture des compétences techniques et relationnelles", "Évaluation entre pairs, auto-évaluation, boucles évaluatives"]
+        }
+      ]
+    },
+    {
+      "code": "B5", "capacite": "C5", "type": "professionnelle", "module": "MP5 — Choix d'un équipement dans un contexte de transitions",
+      "libelle": "Choisir un équipement adapté à un contexte en lien avec les transitions",
+      "champ": "Réalisation de travaux agricoles mécanisés",
+      "capacites": [
+        {
+          "code": "C5.1", "libelle": "Identifier les éléments d'un contexte professionnel préalablement à la réalisation d'une opération culturale",
+          "criteres": ["Identification des éléments du contexte d'intervention", "Identification des caractéristiques et des performances des équipements", "Identification des ressources naturelles communes mises en jeu dans la situation"],
+          "savoirs": ["Approche écosystémique", "Système de production", "Relations sol/climat/plante", "Ressources naturelles communes", "Caractéristiques des équipements", "Classification des machines"],
+          "disciplines": ["STE", "STA"],
+          "conditionAtteinte": "L'apprenant repère, dans son entreprise, les machines du parc matériel et les fonctions de chacune pour réaliser les opérations culturales, et prend en compte le contexte global pour analyser les effets de l'opération sur les ressources naturelles communes.",
+          "attendus": ["Caractérisation des systèmes de production", "Caractérisation du milieu cultivé", "Caractérisation des ressources naturelles communes", "Caractérisation des équipements utilisés lors des opérations culturales", "Mise en relation des performances avec les objectifs de l'opération culturale"]
+        },
+        {
+          "code": "C5.2", "libelle": "Raisonner le choix d'équipements pour une opération culturale en prenant en compte les transitions",
+          "criteres": ["Pertinence des choix proposés au regard du contexte et des ressources naturelles communes", "Cohérence du raisonnement", "Pertinence des propositions d'adaptation et/ou d'évolution en lien avec les transitions"],
+          "savoirs": ["Méthodologie de diagnostic", "Approche comparative", "Adaptation des équipements et des pratiques mobilisables au contexte"],
+          "disciplines": ["STE", "STA"],
+          "conditionAtteinte": "Dans un contexte donné, l'apprenant propose un nouveau choix d'équipement et/ou des adaptations en prenant en compte les transitions pour une opération culturale donnée.",
+          "attendus": ["Analyse des effets d'une opération culturale sur le processus de production en lien avec les transitions", "Acquisition d'une démarche réflexive dans le cadre des transitions", "Prise en compte du contexte", "Choix de l'équipement"]
+        }
+      ]
+    },
+    {
+      "code": "B6", "capacite": "C6", "type": "professionnelle", "module": "MP6 — Organisation des chantiers d'agroéquipement",
+      "libelle": "Organiser un chantier mobilisant des agroéquipements",
+      "capacites": [
+        {
+          "code": "C6.1", "libelle": "Préparer un chantier",
+          "criteres": ["Appropriation de la commande, des enjeux et objectifs", "Choix de la stratégie d'intervention et planification en respectant la réglementation", "Estimation des coûts"],
+          "savoirs": ["Analyse d'une commande", "Étude prévisionnelle sur le déroulement du chantier", "Gestion d'un parc d'agroéquipements", "Gestion des stocks et des approvisionnements", "Sécurité au travail"],
+          "disciplines": ["STE", "SESG"],
+          "conditionAtteinte": "L'apprenant s'approprie les enjeux d'une commande, les combine avec l'organisation de l'entreprise et de la production pour mettre en œuvre une stratégie d'intervention prenant en compte les contextes réglementaire et socio-économique ; la culture de la sécurité appliquée au chantier est une condition d'atteinte.",
+          "attendus": ["Cadre juridique et social, système décisionnel et opérant de l'organisation", "Compréhension du cahier des charges et analyse des moyens disponibles", "Période de réalisation, répartition et organisation des tâches", "Vérification et adaptation des équipements à la commande", "Identification des risques et veille réglementaire", "Estimation et prise en compte des coûts de chantier"]
+        },
+        {
+          "code": "C6.2", "libelle": "Réaliser le suivi d'un chantier",
+          "criteres": ["Organisation du suivi", "Qualité de la réalisation", "Respect des contraintes et de la réglementation", "Proposition de pistes d'amélioration"],
+          "savoirs": ["Gestion technique, économique, sociale et environnementale d'un chantier", "Bilan du chantier", "Réglementations diverses"],
+          "disciplines": ["STE", "SESG"],
+          "conditionAtteinte": "En situation professionnelle, l'apprenant évalue le déroulement et le résultat de l'activité, présente une évaluation multicritère et propose des pistes d'amélioration.",
+          "attendus": ["Bilan technico-économique", "Points forts et points faibles de l'activité", "Améliorations techniques, organisationnelles, environnementales", "Rendre compte de son activité et communiquer avec les partenaires"]
+        }
+      ]
+    },
+    {
+      "code": "B7", "capacite": "C7", "type": "professionnelle", "module": "MP7 — Caractérisation des technologies et de leurs évolutions dans les agroéquipements",
+      "libelle": "Adapter les équipements à la conduite d'un chantier en prenant en compte les transitions et les évolutions technologiques",
+      "champ": "Réalisation de travaux agricoles mécanisés",
+      "capacites": [
+        {
+          "code": "C7.1", "libelle": "Caractériser les technologies utilisées dans les équipements mobilisables sur le chantier",
+          "criteres": ["Appropriation des éléments de technologie mis en œuvre dans le cadre d'un chantier", "Exploitation de documents et de mesures", "Analyse et explication du fonctionnement des équipements en situation"],
+          "savoirs": ["Technologies des circuits hydrauliques", "Technologies des machines utilisant des échanges thermiques", "Technologies des systèmes électriques et automatisés", "Raisonnement de situations d'utilisation des matériels", "Réglages des équipements"],
+          "disciplines": ["STE", "Sciences physiques"],
+          "conditionAtteinte": "Pour chaque équipement mobilisable sur un chantier, l'apprenant identifie la technologie mise en œuvre, en analyse les composantes et en explique le principe global.",
+          "attendus": ["Statique et dynamique des fluides, circuits hydrauliques et composants", "Énergie thermique, transferts thermiques, machines thermiques", "Appareils de mesure électriques, fonctions des éléments électriques et électroniques, systèmes automatisés", "Équilibre d'un système en translation ou rotation, mouvements de solides", "Adhérence et frottements", "Comportement des matériaux soumis à des sollicitations"]
+        },
+        {
+          "code": "C7.2", "libelle": "Raisonner le choix des technologies dans un contexte de transitions",
+          "criteres": ["Prise en compte du contexte", "Justification des technologies au regard des contraintes et du contexte agro-écologique"],
+          "savoirs": ["Agriculture de précision", "Transition énergétique", "Transition agro-écologique", "Transition numérique"],
+          "disciplines": ["STE", "Sciences physiques"],
+          "conditionAtteinte": "L'apprenant justifie les choix technologiques effectués sur un chantier en lien avec le contexte de transitions : il analyse le contexte, appréhende les contraintes et explique les choix opérés.",
+          "attendus": ["Caractéristiques des carburants et des combustions", "Piles, accumulateurs, moteurs hybrides ou à hydrogène", "Énergies renouvelables", "Technologies de l'agriculture de précision", "Technologies de la robotique"]
+        }
+      ]
+    },
+    {
+      "code": "B8", "capacite": "C8", "type": "professionnelle", "module": "MP8 — Mise en œuvre des équipements en sécurité",
+      "libelle": "Mettre en œuvre des équipements en sécurité",
+      "capacites": [
+        {
+          "code": "C8.1", "libelle": "Conduire un automoteur en sécurité",
+          "criteres": ["Maîtrise de la conduite d'un automoteur", "Réalisation de l'attelage en sécurité", "Respect de l'équilibre statique", "Travail en autonomie"],
+          "savoirs": ["Méthodologie de mise en œuvre d'un équipement", "Équilibre statique d'un équipement", "Évaluation des risques", "Technologie des automoteurs"],
+          "disciplines": ["STE"],
+          "conditionAtteinte": "L'apprenant réalise des déplacements et manœuvres d'un automoteur en autonomie, à vitesse réduite, et attelle et dételle un outil porté en toute sécurité. Cet enseignement permet la délivrance d'une attestation de conduite en sécurité valant CACES.",
+          "attendus": ["Poste de conduite et commandes, systèmes composant un automoteur", "Relevage hydraulique et prises de puissance", "Vérifications avant départ, installation au poste, déplacements", "Réglementations et protocoles de sécurité", "Réalisation de l'attelage en sécurité"]
+        },
+        {
+          "code": "C8.2", "libelle": "Mettre en œuvre un équipement lors de travaux mécanisés",
+          "criteres": ["Préparation du matériel et réglages, à poste fixe et au champ", "Réalisation de travaux mécanisés en prenant en compte le contexte agronomique et agro-écologique", "Préservation des ressources", "Évaluation du travail réalisé et compte rendu au responsable"],
+          "savoirs": ["Réglages des équipements", "Itinéraires techniques et transitions agro-écologiques", "Relations sol/plante/climat", "Performances énergétiques des équipements", "Règles de l'éco-conduite", "Réglementations et obligations liées aux opérations culturales", "Réglementations liées à la conduite d'engins agricoles"],
+          "disciplines": ["STE", "STA"],
+          "conditionAtteinte": "L'apprenant réalise divers travaux mécanisés, dont des opérations culturales, en autonomie et en sécurité conformément à la commande et aux réglementations, en adaptant sa pratique aux principes de l'agro-écologie.",
+          "attendus": ["Place de l'opération culturale dans l'itinéraire technique", "Ressources naturelles communes concernées par l'opération", "Vérification de l'état fonctionnel, choix des adaptations, réglages à poste fixe", "Adaptation des réglages au champ, mise en œuvre de l'opération", "Technologies innovantes embarquées", "Évaluation de l'opération et compte rendu"]
+        }
+      ]
+    },
+    {
+      "code": "B9", "capacite": "C9", "type": "professionnelle", "module": "MP9 — Réalisation des opérations de maintenance",
+      "libelle": "Réaliser des opérations de maintenance",
+      "champ": "Maintenance des machines et des équipements agricoles",
+      "capacites": [
+        {
+          "code": "C9.1", "libelle": "Réaliser un diagnostic",
+          "criteres": ["Identification d'un dysfonctionnement", "Utilisation d'outils simples de diagnostic", "Qualité du diagnostic et propositions de solutions"],
+          "savoirs": ["Technologies des équipements", "Appareils de mesure", "Outils de diagnostic", "Métrologie", "Documentation technique"],
+          "disciplines": ["STE"],
+          "conditionAtteinte": "L'apprenant formule un diagnostic fiable permettant d'induire la maintenance appropriée : démarche logique de diagnostic, outils et matériels appropriés, préconisations d'intervention.",
+          "attendus": ["Outils de diagnostic utilisés en agroéquipement, embarqués et interfaçables", "Appareils de mesure du domaine", "Lecture et interprétation d'un dessin technique et de la schématisation", "Lecture, interprétation et réalisation d'un schéma électrique", "Lecture, interprétation et réalisation d'un schéma hydraulique et pneumatique", "Logigramme et diagramme, pose d'un diagnostic", "Préconisations de travaux"]
+        },
+        {
+          "code": "C9.2", "libelle": "Réaliser des opérations de maintenance courante",
+          "criteres": ["Prise en compte de la commande et des contraintes", "Qualité de la réalisation et maîtrise technique", "Gestion des déchets et préservation de l'environnement"],
+          "savoirs": ["Travail des métaux", "Utilisation des outils", "Techniques de maintenance", "Savoir-faire pratique", "Gestion de la sécurité", "Gestion des déchets"],
+          "disciplines": ["STE"],
+          "conditionAtteinte": "À la suite d'une commande ou d'un diagnostic, l'apprenant réalise en autonomie les opérations de maintenance courante assurant la durabilité des matériels, avec les outils adaptés et en prenant en compte la dimension environnementale.",
+          "attendus": ["Réparations et/ou modifications sur des structures métalliques", "Opérations de préparation", "Assemblage mécanique démontable et/ou permanent", "Intervention suite à un diagnostic", "Compte rendu d'intervention", "Sécurité et déchets"]
+        }
+      ]
+    },
+    {
+      "code": "B10", "capacite": "C10", "type": "professionnelle", "module": "MAP — Module d'adaptation professionnelle",
+      "libelle": "S'adapter à des enjeux professionnels particuliers",
+      "adaptableLocalement": true,
+      "capacites": [
+        {
+          "code": "C10", "libelle": "S'adapter à des enjeux professionnels particuliers",
+          "criteres": ["Critères à définir localement par les équipes"],
+          "savoirs": ["Savoirs à définir localement par les équipes"],
+          "disciplines": ["STP"],
+          "conditionAtteinte": "Définie localement. Le module permet d'acquérir des compétences complémentaires en lien avec les agroéquipements, répondant à la demande des professionnels.",
+          "attendus": ["Exemples indicatifs : systèmes de guidage et équipements connectés au tracteur", "Conception, modification et/ou fabrication d'équipements", "Équipements forestiers", "Équipements de récolte, stockage et distribution de fourrage et aliments"]
+        }
+      ]
+    }
+  ]
+}

@@ -80,13 +80,13 @@ export function depotEvaluationPrisma(prisma: PrismaClient): DepotEvaluation {
     async chargerCorriges(id): Promise<readonly QuestionAvecCorrige[]> {
       const questions = await prisma.question.findMany({
         where: { evaluationId: id },
-        select: { id: true, type: true, corrige: true, bareme: true },
+        select: { id: true, type: true, corrige: true, bareme: true, explication: true },
       })
 
       return questions.flatMap((q) => {
         const corrige = lireCorrige({ type: q.type, ...(q.corrige as object) })
         if (!corrige) return []
-        return [{ id: q.id, corrige, bareme: Number(q.bareme) }]
+        return [{ id: q.id, corrige, bareme: Number(q.bareme), explication: q.explication }]
       })
     },
 

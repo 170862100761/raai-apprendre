@@ -893,6 +893,41 @@ async function semerEcheances(q, CH1, CH2) {
   )
 
   await semerQuestionsEcheances(q)
+  await semerExplications(q)
+}
+
+/**
+ * Pourquoi c'est la bonne réponse, par énoncé. Rendu à l'élève avec sa note,
+ * jamais avec l'énoncé. Posé par `semerExplications`, idempotent : une base
+ * déjà semée les reçoit sans rien rejouer.
+ */
+const EXPLICATIONS_DEMO = {
+  "Quelle grandeur détermine la VITESSE d’un vérin ?": "La vitesse de la tige dépend du débit : plus il entre d'huile par minute, plus elle sort vite. La pression fait l'effort, pas la vitesse.",
+  "Un tracteur relève lentement un outil lourd : il manque de pression.": "Faux : s'il relève, la pression suffit à l'effort. La lenteur vient d'un manque de débit, par exemple une pompe usée ou un régime moteur trop bas.",
+  "Une pompe débite 60 L/min sous 180 bars. Quelle puissance développe-t-elle ?": "P = p × Q / 600 = 180 × 60 / 600 = 18 kW.",
+  "Dans quelle unité mesure-t-on un débit hydraulique ?": "Un débit est un volume par unité de temps : en hydraulique mobile, des litres par minute (L/min).",
+  "À quel régime tourne une prise de force à 6 cannelures ?": "L'arbre à 6 cannelures est celui du régime normalisé 540 tr/min. Le 1000 tr/min a 21 cannelures : impossible d'atteler le mauvais outil.",
+  "Un protecteur de cardan fendu protège encore, tant qu’il reste en place.": "Faux : un protecteur fendu peut happer un vêtement par la fente et tourner avec l'arbre. Il se remplace avant toute mise en route.",
+  "Que représente un triangle plein sur un schéma ISO 1219 ?": "Le triangle plein indique le sens d'écoulement d'un fluide hydraulique, le triangle vide celui d'un fluide pneumatique. Sur une pompe, il pointe vers la sortie.",
+  "Avant de lire la pression sur le banc, que faut-il vérifier en premier ?": "Un manomètre qui ne revient pas à zéro moteur arrêté est faussé : toute lecture serait décalée d'autant.",
+  "Le manomètre indique 150 bars et le débitmètre 48 L/min. Quelle puissance hydraulique le banc fournit-il ?": "P = 150 × 48 / 600 = 12 kW.",
+  "Si la pression monte mais que le vérin ne bouge pas, la pompe est forcément en cause.": "Faux : si la pression monte, la pompe débite. Le vérin bloqué vient d'ailleurs : distributeur, vérin grippé ou charge trop lourde.",
+  "Une pompe débite 30 L/min sous 200 bars. Quelle puissance développe-t-elle ?": "P = 200 × 30 / 600 = 10 kW.",
+  "Un moteur hydraulique reçoit 90 L/min sous 120 bars. Quelle puissance lui arrive-t-il ?": "P = 120 × 90 / 600 = 18 kW.",
+  "Pour obtenir 15 kW avec une pompe de 50 L/min, quelle pression faut-il ?": "On isole p : p = P × 600 / Q = 15 × 600 / 50 = 180 bars.",
+  "Dans la formule P = p × Q / 600, à quoi sert le 600 ?": "Le 600 vient des conversions d'unités : bars en pascals, litres par minute en mètres cubes par seconde, watts en kilowatts. Le rendement n'y est pas.",
+  "Quelle grandeur mesure un manomètre ?": "Le manomètre mesure une pression. Le débit se mesure au débitmètre."
+}
+
+export async function semerExplications(q) {
+  for (const [enonce, explication] of Object.entries(EXPLICATIONS_DEMO)) {
+    await q(
+      `UPDATE raai_apprendre.question SET explication = $2
+        WHERE enonce = $1 AND explication IS DISTINCT FROM $2
+          AND evaluation_id IN (SELECT id FROM raai_apprendre.evaluation WHERE etablissement_id = $3)`,
+      [enonce, explication, id(3)],
+    )
+  }
 }
 
 /**

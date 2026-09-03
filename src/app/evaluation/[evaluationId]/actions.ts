@@ -17,6 +17,13 @@ export type EtatCopie = {
   readonly attendUnHumain?: boolean
   /** Compétences dont le niveau a réellement bougé. */
   readonly montees?: readonly string[]
+  /** Par question : la part obtenue et le pourquoi. Absent avant la remise. */
+  readonly parQuestion?: readonly {
+    questionId: string
+    score: number | null
+    bareme: number
+    explication: string | null
+  }[]
   readonly erreur?: string
 }
 
@@ -97,5 +104,6 @@ export async function rendreCopie(
     scoreMax: resultat.valeur.scoreMax,
     attendUnHumain: resultat.valeur.attendUnHumain,
     montees: evolutions.filter((e) => e.modifie).map((e) => e.competenceId),
+    parQuestion: resultat.valeur.parQuestion,
   }
 }

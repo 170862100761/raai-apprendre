@@ -197,9 +197,9 @@ async function principal() {
       )
       for (const [rang, question] of questions.entries()) {
         await q(
-          `INSERT INTO raai_apprendre.question (id, evaluation_id, type, enonce, options, corrige, bareme, ordre, genere_par_ia)
-           VALUES ($1, $2, 'qcm', $3, $4, $5, 2, $6, true)
-           ON CONFLICT (id) DO UPDATE SET enonce = EXCLUDED.enonce, options = EXCLUDED.options, corrige = EXCLUDED.corrige`,
+          `INSERT INTO raai_apprendre.question (id, evaluation_id, type, enonce, options, corrige, bareme, ordre, genere_par_ia, explication)
+           VALUES ($1, $2, 'qcm', $3, $4, $5, 2, $6, true, $7)
+           ON CONFLICT (id) DO UPDATE SET enonce = EXCLUDED.enonce, options = EXCLUDED.options, corrige = EXCLUDED.corrige, explication = EXCLUDED.explication`,
           [
             idStable('agria-question', cle, String(rang)),
             quizId,
@@ -207,6 +207,7 @@ async function principal() {
             JSON.stringify({ propositions: question.propositions }),
             JSON.stringify({ bonnes: question.bonnesReponses }),
             rang + 1,
+            question.explication ?? null,
           ],
         )
       }

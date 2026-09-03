@@ -17,7 +17,7 @@ import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import dotenv from 'dotenv'
 import pg from 'pg'
-import { semer, semerQuestionsEcheances } from './semer-demo.mjs'
+import { semer, semerQuestionsEcheances, semerExplications } from './semer-demo.mjs'
 
 const env = dotenv.parse(readFileSync(process.argv[2] ?? '.env.local'))
 const url = env.DIRECT_URL ?? env.DATABASE_URL
@@ -31,8 +31,10 @@ if (deja.rowCount) {
   console.log('MFR Escatalens existe déjà : le jeu de démonstration est en place.')
   // Les compléments idempotents du semis : ce qui a été ajouté après coup
   // (questions du TP et de l'entraînement) rejoint une base déjà semée.
-  await semerQuestionsEcheances((sql, params = []) => client.query(sql, params))
-  console.log('Compléments appliqués (questions des évaluations).')
+  const q = (sql, params = []) => client.query(sql, params)
+  await semerQuestionsEcheances(q)
+  await semerExplications(q)
+  console.log('Compléments appliqués (questions des évaluations, explications).')
 } else {
   const substitutions = new Map()
   const bd = {

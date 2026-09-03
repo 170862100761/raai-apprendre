@@ -24,7 +24,13 @@ export type ResultatSoumission = {
   readonly attendUnHumain: boolean
   readonly competences: readonly IdentifiantCompetence[]
   /** Détail par question, pour le retour immédiat à l'élève. */
-  readonly parQuestion: readonly { questionId: string; score: number | null; bareme: number }[]
+  readonly parQuestion: readonly {
+    questionId: string
+    score: number | null
+    bareme: number
+    /** Le « pourquoi », maintenant que la copie est rendue. */
+    explication: string | null
+  }[]
 }
 
 /**
@@ -124,6 +130,7 @@ export async function soumettre(
       questionId: r.questionId,
       score: r.score,
       bareme: r.bareme,
+      explication: corriges.find((q) => q.id === r.questionId)?.explication ?? null,
     })),
   })
 }

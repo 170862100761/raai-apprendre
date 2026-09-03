@@ -33,6 +33,8 @@ export type QuestionAvecCorrige = {
   readonly id: string
   readonly corrige: Corrige
   readonly bareme: number
+  /** Pourquoi c'est la bonne réponse — rendu à l'élève avec sa note, pas avant. */
+  readonly explication: string | null
 }
 
 export type TentativeStockee = {

@@ -778,6 +778,9 @@ model Question {
   /// Le corrigé n'est JAMAIS envoyé au client avant soumission : un modèle ne
   /// peut pas divulguer ce qu'il n'a pas, un navigateur non plus.
   corrige      Json   @default("{}")
+  /// Pourquoi c'est la bonne réponse. Même règle que le corrigé : montrée
+  /// seulement après soumission.
+  explication  String?
   bareme       Decimal @default(1.0) @db.Decimal(5, 2)
   ordre        Int
   genereParIa  Boolean @default(false) @map("genere_par_ia")

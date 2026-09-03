@@ -52,7 +52,7 @@ export function Copie({
   const rendue = etat.score !== undefined
 
   if (rendue) {
-    return <Resultat etat={etat} />
+    return <Resultat etat={etat} questions={questions} />
   }
 
   const repondre = (questionId: string, valeur: unknown) =>
@@ -240,10 +240,17 @@ function ChampQuestion({
   }
 }
 
-function Resultat({ etat }: { etat: EtatCopie }) {
+function Resultat({
+  etat,
+  questions,
+}: {
+  etat: EtatCopie
+  questions: readonly QuestionPourEleve[]
+}) {
   const score = etat.score ?? 0
   const scoreMax = etat.scoreMax ?? 0
   const part = scoreMax > 0 ? score / scoreMax : 0
+  const detail = new Map((etat.parQuestion ?? []).map((q) => [q.questionId, q]))
 
   return (
     <section className="flex flex-col gap-5">
@@ -278,6 +285,40 @@ function Resultat({ etat }: { etat: EtatCopie }) {
           validé reste acquis.
         </p>
       )}
+
+      {/* Le détail n'arrive qu'avec la note : c'est la seule fois où le
+          « pourquoi » traverse le réseau, et il ne dit jamais la réponse
+          attendue elle-même — seulement de quoi comprendre. */}
+      {detail.size > 0 ? (
+        <ol className="flex flex-col gap-4">
+          {questions.map((question, index) => {
+            const q = detail.get(question.id)
+            if (!q) return null
+            const verdict =
+              q.score === null
+                ? 'À corriger par ton formateur'
+                : q.score >= q.bareme
+                  ? 'Juste'
+                  : q.score > 0
+                    ? 'En partie'
+                    : 'Faux'
+            return (
+              <li key={question.id} className="rounded-carte border border-bordure px-4 py-3">
+                <p className="flex items-baseline justify-between gap-4">
+                  <span className="font-medium">
+                    {index + 1}. {question.intitule}
+                  </span>
+                  <span className="shrink-0 text-sm tabular-nums text-mine-doux">
+                    {verdict}
+                    {q.score !== null ? ` · ${q.score} / ${q.bareme}` : ''}
+                  </span>
+                </p>
+                {q.explication ? <p className="mt-2 text-sm text-mine-doux">{q.explication}</p> : null}
+              </li>
+            )
+          })}
+        </ol>
+      ) : null}
 
       <Link href="/aujourdhui" className="w-fit underline">
         Revenir à Aujourd’hui

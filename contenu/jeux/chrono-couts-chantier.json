@@ -1,0 +1,144 @@
+{
+  "cle": "chrono-couts-chantier",
+  "slug": "chrono-couts-chantier",
+  "nom": "Chrono — Coûts et débits de chantier",
+  "titre": "Chrono — Coûts et débits de chantier",
+  "mecanique": "chrono",
+  "difficulte": "Moyen",
+  "capacites": ["C6.1", "C6.2"],
+  "chrono": {
+    "titre": "Calculs express de chantier",
+    "consigne": "Les données s'affichent, tu as 15 secondes pour trouver le résultat. Coût horaire, coût à l'hectare, débit, consommation, remorques : les calculs du chef de chantier.",
+    "duree": 15
+  },
+  "donnees": {
+    "questions": [
+      {
+        "display": "110 000 € · 6 000 h",
+        "prompt": "Amortissement horaire d'un tracteur acheté 110 000 € et gardé 6 000 h ?",
+        "c": ["18,3 €/h", "11 €/h", "66 €/h", "55 €/h"],
+        "a": 0,
+        "e": "110 000 ÷ 6 000 = 18,3 €/h. C'est le premier poste du coût horaire, avant frais financiers, entretien, carburant et chauffeur."
+      },
+      {
+        "display": "4 m × 10 km/h",
+        "prompt": "Débit théorique d'un déchaumeur de 4 m à 10 km/h ?",
+        "c": ["40 ha/h", "4 ha/h", "0,4 ha/h", "14 ha/h"],
+        "a": 1,
+        "e": "Débit (ha/h) = largeur (m) × vitesse (km/h) ÷ 10 = 4 ha/h. Le débit réel sera ensuite multiplié par un coefficient d'efficience de 0,6 à 0,9."
+      },
+      {
+        "display": "3,15 ha/h × 0,65",
+        "prompt": "Débit réel d'un semoir monograine de 3,15 ha/h théoriques avec un coefficient d'efficience de 0,65 ?",
+        "c": ["4,8 ha/h", "3,8 ha/h", "2 ha/h", "1,2 ha/h"],
+        "a": 2,
+        "e": "3,15 × 0,65 ≈ 2,05 ha/h. Recharges de semences et demi-tours sur petites parcelles font perdre un tiers du temps."
+      },
+      {
+        "display": "659 €/h ÷ 2 ha/h",
+        "prompt": "Coût à l'hectare d'un chantier d'ensilage à 659 €/h pour 2 ha/h ?",
+        "c": ["1 318 €/ha", "165 €/ha", "659 €/ha", "330 €/ha"],
+        "a": 3,
+        "e": "Coût à l'hectare = coût horaire de l'ensemble du chantier ÷ débit réel = 329,5 ≈ 330 €/ha."
+      },
+      {
+        "display": "28 ha en 12,33 h",
+        "prompt": "Débit réel de chantier pour 28 ha ensilés en 12 h 20 de présence ?",
+        "c": ["2,27 ha/h", "1,8 ha/h", "3,5 ha/h", "0,44 ha/h"],
+        "a": 0,
+        "e": "28 ÷ 12,33 ≈ 2,27 ha/h, meilleur que les 2 ha/h prévus : le maïs pesait 36 t/ha au lieu de 40, l'ensileuse avançait plus vite."
+      },
+      {
+        "display": "21 L/h ÷ 3,2 ha/h",
+        "prompt": "Consommation à l'hectare d'un tracteur brûlant 21 L/h pour un débit réel de 3,2 ha/h ?",
+        "c": ["67 L/ha", "6,6 L/ha", "0,15 L/ha", "24 L/ha"],
+        "a": 1,
+        "e": "Consommation à l'hectare = consommation horaire ÷ débit réel = 21 ÷ 3,2 ≈ 6,6 L/ha."
+      },
+      {
+        "display": "610 L en 11,4 h",
+        "prompt": "Consommation horaire d'une ensileuse qui a brûlé 610 L en 11,4 h moteur ?",
+        "c": ["35 L/h", "70 L/h", "53,5 L/h", "61 L/h"],
+        "a": 2,
+        "e": "610 ÷ 11,4 ≈ 53,5 L/h. Rapporté aux 1 008 t rentrées, cela fait 0,6 L par tonne, dans la norme de 0,5 à 0,7 L/t."
+      },
+      {
+        "display": "12 t à 80 t/h",
+        "prompt": "Temps de remplissage d'une remorque de 12 t derrière une ensileuse à 80 t/h ?",
+        "c": ["15 min", "6 min", "12 min", "9 min"],
+        "a": 3,
+        "e": "12 ÷ 80 = 0,15 h, soit 9 minutes. C'est le temps de référence pour dimensionner le nombre de remorques."
+      },
+      {
+        "display": "cycle 35 min · remplissage 9 min",
+        "prompt": "Nombre de remorques nécessaires pour un cycle complet de 35 min et un remplissage de 9 min ?",
+        "c": ["4", "3", "6", "2"],
+        "a": 0,
+        "e": "35 ÷ 9 ≈ 3,9, arrondi au-dessus : 4 remorques. On en prévoit une cinquième si la route est encombrée ou si le silo est en montée."
+      },
+      {
+        "display": "8 km à 25 km/h",
+        "prompt": "Durée d'un aller-retour de 8 km à 25 km/h de moyenne ?",
+        "c": ["8 min", "19 min", "32 min", "12 min"],
+        "a": 1,
+        "e": "8 ÷ 25 = 0,32 h, soit environ 19 minutes. C'est le trajet de la parcelle située à 4 km du silo."
+      },
+      {
+        "display": "28 ha × 285 €/ha",
+        "prompt": "Recette d'un chantier de 28 ha facturé 285 €/ha ?",
+        "c": ["6 403 €", "8 550 €", "7 980 €", "9 120 €"],
+        "a": 2,
+        "e": "28 × 285 = 7 980 €. Face aux 6 403 € de coûts réels, la marge brute sera de 1 577 €."
+      },
+      {
+        "display": "7 980 € − 6 403 €",
+        "prompt": "Marge brute d'un chantier dont la recette est 7 980 € et les coûts réels 6 403 € ?",
+        "c": ["2 150 €", "977 €", "1 250 €", "1 577 €"],
+        "a": 3,
+        "e": "7 980 − 6 403 = 1 577 €, soit 56 €/ha ou près de 20 % de la recette. La panne du bec en a coûté 250 de plus."
+      },
+      {
+        "display": "1 100 L × 1,10 €/L · 28 ha",
+        "prompt": "Coût du carburant à l'hectare pour 1 100 L de GNR à 1,10 €/L sur 28 ha ?",
+        "c": ["43 €/ha", "39 €/ha", "121 €/ha", "12 €/ha"],
+        "a": 0,
+        "e": "1 100 × 1,10 = 1 210 €, divisés par 28 ha ≈ 43 €/ha. Ce chiffre se compare d'une année sur l'autre pour repérer une machine déréglée."
+      },
+      {
+        "display": "2 h 05 sur 12 h 20",
+        "prompt": "Taux de temps d'arrêt d'un chantier arrêté 2 h 05 sur 12 h 20 de présence ?",
+        "c": ["8 %", "17 %", "25 %", "12 %"],
+        "a": 1,
+        "e": "125 min ÷ 740 min ≈ 17 %. Un taux de 10 à 15 % est courant ; au-delà de 20 %, l'organisation doit être revue."
+      },
+      {
+        "display": "80 ha en 12 jours",
+        "prompt": "Surface à semer chaque jour pour boucler 80 ha en 12 jours disponibles ?",
+        "c": ["4 ha/jour", "10 ha/jour", "7 ha/jour", "12 ha/jour"],
+        "a": 2,
+        "e": "80 ÷ 12 ≈ 6,7 ha, arrondi à 7 ha par jour, pluie et pannes comprises. C'est ce qui dimensionne le semoir."
+      },
+      {
+        "display": "28 ha × 36 t/ha",
+        "prompt": "Tonnage rentré pour 28 ha de maïs à 36 t/ha ?",
+        "c": ["1 120 t", "864 t", "980 t", "1 008 t"],
+        "a": 3,
+        "e": "28 × 36 = 1 008 t. En 11,4 h moteur, cela fait 88 t/h contre 80 prévues : l'ETA raisonne à la tonne par heure de machine."
+      },
+      {
+        "display": "18 L/h × 1,10 €/L",
+        "prompt": "Coût horaire du carburant d'un tracteur consommant 18 L/h à 1,10 €/L ?",
+        "c": ["19,8 €/h", "16,4 €/h", "22 €/h", "18 €/h"],
+        "a": 0,
+        "e": "18 × 1,10 = 19,8 €/h. C'est le plus gros poste variable du coût horaire d'un tracteur de 150 ch en travail lourd."
+      },
+      {
+        "display": "3 400 €/an ÷ 70 ha",
+        "prompt": "Coût à l'hectare des charges fixes et d'entretien d'un semoir (3 400 €/an) semant 70 ha par an ?",
+        "c": ["34 €/ha", "48,5 €/ha", "21 €/ha", "68 €/ha"],
+        "a": 1,
+        "e": "3 400 ÷ 70 ≈ 48,5 €/ha, avant le tracteur et le chauffeur. Sur 150 ha, le même semoir tomberait à 23 €/ha : c'est la surface qui fait le coût."
+      }
+    ]
+  }
+}

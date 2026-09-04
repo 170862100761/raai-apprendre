@@ -1,0 +1,23 @@
+{
+  "cle": "memory-symboles-iso1219",
+  "slug": "memory-symboles-iso-1219",
+  "nom": "Memory — Symboles hydrauliques ISO 1219",
+  "titre": "Memory — Symboles hydrauliques ISO 1219",
+  "mecanique": "memory",
+  "difficulte": "Facile",
+  "capacites": ["C7.1"],
+  "donnees": {
+    "pairs": [
+      { "sym": "○▷", "name": "Pompe hydraulique" },
+      { "sym": "▷○", "name": "Moteur hydraulique" },
+      { "sym": "4/3", "name": "Distributeur" },
+      { "sym": "⊳~", "name": "Limiteur de pression" },
+      { "sym": "⊔", "name": "Réservoir" },
+      { "sym": "⊏═", "name": "Vérin" },
+      { "sym": "◇", "name": "Filtre" },
+      { "sym": "⌂", "name": "Accumulateur" },
+      { "sym": "⊙", "name": "Manomètre" },
+      { "sym": "—○|", "name": "Clapet anti-retour" }
+    ]
+  }
+}

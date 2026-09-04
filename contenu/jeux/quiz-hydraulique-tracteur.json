@@ -1,0 +1,145 @@
+{
+  "cle": "quiz-hydraulique-tracteur",
+  "slug": "quiz-hydraulique-tracteur",
+  "nom": "Quiz éclair — Hydraulique du tracteur",
+  "titre": "Quiz éclair — Hydraulique du tracteur",
+  "mecanique": "quiz",
+  "difficulte": "Moyen",
+  "capacites": ["C7.1", "C9.1"],
+  "donnees": {
+    "questions": [
+      {
+        "text": "Combien vaut 1 bar en pascals ?",
+        "choices": ["1 000 Pa", "10 000 Pa", "100 000 Pa", "1 000 000 Pa"],
+        "answer": 2,
+        "e": "Le pascal est une unité minuscule (1 N/m²), c'est pourquoi l'atelier parle en bars : 1 bar = 10⁵ Pa. Une pression de 180 bar vaut donc 1,8 × 10⁷ Pa dans un calcul en unités SI."
+      },
+      {
+        "text": "Dans un circuit hydraulique de tracteur, qui fabrique la pression ?",
+        "choices": ["La résistance que rencontre l'huile, c'est-à-dire la charge au bout du vérin", "La pompe, qui refoule l'huile sous pression", "Le limiteur de pression, qui la fixe à son tarage", "Le filtre, qui freine l'huile"],
+        "answer": 0,
+        "e": "La pompe ne fabrique pas de pression, elle fabrique un débit. La pression naît de la résistance opposée par le récepteur : sans charge sur le vérin, l'aiguille du manomètre reste basse."
+      },
+      {
+        "text": "Un vérin de relevage a un piston de 80 mm de diamètre, soit une section d'environ 50 cm². Sous 200 bar, quelle force développe-t-il ?",
+        "choices": ["Environ 10 kN", "Environ 50 kN", "Environ 100 kN", "Environ 400 kN"],
+        "answer": 2,
+        "e": "F = p × S = 2 × 10⁷ Pa × 5,0 × 10⁻³ m² ≈ 100 000 N, soit un peu plus de 10 tonnes. La pression fait la force ; elle ne fait pas la vitesse."
+      },
+      {
+        "text": "Une pompe débite 60 L/min. À combien cela correspond-il en unités SI ?",
+        "choices": ["0,06 m³/s", "0,01 m³/s", "0,001 m³/s", "0,0001 m³/s"],
+        "answer": 2,
+        "e": "60 L/min = 60 dm³ par 60 s = 1 L/s = 0,001 m³/s. C'est cette valeur qu'on utilise dans v = Q / S ou dans P = p × Q en watts."
+      },
+      {
+        "text": "Le relevage lève la charrue, mais beaucoup plus lentement qu'avant. Quelle grandeur manque en priorité ?",
+        "choices": ["La pression", "La viscosité", "La température de l'huile", "Le débit"],
+        "answer": 3,
+        "e": "Le débit fixe la vitesse de sortie de la tige (v = Q / S). Un relevage qui lève encore mais lentement manque de débit : pompe usée, régime moteur trop bas ou huile détournée avant le vérin."
+      },
+      {
+        "text": "Le relevage ne soulève plus du tout l'outil, même à plein régime. Quelle grandeur est en cause ?",
+        "choices": ["La pression disponible", "Le débit de la pompe", "La longueur des flexibles", "Le régime de la prise de force"],
+        "answer": 0,
+        "e": "La force d'un vérin est F = p × S : si la charge ne bouge plus, c'est que la pression n'atteint plus la valeur nécessaire, par exemple parce que le limiteur s'ouvre trop tôt."
+      },
+      {
+        "text": "Quelle puissance hydraulique fournit un circuit à 180 bar avec un débit de 60 L/min ?",
+        "choices": ["1,8 kW", "10,8 kW", "18 kW", "108 kW"],
+        "answer": 2,
+        "e": "P (kW) = p (bar) × Q (L/min) / 600 = 180 × 60 / 600 = 18 kW. Sur un tracteur de 120 ch (88 kW), l'hydraulique à plein régime absorbe donc un cinquième de la puissance moteur."
+      },
+      {
+        "text": "Un distributeur auxiliaire travaille à 200 bar avec 45 L/min. Quelle puissance cela représente-t-il ?",
+        "choices": ["9 kW", "15 kW", "22,5 kW", "90 kW"],
+        "answer": 1,
+        "e": "P = 200 × 45 / 600 = 15 kW. Cette puissance est prélevée sur le moteur ; si elle ne devient pas mouvement, elle devient chaleur dans l'huile."
+      },
+      {
+        "text": "Un moteur hydraulique absorbe 12 kW sous 150 bar. Quel débit le traverse ?",
+        "choices": ["24 L/min", "36 L/min", "48 L/min", "80 L/min"],
+        "answer": 2,
+        "e": "On inverse la formule : Q = P × 600 / p = 12 × 600 / 150 = 48 L/min. Retenir la formule dans les deux sens permet de vérifier un débitmètre avec un simple manomètre."
+      },
+      {
+        "text": "Quel est le rôle du limiteur de pression ?",
+        "choices": ["Augmenter le débit quand la charge est lourde", "Filtrer l'huile avant le distributeur", "Refroidir l'huile en la renvoyant au réservoir", "Renvoyer l'huile au réservoir dès que la pression atteint son tarage"],
+        "answer": 3,
+        "e": "Le limiteur est la soupape de sûreté du circuit : fermé sous le tarage, il s'ouvre vers le réservoir au-delà. Sans lui, un vérin en butée ferait éclater un flexible ou casser la pompe."
+      },
+      {
+        "text": "À quelle valeur est tarée le limiteur de pression d'un relevage de tracteur, en ordre de grandeur ?",
+        "choices": ["20 à 30 bar", "60 à 80 bar", "180 à 210 bar", "500 à 700 bar"],
+        "answer": 2,
+        "e": "La plupart des relevages sont tarés entre 180 et 210 bar. Retarer « au jugé » en vissant le bouchon est interdit : on règle manomètre branché, par paliers, jusqu'à la valeur constructeur."
+      },
+      {
+        "text": "Sur un schéma ISO 1219, comment se dessine une pompe hydraulique ?",
+        "choices": ["Un cercle avec un triangle plein pointé vers l'extérieur", "Un cercle avec un triangle plein pointé vers l'intérieur", "Un carré avec une flèche retenue par un ressort", "Un rectangle ouvert vers le haut"],
+        "answer": 0,
+        "e": "La pompe pousse l'huile hors d'elle : le triangle pointe vers l'extérieur. Le moteur hydraulique, qui reçoit l'huile, a le même cercle avec le triangle pointé vers l'intérieur."
+      },
+      {
+        "text": "Que signifie « distributeur 4/3 » ?",
+        "choices": ["4 positions et 3 orifices", "4 orifices et 3 positions", "4 bar de perte de charge sur 3 voies", "4 vérins commandés par 3 leviers"],
+        "answer": 1,
+        "e": "Le premier chiffre compte les orifices (P, T, A, B), le second les positions, dessinées comme des cases accolées. Un 4/3 alimente un vérin double effet avec une position neutre."
+      },
+      {
+        "text": "Sur un schéma, les triangles des symboles sont vides au lieu d'être pleins. Que représente ce schéma ?",
+        "choices": ["Un circuit à cylindrée variable", "Un circuit de pilotage", "Un circuit pneumatique", "Un circuit basse pression"],
+        "answer": 2,
+        "e": "Un triangle plein désigne un fluide hydraulique, un triangle vide un fluide pneumatique. C'est le signe qui distingue au premier coup d'œil le schéma du relevage de celui des freins de remorque."
+      },
+      {
+        "text": "À quoi sert le clapet anti-retour piloté placé sur le vérin de relevage ?",
+        "choices": ["À limiter la vitesse de montée", "À filtrer l'huile qui entre dans le vérin", "À refroidir l'huile du vérin", "À bloquer le vérin en position pour qu'un outil lourd ne redescende pas seul"],
+        "answer": 3,
+        "e": "Le clapet piloté ne laisse passer l'huile en retour que lorsqu'une ligne de pilotage l'ouvre. Il tient la charge levée même si le distributeur fuit un peu, ce que l'hydraulique seule ne garantit jamais."
+      },
+      {
+        "text": "Le relevage d'un tracteur neuf montait en 3 s avec une pompe de 60 L/min ; il met maintenant 12 s. Quel débit arrive réellement au vérin ?",
+        "choices": ["15 L/min", "20 L/min", "30 L/min", "45 L/min"],
+        "answer": 0,
+        "e": "Le temps est inversement proportionnel au débit : 60 × 3 / 12 = 15 L/min. La question du diagnostic devient : où passent les 45 L/min manquants (limiteur, distributeur, joint de piston ou pompe) ?"
+      },
+      {
+        "text": "Vérin en butée, moteur au régime nominal, le manomètre plafonne à 130 bar au lieu des 200 bar annoncés. Qu'en conclure ?",
+        "choices": ["Le manomètre est défectueux", "Le limiteur est déréglé ou fatigué, ou la pompe ne monte plus en pression", "Le vérin est trop petit pour la charge", "C'est normal : la pression doit retomber quand le vérin arrive en butée"],
+        "answer": 1,
+        "e": "En butée, l'huile n'a plus où aller et la pression doit monter jusqu'au tarage. Si elle plafonne en dessous, l'huile s'échappe avant : limiteur qui s'ouvre trop tôt ou pompe usée. Le débitmètre départage ensuite les deux."
+      },
+      {
+        "text": "La pression maximale est correcte, mais un seul récepteur est faible : le relevage redescend seul sous charge. Quelle cause est la plus probable ?",
+        "choices": ["Une pompe usée", "Un limiteur de pression déréglé", "Une fuite interne dans ce vérin (joint de piston) ou un tiroir de distributeur usé", "Une crépine d'aspiration bouchée"],
+        "answer": 2,
+        "e": "Une pompe ou un limiteur défaillants affaibliraient tous les récepteurs. Un défaut localisé sur un seul récepteur désigne ce qui lui est propre : ses joints ou son tiroir de distributeur."
+      },
+      {
+        "text": "Par quelle étape commence le diagnostic d'un relevage lent ?",
+        "choices": ["Démonter la pompe pour l'inspecter", "Remplacer les joints du vérin", "Retarer le limiteur au maximum", "Contrôler le niveau et l'état de l'huile, puis le filtre"],
+        "answer": 3,
+        "e": "Le logigramme va toujours du plus probable et du moins coûteux au plus rare et au plus cher. Une huile laiteuse, brûlée ou un filtre colmaté qui fait caviter la pompe se voient avant tout démontage."
+      },
+      {
+        "text": "Au débitmètre, une pompe saine perd combien de débit entre 0 et 200 bar ?",
+        "choices": ["Moins de 10 %", "Environ 25 %", "Environ 50 %", "Elle n'en perd aucun"],
+        "answer": 0,
+        "e": "Une pompe à engrenages en bon état garde plus de 90 % de son débit sous charge ; une pompe usée tombe par exemple à 40 L/min dès 150 bar. Toute mesure se note avec la température de l'huile et le régime moteur."
+      },
+      {
+        "text": "Une huile hydraulique qui dépasse 80 °C en permanence, quelle conséquence ?",
+        "choices": ["Elle épaissit et bouche le filtre", "Elle perd sa viscosité, vieillit deux fois plus vite et augmente les fuites internes", "Elle augmente la pression du limiteur", "Aucune : l'huile est prévue pour 150 °C"],
+        "answer": 1,
+        "e": "Toute puissance hydraulique qui ne devient pas mouvement devient chaleur. Un limiteur qui s'ouvre en continu ou un distributeur laissé fermé sur une pompe à débit fixe cuit l'huile, qui fuit alors davantage."
+      },
+      {
+        "text": "Comment cherche-t-on une fuite sur un flexible sous 180 bar ?",
+        "choices": ["Avec la main, pour sentir le jet", "Avec un chiffon tenu à la main", "Moteur tournant, en observant de près le raccord", "Avec un morceau de carton passé le long du flexible, jamais avec la main"],
+        "answer": 3,
+        "e": "Un jet d'huile par un trou d'épingle traverse la peau et injecte l'huile sous les tissus : urgence chirurgicale même sans douleur. Avant de dévisser un raccord, on pose l'outil, on coupe le moteur et on décomprime le circuit."
+      }
+    ]
+  }
+}

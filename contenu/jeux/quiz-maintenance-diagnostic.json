@@ -1,0 +1,255 @@
+{
+  "cle": "quiz-maintenance-diagnostic",
+  "slug": "quiz-eclair-maintenance-diagnostic",
+  "nom": "Quiz éclair — Maintenance et diagnostic",
+  "titre": "Quiz éclair — Maintenance et diagnostic",
+  "mecanique": "quiz",
+  "difficulte": "Moyen",
+  "capacites": ["C9.1", "C9.2"],
+  "donnees": {
+    "questions": [
+      {
+        "text": "Sur un schéma électrique d'engin agricole, que désigne la borne numérotée 31 ?",
+        "choices": [
+          "Le plus permanent de la batterie",
+          "Le plus après contact",
+          "La masse",
+          "La sortie du relais"
+        ],
+        "answer": 2,
+        "e": "La numérotation automobile fixe 30 pour le plus permanent, 15 pour le plus après contact et 31 pour la masse. La masse par le châssis économise la moitié des fils, mais c'est la première cause de panne."
+      },
+      {
+        "text": "Quel calibre de fusible protège un conducteur de 2,5 mm² ?",
+        "choices": [
+          "15 A",
+          "5 A",
+          "40 A",
+          "25 A"
+        ],
+        "answer": 0,
+        "e": "Le fusible protège le fil, pas l'appareil : 10 A pour du 1,5 mm², 15 A pour du 2,5 mm², 25 A pour du 4 mm². Monter un calibre supérieur pour « faire tenir » fait chauffer le fil et brûler la cabine."
+      },
+      {
+        "text": "Sur un relais standard à quatre bornes, entre quelles bornes se branche la bobine de commande ?",
+        "choices": [
+          "30 et 87",
+          "15 et 31",
+          "30 et 31",
+          "85 et 86"
+        ],
+        "answer": 3,
+        "e": "La bobine est alimentée entre 85 et 86 ; quand elle l'est, le contact se ferme entre 30 (arrivée de puissance) et 87 (sortie vers le récepteur). Un relais se teste hors circuit : clic à l'alimentation, continuité entre 30 et 87."
+      },
+      {
+        "text": "Quelle tension mesure-t-on aux bornes d'une batterie 12 V chargée, au repos, puis moteur tournant avec un alternateur sain ?",
+        "choices": [
+          "12,0 V puis 12,6 V",
+          "12,6 V puis 13,8 à 14,4 V",
+          "11,5 V puis 12,6 V",
+          "12,6 V puis 16 à 18 V"
+        ],
+        "answer": 1,
+        "e": "12,6 V au repos signale une batterie chargée, 12,2 V une batterie à moitié déchargée. Moteur tournant, 13,8 à 14,4 V prouvent que l'alternateur fait son travail."
+      },
+      {
+        "text": "Quelle chute de tension maximale tolère-t-on sur une masse, récepteur allumé ?",
+        "choices": [
+          "2 V",
+          "1 V",
+          "0,2 V",
+          "5 V"
+        ],
+        "answer": 2,
+        "e": "Sous 0,2 V sur une masse, sous 0,5 V sur un circuit complet. Une masse à 1,5 V de chute laisse passer la continuité en ohmmètre mais fait clignoter le gyrophare : la chute de tension est la mesure la plus utile."
+      },
+      {
+        "text": "Quelle consommation électrique maximale un tracteur à l'arrêt ne doit-il pas dépasser ?",
+        "choices": [
+          "50 mA",
+          "500 mA",
+          "2 A",
+          "5 mA"
+        ],
+        "answer": 0,
+        "e": "Au-delà de 50 mA au repos, la batterie sera à plat au matin. Le multimètre en ampèremètre, en série dans le circuit, permet de traquer le consommateur caché."
+      },
+      {
+        "text": "Quelle valeur de résistance de terminaison trouve-t-on à chaque extrémité d'un bus CAN ?",
+        "choices": [
+          "12 Ω",
+          "1 000 Ω",
+          "0 Ω",
+          "120 Ω"
+        ],
+        "answer": 3,
+        "e": "Le bus CAN relie les calculateurs par deux fils torsadés, CAN High et CAN Low, avec une résistance de 120 Ω à chaque extrémité. Sans elles, les signaux se réfléchissent et le bus décroche."
+      },
+      {
+        "text": "En langage J1939, que désigne le FMI d'un code défaut ?",
+        "choices": [
+          "Le paramètre concerné, par exemple la pression d'huile",
+          "Le type de défaut : valeur trop haute, trop basse, court-circuit, signal absent",
+          "Le numéro de série du calculateur",
+          "Le nombre d'heures depuis la dernière révision"
+        ],
+        "answer": 1,
+        "e": "Le SPN désigne le paramètre, le FMI le type de défaut. Un FMI « court-circuit à la masse » sur un capteur de température ne dit pas que le moteur chauffe : il dit que le fil du capteur touche le châssis."
+      },
+      {
+        "text": "Sur un schéma ISO 1219, comment distingue-t-on au premier coup d'œil un circuit hydraulique d'un circuit pneumatique ?",
+        "choices": [
+          "Par la couleur des traits",
+          "Par la forme du réservoir",
+          "Triangle plein pour l'hydraulique, triangle vide pour le pneumatique",
+          "Par la taille des symboles"
+        ],
+        "answer": 2,
+        "e": "Le triangle plein désigne un fluide hydraulique, le triangle vide un fluide pneumatique. La pompe est un cercle avec triangle pointé vers l'extérieur, le moteur hydraulique le même cercle triangle vers l'intérieur."
+      },
+      {
+        "text": "Que signifie « distributeur 4/3 » ?",
+        "choices": [
+          "Quatre orifices (P, T, A, B) et trois positions",
+          "Quatre positions et trois orifices",
+          "Quatre vérins et trois pompes",
+          "Pression de 4 bar sur 3 voies"
+        ],
+        "answer": 0,
+        "e": "Chaque case du symbole représente une position, et les flèches montrent les chemins ouverts entre P (pression), T (retour), A et B (vers le vérin). Les symboles aux extrémités disent comment il est commandé."
+      },
+      {
+        "text": "À quoi sert le limiteur de pression d'un circuit hydraulique de tracteur, réglé typiquement à 180-210 bar ?",
+        "choices": [
+          "À créer la pression dans le circuit",
+          "À régler la vitesse du vérin",
+          "À filtrer l'huile",
+          "À protéger le circuit en s'ouvrant vers le réservoir dès que la pression dépasse son réglage"
+        ],
+        "answer": 3,
+        "e": "En position normale il est fermé. Ce n'est pas lui qui fait la pression : c'est la résistance de la charge. Un limiteur qui s'ouvre trop tôt fait perdre de la force au relevage."
+      },
+      {
+        "text": "Un vérin de 80 mm d'alésage (section 50,3 cm²) reçoit 60 L/min. Combien de temps dure une course de 600 mm ?",
+        "choices": [
+          "12 secondes",
+          "3 secondes",
+          "30 secondes",
+          "0,5 seconde"
+        ],
+        "answer": 1,
+        "e": "60 L/min = 1 000 cm³/s ; 1 000 ÷ 50,3 ≈ 20 cm/s ; 60 cm ÷ 20 cm/s = 3 s. Si le relevage met 12 s, le vérin ne reçoit plus que 15 L/min : où passent les 45 L/min manquants ?"
+      },
+      {
+        "text": "Quelle perte de débit maximale accepte-t-on d'une pompe hydraulique saine entre 0 et 200 bar au débitmètre ?",
+        "choices": [
+          "50 %",
+          "30 %",
+          "Moins de 10 %",
+          "Aucune perte"
+        ],
+        "answer": 2,
+        "e": "Une pompe saine perd moins de 10 % de son débit quand la pression monte ; une pompe usée tombe à 40 L/min dès 150 bar. Toute mesure se note avec la température de l'huile et le régime moteur."
+      },
+      {
+        "text": "Sur le freinage pneumatique d'une remorque, quel est le rôle de la conduite rouge ?",
+        "choices": [
+          "Alimenter le réservoir de la remorque",
+          "Transmettre la commande de la pédale de frein",
+          "Purger l'eau du dessiccateur",
+          "Alimenter l'éclairage de la remorque"
+        ],
+        "answer": 0,
+        "e": "La conduite rouge remplit le réservoir de la remorque, la jaune porte la pression de commande modulée par la pédale. Si la rouge se rompt, la valve de rupture freine la remorque toute seule."
+      },
+      {
+        "text": "Dans quel ordre enchaîne-t-on les questions d'un logigramme de diagnostic ?",
+        "choices": [
+          "Du composant le plus cher au moins cher",
+          "Dans l'ordre du schéma, de la pompe au vérin",
+          "Au hasard, en testant chaque composant",
+          "Du plus probable et moins coûteux au plus rare et plus cher"
+        ],
+        "answer": 3,
+        "e": "Niveau d'huile avant pression maximale, limiteur avant pompe, test de chambre du vérin avant distributeur. Le logigramme s'écrit avant l'intervention et se corrige après, pour capitaliser l'expérience de l'atelier."
+      },
+      {
+        "text": "Que signifie le marquage 8.8 sur la tête d'une vis ?",
+        "choices": [
+          "Diamètre 8 mm, longueur 8 mm",
+          "Résistance à la rupture 800 MPa, limite élastique 640 MPa",
+          "Couple de serrage 88 N·m",
+          "Pas de 8 mm, classe 8"
+        ],
+        "answer": 1,
+        "e": "Premier chiffre × 100 = résistance à la rupture (800 MPa) ; produit des deux × 10 = limite élastique (8 × 8 × 10 = 640 MPa). Une vis sans marquage est de la quincaillerie 4.6 ou 5.6, à proscrire sur un châssis."
+      },
+      {
+        "text": "Quel couple de serrage applique-t-on, à titre indicatif, sur une vis M12 classe 8.8 aux filets légèrement huilés ?",
+        "choices": [
+          "25 N·m",
+          "210 N·m",
+          "85 N·m",
+          "410 N·m"
+        ],
+        "answer": 2,
+        "e": "M8 : 25 N·m ; M10 : 50 ; M12 : 85 ; M16 : 210 ; M20 : 410 N·m en classe 8.8. Une classe 10.9 demande environ 40 % de plus, et on serre à la clé dynamométrique en deux passes, à 50 % puis à 100 %."
+      },
+      {
+        "text": "Après remontage d'une roue de tracteur, quand revérifie-t-on le serrage des écrous ?",
+        "choices": [
+          "Après 10 heures ou 50 km, puis toutes les 50 heures",
+          "Jamais, si le serrage a été fait à la clé à choc",
+          "Après un an",
+          "Après 1 000 heures"
+        ],
+        "answer": 0,
+        "e": "Les écrous de roues, serrés entre 400 et 650 N·m selon les constructeurs, se recontrôlent après 10 h ou 50 km. C'est ce contrôle qui manquait au tracteur revenu des enchères avec trois écrous desserrés."
+      },
+      {
+        "text": "Comment démonte-t-on un assemblage bloqué au frein-filet rouge (force forte) ?",
+        "choices": [
+          "À la clé, sans précaution particulière",
+          "En trempant la vis dans l'eau",
+          "Impossible, il faut couper la vis",
+          "Après chauffage à 250 °C"
+        ],
+        "answer": 3,
+        "e": "Le rouge se réserve aux goujons qu'on ne doit plus jamais revoir ; le bleu, de force moyenne, se démonte à la clé et convient aux vis de M6 à M20. Deux gouttes sur des filets propres suffisent, polymérisation en 24 h."
+      },
+      {
+        "text": "Quel mélange gazeux protège généralement l'arc en soudage MAG à l'atelier agricole ?",
+        "choices": [
+          "100 % argon",
+          "82 % argon et 18 % CO₂",
+          "100 % CO₂",
+          "Oxygène et acétylène"
+        ],
+        "answer": 1,
+        "e": "Le MAG (Metal Active Gas) fond un fil-électrode continu sous gaz actif, typiquement 82 % argon / 18 % CO₂ à 12-15 L/min. Un timon de 6 mm se soude à environ 150 A et 20 V en deux passes."
+      },
+      {
+        "text": "À quelle vitesse de rotation perce-t-on l'acier de construction avec un foret HSS de Ø10 mm (vitesse de coupe 25 m/min) ?",
+        "choices": [
+          "80 tr/min",
+          "3 000 tr/min",
+          "Environ 800 tr/min",
+          "8 000 tr/min"
+        ],
+        "answer": 2,
+        "e": "n = (1000 × Vc) / (π × D) = 25 000 / 31,4 ≈ 800 tr/min. Un foret qui tourne trop vite chauffe, bleuit et perd sa coupe en une minute ; à Ø20, on descend à 400 tr/min."
+      },
+      {
+        "text": "Que fait-on de l'huile usagée après une vidange à l'atelier ?",
+        "choices": [
+          "Elle part dans une cuve dédiée, sans mélange avec gazole, liquide de frein ou de refroidissement, vers une collecte agréée",
+          "On la mélange au gazole pour la brûler",
+          "On la verse dans le bac à filtres",
+          "On la stocke dans un bidon ouvert derrière l'atelier"
+        ],
+        "answer": 0,
+        "e": "Un litre d'huile couvre 1 000 m² d'eau d'un film qui étouffe la vie aquatique. Chaque déchet a sa filière : un mélange rend le lot irrécupérable, et les filtres s'égouttent 24 h avant d'aller dans leur fût."
+      }
+    ]
+  }
+}

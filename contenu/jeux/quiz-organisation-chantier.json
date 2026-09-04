@@ -1,0 +1,255 @@
+{
+  "cle": "quiz-organisation-chantier",
+  "slug": "quiz-eclair-organisation-chantier",
+  "nom": "Quiz éclair — Organisation d'un chantier",
+  "titre": "Quiz éclair — Organisation d'un chantier",
+  "mecanique": "quiz",
+  "difficulte": "Moyen",
+  "capacites": ["C6.1", "C6.2"],
+  "donnees": {
+    "questions": [
+      {
+        "text": "Qu'est-ce qui caractérise une ETA par rapport à une CUMA ou à une exploitation ?",
+        "choices": [
+          "Elle prête son matériel gratuitement aux voisins",
+          "C'est une entreprise commerciale qui vend une prestation et doit dégager une marge",
+          "Ses adhérents s'engagent sur un nombre d'hectares par an",
+          "Elle ne peut pas employer de chauffeur salarié"
+        ],
+        "answer": 1,
+        "e": "L'entreprise de travaux agricoles facture à l'hectare ou à l'heure avec son matériel et ses chauffeurs : la commande y est un contrat. Dans une CUMA, c'est un tour de rôle entre adhérents."
+      },
+      {
+        "text": "Dans une CUMA, qui arbitre l'ordre de passage du matériel entre les adhérents ?",
+        "choices": [
+          "Le premier adhérent qui appelle",
+          "La chambre d'agriculture",
+          "L'ETA du canton",
+          "Un responsable de matériel désigné"
+        ],
+        "answer": 3,
+        "e": "Chaque adhérent s'engage sur un nombre d'hectares par an, et un responsable de matériel arbitre le planning. Le conseil d'administration, lui, décide des investissements comme l'achat d'une deuxième ensileuse."
+      },
+      {
+        "text": "Quelles sont les durées maximales de travail d'un chauffeur salarié d'ETA, sauf dérogation en période de pointe ?",
+        "choices": [
+          "48 h par semaine et 10 h par jour",
+          "35 h par semaine et 7 h par jour",
+          "60 h par semaine et 12 h par jour",
+          "Aucune limite en saison"
+        ],
+        "answer": 0,
+        "e": "Le code du travail fixe 48 h hebdomadaires et 10 h quotidiennes au plus, avec des dérogations encadrées en période de pointe. L'obligation de sécurité est portée par l'employeur."
+      },
+      {
+        "text": "Dans l'organisation d'une ETA, à quel niveau appartiennent les chauffeurs, le mécanicien et le responsable de silo ?",
+        "choices": [
+          "Au système décisionnel",
+          "Au conseil d'administration",
+          "Au système opérant",
+          "Au système juridique"
+        ],
+        "answer": 2,
+        "e": "Le système décisionnel fixe les objectifs et arbitre (le gérant qui accepte la commande) ; le système opérant exécute. L'information doit circuler dans les deux sens, sinon le chauffeur découvre le matin même qu'il y a 28 ha et non 18."
+      },
+      {
+        "text": "Que doit préciser un cahier des charges de chantier, même court ?",
+        "choices": [
+          "Uniquement le prix et la date",
+          "L'objet, la période, le résultat attendu, la répartition des rôles, les contraintes et le prix",
+          "La liste des pièces de rechange à prévoir",
+          "Le nom de chaque chauffeur et son numéro de permis"
+        ],
+        "answer": 1,
+        "e": "Ce document engage les deux parties. Un chantier sans cahier des charges finit souvent par une discussion sur « ce qui avait été dit »."
+      },
+      {
+        "text": "À quel taux de matière sèche plante entière récolte-t-on un maïs ensilage ?",
+        "choices": [
+          "14 à 15 %",
+          "50 à 60 %",
+          "20 à 25 %",
+          "30 à 35 %"
+        ],
+        "answer": 3,
+        "e": "Trop tôt, le silo coule et perd des sucres ; trop tard, le grain devient dur et se digère mal. La maturité est ce qui ne se déplace pas : le planning s'y adapte."
+      },
+      {
+        "text": "À quelle humidité du grain moissonne-t-on un blé ?",
+        "choices": [
+          "14 à 15 %",
+          "30 à 35 %",
+          "5 à 8 %",
+          "25 à 28 %"
+        ],
+        "answer": 0,
+        "e": "Le blé se moissonne à 14-15 % d'humidité du grain, seuil de conservation sans séchage. Les 30-35 % sont le repère de matière sèche du maïs ensilage."
+      },
+      {
+        "text": "Dans quel ordre traite-t-on en général les parcelles d'un chantier de récolte sur une journée ?",
+        "choices": [
+          "Toujours par ordre alphabétique des noms de parcelle",
+          "La plus proche d'abord, la plus éloignée en fin de journée",
+          "La plus mûre ou la plus éloignée d'abord, la plus proche en fin de journée",
+          "La plus grande d'abord, quelle que soit sa distance"
+        ],
+        "answer": 2,
+        "e": "On garde la parcelle la plus proche pour la fin, quand les chauffeurs fatiguent et que la lumière baisse. Les trajets longs se font avec une équipe fraîche."
+      },
+      {
+        "text": "En quelles épaisseurs le tracteur tasseur étale-t-il et tasse-t-il le fourrage au silo ?",
+        "choices": [
+          "5 cm",
+          "15 à 20 cm",
+          "50 cm",
+          "1 m"
+        ],
+        "answer": 1,
+        "e": "Des couches de 15 à 20 cm tassées avec un engin lourd, souvent lesté à 8 ou 10 tonnes, chassent l'air. Un tas mal tassé chauffe et perd de la valeur alimentaire."
+      },
+      {
+        "text": "Comment calcule-t-on le nombre de remorques nécessaires sur un chantier d'ensilage ?",
+        "choices": [
+          "Un tracteur par hectare",
+          "Le tonnage horaire divisé par 10",
+          "La distance au silo en kilomètres",
+          "La durée d'un cycle complet divisée par le temps de remplissage, arrondie au-dessus"
+        ],
+        "answer": 3,
+        "e": "Cycle = remplissage + trajet aller-retour + déchargement et manœuvres. Avec 35 min de cycle et 9 min de remplissage, 35 ÷ 9 ≈ 3,9, donc 4 remorques, et une cinquième en réserve si le silo est en montée."
+      },
+      {
+        "text": "Quelle masse de tasseurs vise-t-on au silo pour une ensileuse qui rentre 80 t/h ?",
+        "choices": [
+          "Environ 30 t, soit 40 % du tonnage horaire",
+          "Environ 8 t, un seul tracteur suffit",
+          "Environ 80 t, autant que le fourrage",
+          "La masse importe peu, seule la vitesse compte"
+        ],
+        "answer": 0,
+        "e": "La règle est d'environ 40 % de la masse de fourrage rentrée par heure, soit 30 t pour 80 t/h, ce qui impose souvent deux engins. Sans cela, le silo n'absorbe pas le débit de l'ensileuse."
+      },
+      {
+        "text": "Quelle est la largeur maximale d'un engin agricole sur route sans signalisation particulière, et jusqu'où va le convoi du groupe A ?",
+        "choices": [
+          "2 m, groupe A jusqu'à 3 m",
+          "3 m, groupe A jusqu'à 4 m",
+          "2,55 m, groupe A jusqu'à 3,50 m de large et 22 m de long",
+          "4,50 m, groupe A jusqu'à 6 m"
+        ],
+        "answer": 2,
+        "e": "Au-delà de 2,55 m, l'engin porte des panneaux rouges et blancs réfléchissants et un gyrophare orange allumé. Une ensileuse de 3,30 m relève donc du groupe A."
+      },
+      {
+        "text": "Qu'impose le groupe B des convois agricoles, entre 3,50 et 4,50 m de large ?",
+        "choices": [
+          "Rien de plus que le groupe A",
+          "Un véhicule pilote devant et une longueur limitée à 25 m",
+          "Une autorisation préfectorale de transport exceptionnel",
+          "Une circulation de nuit uniquement"
+        ],
+        "answer": 1,
+        "e": "Le groupe B ajoute un véhicule pilote et limite la longueur à 25 m. Au-delà de 4,50 m, on passe au transport exceptionnel avec autorisation."
+      },
+      {
+        "text": "À quelle vitesse maximale un tracteur agricole peut-il rouler sur route ?",
+        "choices": [
+          "80 km/h dans tous les cas",
+          "50 km/h dans tous les cas",
+          "30 km/h dans tous les cas",
+          "40 km/h s'il est homologué pour cette vitesse, 25 km/h sinon"
+        ],
+        "answer": 3,
+        "e": "La vitesse dépend de l'homologation du tracteur, et elle s'applique à l'ensemble avec sa remorque. Un convoi de quatre tracteurs à 25 km/h dans un bourg ne se dépasse pas facilement."
+      },
+      {
+        "text": "Quel poids total roulant un ensemble tracteur-remorque ne doit-il pas dépasser ?",
+        "choices": [
+          "40 t",
+          "20 t",
+          "60 t",
+          "12 t"
+        ],
+        "answer": 0,
+        "e": "Le PTRA d'un ensemble agricole est limité à 40 t. Une remorque de 16 m³ pleine de maïs pèse déjà 12 t de fourrage : on vérifie que tracteur et remorque chargée restent sous la limite."
+      },
+      {
+        "text": "Un élève mineur en PFMP peut-il conduire un tracteur attelé sur route ?",
+        "choices": [
+          "Jamais, quelle que soit la situation",
+          "Oui, librement dès 16 ans",
+          "Seulement dans le cadre d'une dérogation demandée par l'établissement, après formation et sous tutorat",
+          "Seulement s'il a le permis B"
+        ],
+        "answer": 2,
+        "e": "Les travaux interdits aux jeunes ne sont autorisés que par dérogation accordée pour la durée de la formation, après évaluation des risques. Refuser une tâche hors de ce cadre est une obligation, pas un manque de motivation."
+      },
+      {
+        "text": "Un tracteur de 150 ch acheté 110 000 € et gardé 6 000 h coûte combien en amortissement horaire ?",
+        "choices": [
+          "11 €/h",
+          "18,3 €/h",
+          "66 €/h",
+          "36,7 €/h"
+        ],
+        "answer": 1,
+        "e": "110 000 ÷ 6 000 = 18,3 €/h. En ajoutant frais financiers, assurance, entretien, carburant et chauffeur, le coût horaire complet atteint environ 66 €/h."
+      },
+      {
+        "text": "Que représente le barème d'entraide publié par les chambres d'agriculture, par exemple 35 à 45 €/h pour un tracteur de 150 ch ?",
+        "choices": [
+          "Le tarif obligatoire de toute ETA",
+          "Le coût carburant et chauffeur inclus",
+          "Le prix de vente d'un tracteur d'occasion à l'heure",
+          "Un prix de référence hors carburant et hors main-d'œuvre, sans marge, pour un prêt entre voisins"
+        ],
+        "answer": 3,
+        "e": "Le barème d'entraide ne vise pas la marge : c'est le prix de référence quand un voisin prête son tracteur. L'ETA, elle, doit couvrir tous ses postes et dégager un résultat."
+      },
+      {
+        "text": "Un chantier d'ensilage coûte 659 €/h et son débit est de 2 ha/h. Quel est le coût à l'hectare ?",
+        "choices": [
+          "330 €/ha",
+          "1 318 €/ha",
+          "165 €/ha",
+          "659 €/ha"
+        ],
+        "answer": 0,
+        "e": "Coût à l'hectare = coût horaire de tout le chantier ÷ débit réel = 659 ÷ 2 ≈ 330 €/ha. Un silo plus éloigné qui impose une cinquième remorque ajoute 33 €/ha."
+      },
+      {
+        "text": "À partir de quel taux de temps d'arrêt l'organisation d'un chantier doit-elle être revue ?",
+        "choices": [
+          "Au-delà de 2 %",
+          "Au-delà de 50 %",
+          "Au-delà de 20 %",
+          "Dès le premier arrêt"
+        ],
+        "answer": 2,
+        "e": "Un taux d'arrêt de 10 à 15 % est courant. On classe les arrêts par cause (mécanique, météo, organisation, entretien) : l'orage ne dépend de personne, la chaîne de bec usée aurait pu être repérée avant."
+      },
+      {
+        "text": "Quelle consommation par tonne de fourrage est dans la norme pour une ensileuse de 500 ch en coupe fine de maïs ?",
+        "choices": [
+          "5 à 7 L/t",
+          "0,5 à 0,7 L/t",
+          "0,05 à 0,07 L/t",
+          "2 à 3 L/t"
+        ],
+        "answer": 1,
+        "e": "610 L pour 1 008 t donnent 0,6 L/t. Ramenée à la tonne ou à l'hectare, la consommation devient comparable d'un chantier à l'autre et révèle une machine déréglée."
+      },
+      {
+        "text": "Quelle version du compte rendu de chantier le client reçoit-il ?",
+        "choices": [
+          "Aucune, le compte rendu reste interne",
+          "La version complète avec la marge de l'ETA",
+          "Uniquement la facture",
+          "Une version sans les données de marge"
+        ],
+        "answer": 3,
+        "e": "Le compte rendu suit un plan fixe et se décline selon le destinataire : l'entreprise archive tout, le client reçoit ce qui le concerne (qualité mesurée, résultats, facture conforme au cahier des charges)."
+      }
+    ]
+  }
+}

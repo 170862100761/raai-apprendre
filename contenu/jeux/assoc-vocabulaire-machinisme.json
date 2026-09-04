@@ -1,0 +1,39 @@
+{
+  "cle": "assoc-vocabulaire-machinisme",
+  "slug": "association-vocabulaire-machinisme",
+  "nom": "Association — Vocabulaire du machinisme",
+  "titre": "Association — Vocabulaire du machinisme",
+  "mecanique": "assoc",
+  "difficulte": "Facile",
+  "capacites": ["C5.1", "C7.1"],
+  "donnees": {
+    "bank": [
+      { "f": "Prise de force 540 tr/min", "d": "Régime normalisé de l'arbre à 6 cannelures, pour les outils traînés courants" },
+      { "f": "Prise de force 1000 tr/min", "d": "Régime normalisé de l'arbre à 21 cannelures, pour les gros consommateurs comme la herse rotative" },
+      { "f": "Régime 540E", "d": "Régime économique : 540 tr/min à la PDF pour environ 1 550 tr/min au moteur" },
+      { "f": "Relevage trois points", "d": "Deux bras inférieurs et un troisième point qui portent l'outil, en mode position, effort ou mixte" },
+      { "f": "Contrôle d'effort", "d": "Mode du relevage qui remonte légèrement l'outil quand la résistance du sol augmente, pour garder l'adhérence" },
+      { "f": "ISOBUS", "d": "Norme ISO 11783 qui fait dialoguer outil et console de marques différentes par un bus CAN" },
+      { "f": "Terminal universel", "d": "Écran unique en cabine qui affiche l'interface de n'importe quel outil ISOBUS attelé" },
+      { "f": "Contrôleur de tâches", "d": "Fonction ISOBUS qui enregistre le travail et pilote modulation et coupure de tronçons" },
+      { "f": "Télégonflage", "d": "Compresseur et conduites tournantes pour gonfler à 1,8 bar sur route et dégonfler à 0,8 bar au champ depuis la cabine" },
+      { "f": "Patinage", "d": "Part du tour de roue qui ne fait pas avancer le tracteur ; optimum de 8 à 15 % au champ" },
+      { "f": "Débit de chantier théorique", "d": "Largeur (m) × vitesse (km/h) ÷ 10, en ha/h" },
+      { "f": "Rendement de chantier", "d": "Coefficient de 0,6 à 0,9 qui ramène le débit théorique au débit réel (demi-tours, remplissages, réglages)" },
+      { "f": "Lestage", "d": "Masses ajoutées à l'avant ou aux roues pour atteindre le patinage cible et garder la direction" },
+      { "f": "Semi-porté", "d": "Mode d'attelage où l'outil repose à la fois sur le relevage et sur son propre train de roues" },
+      { "f": "Outil porté", "d": "Outil entièrement soutenu par le relevage trois points, qui déleste l'essieu avant" },
+      { "f": "PTAC", "d": "Poids total autorisé en charge d'un véhicule ou d'une remorque, à ne jamais dépasser" },
+      { "f": "PTRA", "d": "Poids total roulant autorisé de l'ensemble tracteur plus remorque, 40 t au plus sur route" },
+      { "f": "HVO", "d": "Huile végétale hydrotraitée : gazole de synthèse accepté pur par la plupart des moteurs récents, CO₂ net réduit de 50 à 90 %" },
+      { "f": "GNR", "d": "Gazole non routier, coloré en rouge, à fiscalité réduite ; un litre contient 10 kWh et rejette 2,7 kg de CO₂" },
+      { "f": "RTK", "d": "Correction GNSS par base fixe, précision de 2 à 3 cm et répétable d'une année sur l'autre" },
+      { "f": "EGNOS", "d": "Correction satellitaire gratuite qui ramène l'erreur GNSS à 30 ou 50 cm" },
+      { "f": "Coupure de tronçons", "d": "Fermeture automatique des sections déjà traitées ou hors parcelle, 5 à 10 % de produit économisé" },
+      { "f": "Modulation intra-parcellaire", "d": "Variation de la dose selon la position, à partir d'une carte de préconisation par zones" },
+      { "f": "Puissance à la barre", "d": "Puissance réellement disponible pour tirer, 50 à 65 % de la puissance moteur au champ" },
+      { "f": "Pneus IF / VF", "d": "Technologies de pneus qui encaissent la même charge à pression plus basse, pour réduire le tassement" },
+      { "f": "CUMA", "d": "Coopérative d'utilisation de matériel agricole : les adhérents partagent un matériel qu'ils ne pourraient pas s'offrir seuls" }
+    ]
+  }
+}

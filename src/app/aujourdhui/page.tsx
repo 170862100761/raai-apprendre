@@ -50,9 +50,14 @@ export default async function PageAujourdhui() {
         <h1 className="text-2xl font-semibold">
           Bonjour {apprenant?.prenom ?? ''}
         </h1>
-        <Link href="/recherche" className="text-sm underline">
-          Rechercher
-        </Link>
+        <nav className="flex gap-4">
+          <Link href="/recherche" className="text-sm underline">
+            Rechercher
+          </Link>
+          <Link href="/jeux" className="text-sm underline">
+            Jeux
+          </Link>
+        </nav>
         <form action={deconnecter}>
           <button type="submit" className="text-sm text-mine-doux underline">
             Se déconnecter

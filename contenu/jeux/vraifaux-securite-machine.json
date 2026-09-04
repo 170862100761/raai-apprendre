@@ -1,0 +1,126 @@
+{
+  "cle": "vraifaux-securite-machine",
+  "slug": "vrai-faux-securite-machine",
+  "nom": "Vrai ou faux — Sécurité machine",
+  "titre": "Vrai ou faux — Sécurité machine",
+  "mecanique": "vraifaux",
+  "difficulte": "Moyen",
+  "capacites": [
+    "C8.1",
+    "C8.2"
+  ],
+  "donnees": {
+    "statements": [
+      {
+        "s": "La consignation d'une machine se termine par une étiquette « ne pas remettre en marche » portant le nom de l'intervenant.",
+        "v": true,
+        "e": "La cinquième étape est la vérification et la signalisation : après arrêt, séparation, condamnation et dissipation des énergies, on pose l'étiquette nominative. C'est celui qui consigne qui déconsigne."
+      },
+      {
+        "s": "Une fois le moteur coupé et la clé retirée, la machine ne contient plus aucune énergie.",
+        "v": false,
+        "e": "Moteur coupé n'est pas énergie nulle : pression hydraulique dans les vérins et les accumulateurs, ressorts comprimés, charges levées et inertie des rotors restent à dissiper avant d'intervenir."
+      },
+      {
+        "s": "Un protecteur de cardan en bon état reste immobile quand l'arbre tourne, grâce à ses chaînettes anti-rotation.",
+        "v": true,
+        "e": "Le tube protecteur tourne librement sur ses paliers et les chaînettes, accrochées côté tracteur et côté outil, l'empêchent d'être entraîné. Un protecteur qui tourne avec l'arbre équivaut à un protecteur absent."
+      },
+      {
+        "s": "Si le protecteur de cardan est fendu mais que l'arbre est encore bien graissé, on peut travailler la journée et le remplacer le soir.",
+        "v": false,
+        "e": "Un protecteur manquant, cassé ou qui tourne avec l'arbre entraîne la consignation de la machine : elle n'est pas utilisée. À 540 tr/min, un vêtement happé s'enroule avant tout réflexe."
+      },
+      {
+        "s": "Un outil traîné s'attelle au crochet, à la chape ou à la barre oscillante, jamais au relevage à trois points.",
+        "v": true,
+        "e": "Le relevage porte, il ne tracte pas une charge attelée en un point : accrocher au troisième point ou au-dessus de l'axe des roues arrière crée le moment qui fait cabrer le tracteur."
+      },
+      {
+        "s": "Pendant que le tracteur recule vers l'outil, un camarade peut se tenir entre les deux pour guider l'alignement des rotules.",
+        "v": false,
+        "e": "Personne ne se tient dans l'entre-deux pendant une manœuvre, même pour guider. Le guide se place hors de la trajectoire, visible dans le rétroviseur, et le conducteur s'arrête dès qu'il le perd de vue."
+      },
+      {
+        "s": "Avant de mettre les mains entre le tracteur et l'outil, on applique la règle des trois zéros : zéro mouvement, zéro moteur, zéro énergie.",
+        "v": true,
+        "e": "Frein de parc serré et transmission au neutre, moteur coupé avec la clé dans la poche, prise de force débrayée, outil posé et pression hydraulique relâchée : les trois zéros avant tout geste."
+      },
+      {
+        "s": "Un outil relevé et maintenu par le vérin du relevage est suffisamment sûr pour changer une dent dessous.",
+        "v": false,
+        "e": "L'hydraulique seule ne retient pas une charge : un flexible ou un distributeur qui fuit fait descendre l'outil. On le pose au sol ou on le cale avec des chandelles avant de passer les mains dessous."
+      },
+      {
+        "s": "Un accumulateur oléopneumatique reste sous pression longtemps après l'arrêt du moteur.",
+        "v": true,
+        "e": "Gonflé à l'azote, l'accumulateur garde sa pression moteur arrêté. Sa précharge se dégonfle uniquement avec l'outillage prévu, jamais en dévissant la valve."
+      },
+      {
+        "s": "Pour purger la pression hydraulique résiduelle, on manœuvre les leviers du distributeur moteur tournant, outil relevé.",
+        "v": false,
+        "e": "La dissipation se fait outils descendus au sol et moteur coupé : on actionne les leviers en butée dans les deux sens, puis on vérifie au manomètre que la pression est à zéro."
+      },
+      {
+        "s": "Sur route, les deux pédales de frein d'un tracteur doivent être solidarisées par leur loquet.",
+        "v": true,
+        "e": "Les pédales séparées servent au champ pour resserrer un demi-tour. À 40 km/h, un freinage d'urgence sur une seule roue met le tracteur en travers."
+      },
+      {
+        "s": "Une remorque agricole dont le poids total en charge dépasse 1,5 t doit avoir un freinage relié au tracteur.",
+        "v": true,
+        "e": "Au-delà de 1,5 t de PTAC, la remorque doit être freinée par un système compatible avec le tracteur, hydraulique ou pneumatique. Une remorque de 12 t non freinée pousse le tracteur dans la descente."
+      },
+      {
+        "s": "Un engin agricole de 3 m de large peut circuler sur route sans gyrophare ni panneaux, tant qu'il roule à moins de 25 km/h.",
+        "v": false,
+        "e": "Au-delà de 2,55 m de large, l'engin entre dans le convoi agricole du groupe A : panneaux à bandes rouges et blanches réfléchissantes aux extrémités et gyrophare allumé, quelle que soit la vitesse."
+      },
+      {
+        "s": "Une remorque chargée de 12 t double la distance de freinage de l'ensemble.",
+        "v": true,
+        "e": "À 25 km/h, on garde 30 m derrière le véhicule qui précède. Dans une descente, on garde le même rapport qu'en montée et on ne débraye jamais pour laisser filer."
+      },
+      {
+        "s": "Avec un outil porté lourd à l'arrière, on peut laisser moins de 20 % de la masse totale sur l'essieu avant si l'on roule doucement.",
+        "v": false,
+        "e": "En dessous de 20 % à l'avant, la direction devient imprécise et le tracteur peut cabrer ; le Code de la route impose lui aussi ce seuil. On ajoute des masses avant, jamais on n'accélère pour compenser."
+      },
+      {
+        "s": "Lester le tracteur au maximum en début de saison garantit la traction pour toute l’année.",
+        "v": false,
+        "e": "Trop lester est une faute : chaque tonne en plus tasse le sol, use les pneus et allonge le freinage. On lest juste assez pour le patinage cible de 10 à 15 %, pour le travail du jour."
+      },
+      {
+        "s": "Des gants sont toujours recommandés, y compris pour intervenir tout près d'un arbre ou d'une courroie en rotation.",
+        "v": false,
+        "e": "Près d'une pièce tournante, un gant happé entraîne la main avec lui. Les gants servent à la manutention, aux lames et aux produits ; on adapte l'EPI au geste."
+      },
+      {
+        "s": "Les EPI viennent après la neutralisation de la machine, jamais à sa place.",
+        "v": true,
+        "e": "On ne compense pas un protecteur manquant par une paire de gants. La sécurité, c'est d'abord la machine consignée ; les EPI protègent des risques qui restent ensuite."
+      },
+      {
+        "s": "Pour préparer la bouillie d'un pulvérisateur, les gants nitrile, les lunettes et la combinaison sont nécessaires dès la manipulation du produit.",
+        "v": true,
+        "e": "La contamination de l'opérateur passe surtout par les gants et les poignées, plus que par la dérive. On ne débouche jamais une buse à la bouche mais avec la brosse prévue."
+      },
+      {
+        "s": "La zone de non-traitement le long d'un cours d'eau est d'au moins 5 m, et peut monter à 20 ou 50 m selon l'étiquette du produit.",
+        "v": true,
+        "e": "La ZNT minimale est de 5 m en bordure de tout cours d'eau ; l'étiquette du produit peut imposer 20 ou 50 m. Le terminal de coupure de tronçons aide à la respecter exactement."
+      },
+      {
+        "s": "On peut pulvériser tant que le vent ne dépasse pas 30 km/h.",
+        "v": false,
+        "e": "Au-delà de 3 sur l'échelle de Beaufort, soit environ 19 km/h, il est interdit de traiter. À 22 km/h en rafales, on arrête, on le note et on revient le lendemain à l'aube."
+      },
+      {
+        "s": "Si la rampe du pulvérisateur touche une ligne électrique, il faut sauter immédiatement hors de la cabine.",
+        "v": false,
+        "e": "La cabine est sous tension : on reste à l'intérieur et on appelle les secours. On repère les lignes avant d'entrer dans la parcelle et on replie la rampe pour passer dessous."
+      }
+    ]
+  }
+}

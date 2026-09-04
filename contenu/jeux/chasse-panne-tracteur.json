@@ -1,0 +1,144 @@
+{
+  "cle": "chasse-panne-tracteur",
+  "slug": "chasse-a-la-panne-tracteur",
+  "nom": "Chasse à la panne — Tracteur",
+  "titre": "Chasse à la panne — Tracteur",
+  "mecanique": "chrono",
+  "difficulte": "Moyen",
+  "capacites": ["C9.1"],
+  "chrono": {
+    "titre": "Un symptôme, une cause",
+    "consigne": "Le symptôme s'affiche : désigne la cause la plus probable avant la fin du compte à rebours.",
+    "duree": 12
+  },
+  "donnees": {
+    "questions": [
+      {
+        "display": "Fumée noire à l'échappement en charge",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Filtre à air colmaté", "Joint de culasse", "Bougies de préchauffage", "Niveau de refroidissement bas"],
+        "a": 0,
+        "e": "La fumée noire signe trop de gazole pour trop peu d'air. Le premier contrôle, simple et rapide, est l'indicateur de colmatage puis la cartouche du filtre à air, avant le turbo et les injecteurs."
+      },
+      {
+        "display": "Fumée bleue au démarrage et en décélération",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Eau dans le gazole", "Le moteur brûle de l'huile : segments, guides de soupapes ou joint de turbo", "Filtre à gazole colmaté", "Injecteur qui bave"],
+        "a": 1,
+        "e": "Le bleu est la couleur de l'huile brûlée. On regarde le niveau d'huile, le turbo et l'usure des segments, pas le circuit de carburant."
+      },
+      {
+        "display": "Fumée blanche douceâtre et persistante, moteur chaud",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Filtre à air colmaté", "Turbo défaillant", "Joint de culasse qui laisse passer du liquide de refroidissement", "Trop de gazole injecté"],
+        "a": 2,
+        "e": "À froid, une fumée blanche peut venir du préchauffage ; à chaud et persistante, c'est de l'eau dans la chambre : joint de culasse à suspecter."
+      },
+      {
+        "display": "Le moteur tient au ralenti puis cale dès qu'on demande du débit",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Compression insuffisante", "Filtre à air encrassé", "Alternateur défaillant", "Filtre à gazole bouché ou prise d'air sur le circuit basse pression"],
+        "a": 3,
+        "e": "Un moteur qui cale est presque toujours une alimentation en carburant qui se coupe : filtre colmaté, décanteur saturé, raccord qui aspire de l'air. Carburant d'abord, air ensuite, compression en dernier."
+      },
+      {
+        "display": "Le démarreur tourne, le moteur ne fume pas du tout et ne part pas",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Le gazole n'arrive pas : niveau, filtre, prise d'air, décanteur", "Préchauffage défaillant", "Filtre à air colmaté", "Segments usés"],
+        "a": 0,
+        "e": "S'il fumait en lançant, du gazole arriverait. Pas de fumée du tout : le carburant n'arrive pas au cylindre. On vérifie le circuit d'alimentation avant tout le reste."
+      },
+      {
+        "display": "Manque de puissance en côte, monte mal en régime",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Batterie faible", "Filtres à air ou à gazole encrassés, turbo fatigué", "Thermostat bloqué ouvert", "Pneus sous-gonflés"],
+        "a": 1,
+        "e": "Le moteur est étouffé ou sous-alimenté : on contrôle les filtres, puis la pression du turbo, avant de soupçonner les injecteurs."
+      },
+      {
+        "display": "Relevage lent mais qui lève encore la charge",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Limiteur de pression taré trop haut", "Manque de débit : pompe usée, crépine bouchée ou régime moteur trop bas", "Vérin trop petit", "Flexibles trop courts"],
+        "a": 1,
+        "e": "Le débit fait la vitesse. Lever lentement mais lever, c'est un problème de débit ; ne plus lever du tout serait un problème de pression."
+      },
+      {
+        "display": "Relevage qui redescend seul sous charge, pression maximale correcte",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Pompe usée", "Filtre hydraulique colmaté", "Joint de piston du vérin ou tiroir de distributeur usé", "Huile trop froide"],
+        "a": 2,
+        "e": "La pression est bonne pour tout le circuit, donc pompe et limiteur sont hors de cause. Un seul récepteur qui fuit sous charge trahit ses joints ou son tiroir."
+      },
+      {
+        "display": "Pompe hydraulique bruyante, bruit de crécelle, mousse dans le réservoir",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Limiteur déréglé", "Vérin en butée", "Distributeur mal positionné", "Crépine d'aspiration colmatée : la pompe cavite"],
+        "a": 3,
+        "e": "Un filtre d'aspiration bouché ou une huile trop épaisse fait caviter la pompe : bulles, bruit, mousse. On contrôle la crépine et le niveau avant de changer la pompe."
+      },
+      {
+        "display": "Phare de travail faible, ampoule neuve, fusible bon",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Alternateur en surcharge", "Résistance parasite : cosse ou masse oxydée qui crée une chute de tension", "Batterie trop puissante", "Relais collé"],
+        "a": 1,
+        "e": "U = R × I : une cosse corrodée absorbe la tension avant le phare. On le confirme par une mesure de chute de tension, récepteur allumé, entre le phare et une bonne masse."
+      },
+      {
+        "display": "Batterie à plat chaque matin, alternateur qui charge à 14 V",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Une consommation à l'arrêt supérieure à 50 mA : un récepteur qui reste alimenté", "Fusible trop faible", "Démarreur trop puissant", "Huile moteur trop épaisse"],
+        "a": 0,
+        "e": "Si l'alternateur charge, la batterie se vide la nuit : on mesure le courant de fuite en série, contact coupé. Au-delà de 50 mA, un relais, un calculateur ou une lampe reste alimenté."
+      },
+      {
+        "display": "Le démarreur ne tourne pas, les voyants s'éteignent en tournant la clé",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Injecteur défaillant", "Fusible du gyrophare grillé", "Batterie déchargée ou cosse desserrée", "Filtre à gazole colmaté"],
+        "a": 2,
+        "e": "Les voyants qui s'éteignent à la sollicitation du démarreur montrent une source qui s'effondre : batterie faible ou mauvais contact aux cosses. Avant tout, on serre et on nettoie les bornes."
+      },
+      {
+        "display": "Fusible qui grille de nouveau dès qu'on le remplace",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Fusible de mauvaise marque", "Batterie trop chargée", "Alternateur trop puissant", "Court-circuit : fil dénudé à la masse ou récepteur en défaut"],
+        "a": 3,
+        "e": "Le fusible est le symptôme, pas la panne. On ne monte jamais un calibre supérieur : le fil chaufferait et la cabine brûlerait. On cherche le fil qui touche la masse."
+      },
+      {
+        "display": "Cardan qui vibre et cogne dans les virages",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Régime de prise de force trop bas", "Arbre trop long qui talonne ou trop court qui manque de recouvrement, joints usés", "Protecteur trop lourd", "Huile de transmission usée"],
+        "a": 1,
+        "e": "Un cardan à la mauvaise longueur talonne en bout de course ou perd le recouvrement de ses tubes dans les virages ; des croisillons usés donnent le même cognement. On vérifie la longueur avant tout."
+      },
+      {
+        "display": "Le moteur chauffe, radiateur propre, niveau correct",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Thermostat bloqué fermé, courroie ou ventilateur qui patine", "Filtre à gazole colmaté", "Pneus surgonflés", "Batterie faible"],
+        "a": 0,
+        "e": "L'ordre suit la physique : source froide (radiateur, ventilateur, courroie), puis vecteur (pompe à eau, thermostat), enfin source chaude (surcharge). Radiateur propre, on passe au thermostat et à l'entraînement du ventilateur."
+      },
+      {
+        "display": "Patinage de 25 % au labour, sol ressuyé",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Moteur trop puissant", "Charrue trop courte", "Lestage insuffisant ou pneus trop gonflés", "Huile hydraulique trop chaude"],
+        "a": 2,
+        "e": "L'optimum se situe entre 8 et 15 % ; au-delà de 20 %, on gaspille du carburant et on lisse le sol. On ajoute du lest ou on baisse la pression des pneus pour agrandir l'empreinte."
+      },
+      {
+        "display": "Gyrophare qui clignote, continuité correcte à l'ohmmètre",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Ampoule trop puissante", "Fusible surdimensionné", "Alternateur en panne", "Masse à forte chute de tension sous charge"],
+        "a": 3,
+        "e": "La continuité hors tension ne dit rien de la résistance sous charge. Une masse qui chute de 1,5 V sous 8 A laisse passer le bip de l'ohmmètre mais fait clignoter le récepteur."
+      },
+      {
+        "display": "Direction légère, train avant qui flotte sur route avec la charrue relevée",
+        "prompt": "Cause la plus probable ?",
+        "c": ["Pneus avant trop gonflés", "Essieu avant délesté par l'outil porté : moins de 20 % du poids à l'avant", "Pompe de direction usée", "Blocage de différentiel enclenché"],
+        "a": 1,
+        "e": "Un outil porté agit comme un levier sur l'essieu arrière et retire du poids à l'avant. Remède : des masses de fonte sur le porte-masses avant, calculées par la formule du délestage."
+      }
+    ]
+  }
+}

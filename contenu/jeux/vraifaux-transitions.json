@@ -1,0 +1,123 @@
+{
+  "cle": "vraifaux-transitions",
+  "slug": "vrai-faux-transitions",
+  "nom": "Vrai ou faux — Transitions agro-écologique et énergétique",
+  "titre": "Vrai ou faux — Transitions agro-écologique et énergétique",
+  "mecanique": "vraifaux",
+  "difficulte": "Moyen",
+  "capacites": ["C5.2", "C7.2"],
+  "donnees": {
+    "statements": [
+      {
+        "s": "Un labour consomme en général 20 à 25 litres de gazole par hectare.",
+        "v": true,
+        "e": "C'est l'opération la plus gourmande de l'itinéraire : un tracteur de 150 ch qui laboure rejette 55 à 65 kg de CO₂ par hectare et par passage."
+      },
+      {
+        "s": "Le semis direct consomme plus de carburant à l'hectare que le labour.",
+        "v": false,
+        "e": "Le semis direct ouvre un sillon dans un sol non travaillé : 4 à 6 L/ha pour le semis seul, contre 20 à 25 L/ha pour le labour. L'implantation voit sa consommation divisée par trois."
+      },
+      {
+        "s": "Un pneu de technologie VF gonflé à 0,8 bar sous 3 tonnes par roue laisse une empreinte d'environ 0,30 m², contre 0,19 m² pour un pneu standard à 1,6 bar.",
+        "v": true,
+        "e": "La pression de contact est réduite de moitié et le tassement limité aux 20 premiers centimètres. En traction, le patinage baisse de 15 à 10 %."
+      },
+      {
+        "s": "Le télégonflage sert à gonfler les pneus à 0,8 bar pour rouler sur la route.",
+        "v": false,
+        "e": "C'est l'inverse : depuis la cabine, on gonfle à 1,8 bar pour la route, où un pneu à 0,8 bar s'échauffe et s'use à 40 km/h, et on dégonfle à 0,8 bar au champ."
+      },
+      {
+        "s": "Passer de 1,6 à 0,8 bar au champ fait baisser le patinage de 15 à 10 % environ et économise 5 à 8 % de gazole au labour.",
+        "v": true,
+        "e": "L'empreinte plus grande transmet mieux l'effort. Le télégonflage, de 8 000 à 15 000 € par tracteur, s'amortit sur les tonnes à lisier, les bennes et les fortes puissances."
+      },
+      {
+        "s": "Le HVO exige une modification du moteur sur la plupart des tracteurs récents.",
+        "v": false,
+        "e": "Ce gazole de synthèse d'origine végétale fonctionne pur dans la plupart des moteurs récents sans modification, avec 50 à 90 % de CO₂ net en moins selon la matière première. C'est le B100 qui demande un moteur homologué."
+      },
+      {
+        "s": "Brûler un litre de GNR rejette environ 2,7 kg de CO₂, quoi que fasse le moteur.",
+        "v": true,
+        "e": "La combustion complète transforme le carbone en CO₂. La seule façon d'en émettre moins avec un diesel est de consommer moins de litres : réglage, lestage, régime moteur, choix de l'outil."
+      },
+      {
+        "s": "Le filtre à particules et le catalyseur d'un moteur Stage V réduisent les émissions de CO₂.",
+        "v": false,
+        "e": "Ces dispositifs réduisent particules, monoxyde de carbone et oxydes d'azote, mais ne changent rien au CO₂, qui dépend uniquement des litres brûlés."
+      },
+      {
+        "s": "Un moteur électrique convertit 90 à 95 % de l'énergie de la batterie en travail, contre environ 40 % pour un diesel.",
+        "v": true,
+        "e": "Et il donne son couple maximal dès l'arrêt. Le problème n'est pas le rendement, c'est le stockage de l'énergie à bord."
+      },
+      {
+        "s": "Une batterie lithium-ion stocke plus d'énergie par kilogramme qu'un litre de gazole.",
+        "v": false,
+        "e": "Un litre de GNR contient 10 kWh ; une batterie stocke 0,2 à 0,25 kWh par kilogramme, soit 40 fois moins. C'est pourquoi l'électrique s'impose d'abord sur les petites puissances et les tâches courtes."
+      },
+      {
+        "s": "Un kilogramme d'hydrogène contient environ 33 kWh, dont une pile à combustible ne convertit qu'environ la moitié en électricité.",
+        "v": true,
+        "e": "Soit 16 kWh utiles par kilogramme, l'équivalent de 4 L de GNR dans un diesel. Le réservoir reste volumineux et la filière de distribution rurale n'existe pas encore."
+      },
+      {
+        "s": "Le guidage RTK donne une précision de 30 à 50 cm.",
+        "v": false,
+        "e": "Le RTK atteint 2 à 3 cm, répétables d'une année sur l'autre, grâce à une base fixe. Les 30 à 50 cm sont la précision du SBAS gratuit (EGNOS), suffisante pour l'épandage."
+      },
+      {
+        "s": "Sans aucune correction, un récepteur GNSS se positionne à 2 ou 3 mètres près.",
+        "v": true,
+        "e": "Suffisant pour retrouver une parcelle, pas pour aligner des passages. Les erreurs viennent de l'atmosphère, des horloges et des réflexions sur bâtiments et arbres."
+      },
+      {
+        "s": "La coupure automatique de tronçons évite les doubles passages et économise 3 à 8 % de produit selon la forme de la parcelle.",
+        "v": true,
+        "e": "Sur pointes et fourrières, les recouvrements disparaissent. Contrairement à la modulation, la coupure de tronçons paie presque toujours, même sur une petite parcelle homogène."
+      },
+      {
+        "s": "Un capteur de rendement de moissonneuse non étalonné par pesée donne une carte fausse de 10 à 15 %.",
+        "v": true,
+        "e": "La position GNSS peut être exacte au centimètre, si la valeur mesurée est fausse la carte de préconisation l'est aussi. Chaque capteur (rendement, NDVI, conductivité) demande un étalonnage."
+      },
+      {
+        "s": "ISOBUS est la norme ISO 1219.",
+        "v": false,
+        "e": "ISOBUS est la norme ISO 11783, qui fait dialoguer un outil de n'importe quelle marque avec la console de n'importe quel tracteur. ISO 1219 désigne les symboles des schémas hydrauliques et pneumatiques."
+      },
+      {
+        "s": "Un robot de désherbage exige toujours un conducteur à bord.",
+        "v": false,
+        "e": "Il se guide par RTK et caméras, sans conducteur, et travaille 12 à 20 h par jour. La réglementation impose encore un opérateur responsable à proximité, avec géorepérage, capteurs d'obstacles et arrêt d'urgence."
+      },
+      {
+        "s": "La herse étrille ne travaille que l'inter-rang, comme la bineuse.",
+        "v": false,
+        "e": "La herse étrille et la houe rotative passent sur toute la surface, y compris dans le rang, au stade filament des adventices. C'est la bineuse qui travaille l'inter-rang."
+      },
+      {
+        "s": "Rouler à régime réduit avec le rapport le plus long, lester juste et utiliser le guidage GPS économisent 10 à 15 % de carburant sans changer de matériel.",
+        "v": true,
+        "e": "Avant de changer de carburant, on réduit la quantité. Les régimes économiques de prise de force et le mode éco d'une transmission à variation continue sont des leviers qui ne coûtent presque rien."
+      },
+      {
+        "s": "La première année de travail du sol simplifié, le rendement augmente systématiquement.",
+        "v": false,
+        "e": "Il peut baisser de 5 % le temps que le sol se restructure et que le vivant reprenne son travail. Ce n'est pas un échec mais une transition, qui se pilote par des observations : profil à la bêche, comptage de vers de terre, relevés de consommation."
+      },
+      {
+        "s": "Une prairie peut abriter jusqu'à 2 tonnes de vers de terre par hectare, dix fois plus qu'un sol labouré chaque année.",
+        "v": true,
+        "e": "Les galeries des vers améliorent l'infiltration de l'eau, ce qui réduit ruissellement et érosion : une seule décision d'équipement touche les quatre ressources communes."
+      },
+      {
+        "s": "Le tracteur électrique à batterie convient d'abord aux fortes puissances et au labour.",
+        "v": false,
+        "e": "Un tracteur de 100 kW à 60 % de charge pendant 8 h demanderait une batterie de 530 kWh, soit plus de 2 tonnes de cellules. L'électrique s'impose sur les petites puissances et les tâches courtes proches de la ferme : cour, vigne, maraîchage."
+      }
+    ]
+  }
+}

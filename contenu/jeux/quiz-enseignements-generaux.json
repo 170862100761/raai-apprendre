@@ -1,0 +1,255 @@
+{
+  "cle": "quiz-enseignements-generaux",
+  "slug": "quiz-eclair-enseignements-generaux",
+  "nom": "Quiz éclair — Enseignements généraux en agroéquipement",
+  "titre": "Quiz éclair — Enseignements généraux en agroéquipement",
+  "mecanique": "quiz",
+  "difficulte": "Moyen",
+  "capacites": ["C1.1", "C1.2", "C1.3", "C2.1", "C4.2"],
+  "donnees": {
+    "questions": [
+      {
+        "text": "Dans l'expérience « le passage de la tonne à lisier réduit-il la levée du maïs ? », quelle est la variable indépendante ?",
+        "choices": [
+          "La situation : zone roulée ou non roulée",
+          "Le taux de levée",
+          "La densité apparente du sol",
+          "La variété de maïs"
+        ],
+        "answer": 0,
+        "e": "La variable indépendante est celle que l'on compare ; la densité apparente et le taux de levée sont les variables dépendantes, mesurées. La variété, la date et la profondeur de semis sont des variables contrôlées."
+      },
+      {
+        "text": "Un cylindre de sol de 100 cm³ pèse 152 g après séchage. Quelle est la densité apparente ?",
+        "choices": [
+          "0,66 g/cm³",
+          "15,2 g/cm³",
+          "152 g/cm³",
+          "1,52 g/cm³"
+        ],
+        "answer": 3,
+        "e": "Densité apparente = masse sèche ÷ volume = 152 ÷ 100 = 1,52 g/cm³. La zone non roulée était à 1,32 : le tassement se lit dans ce chiffre."
+      },
+      {
+        "text": "Sur 320 graines semées, 272 plants ont levé. Quel est le taux de levée ?",
+        "choices": [
+          "72 %",
+          "85 %",
+          "94 %",
+          "68 %"
+        ],
+        "answer": 1,
+        "e": "272 ÷ 320 = 0,85, soit 85 %. La zone non roulée, avec 302 sur 320, atteignait 94,4 % : un écart de 9 points, plus grand que la dispersion à l'intérieur de chaque zone."
+      },
+      {
+        "text": "Qu'est-ce qui fait d'une hypothèse une hypothèse scientifique ?",
+        "choices": [
+          "Elle est formulée par un expert",
+          "Elle est toujours vraie",
+          "Elle est écrite de façon à pouvoir être contredite par une mesure",
+          "Elle ne peut jamais être remise en cause"
+        ],
+        "answer": 2,
+        "e": "Une hypothèse qu'aucune mesure ne pourrait contredire n'est pas scientifique. « Dans les passages de roues, la densité est plus élevée et la levée plus faible » peut être testée, et donc réfutée."
+      },
+      {
+        "text": "Comment sèche-t-on un échantillon de sol pour mesurer sa masse sèche ?",
+        "choices": [
+          "À l'étuve à 105 °C pendant 24 heures",
+          "Au soleil pendant une semaine",
+          "Au four à 300 °C pendant une heure",
+          "Au chalumeau jusqu'à ce qu'il rougisse"
+        ],
+        "answer": 0,
+        "e": "Le protocole fixe 105 °C pendant 24 h. L'étuve brûle : on manipule les cylindres avec une pince ou des gants thermiques, et on pose les échantillons sur un plateau métallique."
+      },
+      {
+        "text": "Parmi les données de télémétrie d'une CUMA, lesquelles sont des données personnelles au sens du RGPD ?",
+        "choices": [
+          "La consommation moyenne d'un tracteur",
+          "Le prix du carburant du mois",
+          "Le nombre d'heures d'un matériel",
+          "Une position GPS horodatée associée à un nom de chauffeur"
+        ],
+        "answer": 3,
+        "e": "Dès qu'une donnée permet d'identifier une personne, le RGPD s'applique : finalité déclarée, information des chauffeurs, durée de conservation, accès limité. Pour l'étude, on remplace le nom par un code."
+      },
+      {
+        "text": "Sept chantiers de labour donnent 14, 15, 15, 16, 17, 18 et 24 L/h. Quelle est la médiane ?",
+        "choices": [
+          "17 L/h",
+          "16 L/h",
+          "15 L/h",
+          "24 L/h"
+        ],
+        "answer": 1,
+        "e": "La médiane est la valeur du milieu de la série rangée : 16, avec trois valeurs en dessous et trois au-dessus. La moyenne, 17, est tirée vers le haut par le chantier à 24 L/h."
+      },
+      {
+        "text": "Dans la même série (14, 15, 15, 16, 17, 18, 24), quel est le mode ?",
+        "choices": [
+          "17 L/h",
+          "16 L/h",
+          "15 L/h",
+          "10 L/h"
+        ],
+        "answer": 2,
+        "e": "Le mode est la valeur la plus fréquente : 15 apparaît deux fois. Moyenne, médiane et mode ne racontent pas la même chose ; on donne au moins les deux premières."
+      },
+      {
+        "text": "Lors de la mise en qualité d'un tableur, que fait-on d'une cellule vide ?",
+        "choices": [
+          "On la signale, sans la remplacer par zéro",
+          "On y écrit zéro",
+          "On supprime toute la colonne",
+          "On y recopie la valeur de la ligne du dessus"
+        ],
+        "answer": 0,
+        "e": "Un zéro est une valeur, un vide est une absence. Écrire zéro fausse les moyennes ; on signale le vide, comme on écarte et note une valeur aberrante (450 L pour 2 h)."
+      },
+      {
+        "text": "Quel graphique choisit-on pour comparer la consommation moyenne des 12 tracteurs d'une CUMA ?",
+        "choices": [
+          "Une courbe",
+          "Un diagramme circulaire",
+          "Un nuage de points",
+          "Un diagramme en barres trié du plus gourmand au plus sobre"
+        ],
+        "answer": 3,
+        "e": "Les barres comparent des catégories ; la courbe suit une évolution dans le temps ; le nuage de points cherche une relation entre deux grandeurs. Et l'axe vertical part de zéro, sinon il exagère les écarts."
+      },
+      {
+        "text": "Avec Q1 = 15 L/h et Q3 = 18 L/h, quel est l'écart interquartile ?",
+        "choices": [
+          "33 L/h",
+          "3 L/h",
+          "1,2 L/h",
+          "16,5 L/h"
+        ],
+        "answer": 1,
+        "e": "Écart interquartile = Q3 − Q1 = 3 L/h : la moitié centrale des chantiers consomme entre 15 et 18 L/h. La dispersion dit la confiance qu'on peut avoir dans la moyenne."
+      },
+      {
+        "text": "Un pulvérisateur réglé à 200 L/ha doit traiter 7,5 ha. Quel volume de bouillie prépare-t-on ?",
+        "choices": [
+          "150 L",
+          "2 400 L",
+          "1 500 L",
+          "750 L"
+        ],
+        "answer": 2,
+        "e": "200 × 7,5 = 1 500 L : c'est une situation de proportionnalité, avec le volume par hectare comme coefficient. Elle s'arrête à la capacité de la cuve."
+      },
+      {
+        "text": "Le coût annuel d'un tracteur s'écrit C(h) = 22h + 9 000. Que vaut-il pour 500 heures ?",
+        "choices": [
+          "20 000 €",
+          "11 000 €",
+          "31 000 €",
+          "9 022 €"
+        ],
+        "answer": 0,
+        "e": "22 × 500 + 9 000 = 20 000 €. La pente, 22 €/h, correspond aux charges variables ; l'ordonnée à l'origine, 9 000 €, aux charges fixes payées même si le tracteur ne tourne pas."
+      },
+      {
+        "text": "Un tracteur de 90 000 € perd 15 % de sa valeur par an. Combien vaut-il après un an ?",
+        "choices": [
+          "82 500 €",
+          "85 000 €",
+          "13 500 €",
+          "76 500 €"
+        ],
+        "answer": 3,
+        "e": "90 000 × 0,85 = 76 500 € : une suite géométrique de raison 0,85. L'amortissement linéaire (même somme chaque année) est un choix comptable ; la décote géométrique décrit mieux la valeur de revente."
+      },
+      {
+        "text": "Une pompe a 4 % de risque de panne par an. Sur 10 matériels indépendants, quelle est la probabilité d'au moins une panne dans l'année ?",
+        "choices": [
+          "4 %",
+          "Environ 33,5 %",
+          "40 %",
+          "Environ 66,5 %"
+        ],
+        "answer": 1,
+        "e": "Probabilité d'aucune panne = 0,96¹⁰ ≈ 0,665 ; donc au moins une panne = 1 − 0,665 ≈ 33,5 %. Une chance sur trois justifie une pompe de rechange en stock avant la saison."
+      },
+      {
+        "text": "Achat : A(h) = 19,2h + 9 000. CUMA : C(h) = 39,2h + 1 200. À combien d'heures les deux coûtent-elles la même chose ?",
+        "choices": [
+          "184 h",
+          "41 h",
+          "390 h",
+          "510 h"
+        ],
+        "answer": 2,
+        "e": "On égale les deux expressions : 9 000 − 1 200 = (39,2 − 19,2)h, soit 7 800 = 20h et h = 390 h. En dessous, la CUMA coûte moins ; au-dessus, l'achat."
+      },
+      {
+        "text": "La location coûte L(h) = 68,2h. Qu'a de particulier cette fonction par rapport à l'achat et à la CUMA ?",
+        "choices": [
+          "Elle est linéaire : pas de charges fixes, la droite passe par l'origine",
+          "Elle a la pente la plus faible",
+          "Elle n'est pas une fonction affine",
+          "Elle a les charges fixes les plus élevées"
+        ],
+        "answer": 0,
+        "e": "La fonction linéaire est le cas particulier de la fonction affine où b = 0. Sans charges fixes mais avec la pente la plus forte, la location gagne pour les faibles utilisations, jusqu'à 41 h par an."
+      },
+      {
+        "text": "Quelles sont les cinq questions de la grille pour caractériser une source d'information ?",
+        "choices": [
+          "Combien, où, comment, quand, pourquoi",
+          "Titre, longueur, langue, format, prix",
+          "Vrai, faux, utile, inutile, neutre",
+          "Qui écrit, quand, pourquoi, pour qui, avec quelles preuves"
+        ],
+        "answer": 3,
+        "e": "Appliquée à une fiche constructeur, une note d'agence publique, un article de presse et une vidéo virale, la grille montre que la vidéo n'a ni auteur, ni date, ni méthode. Aucun document n'est à jeter, aucun ne se lit de la même façon."
+      },
+      {
+        "text": "Qu'appelle-t-on la « lecture latérale » d'une information ?",
+        "choices": [
+          "Lire un texte de droite à gauche",
+          "Ouvrir d'autres sources pour voir ce qu'elles disent du même auteur et du même chiffre",
+          "Lire uniquement les titres",
+          "Résumer un document en une ligne"
+        ],
+        "answer": 1,
+        "e": "Au lieu de rester sur la page, on croise avec des sources indépendantes. Trois sources indépendantes qui convergent valent plus qu'une source brillante et seule."
+      },
+      {
+        "text": "Quelle loi garantit la liberté de la presse en France ?",
+        "choices": [
+          "La loi Egalim du 30 octobre 2018",
+          "La loi de 1986 sur l'audiovisuel",
+          "La loi du 29 juillet 1881",
+          "La Constitution du 4 octobre 1958"
+        ],
+        "answer": 2,
+        "e": "La loi du 29 juillet 1881 fonde la liberté de la presse ; la Constitution de 1958 fonde la Ve République, la loi de 1986 ouvre l'audiovisuel privé. Une information prend son sens dans cette histoire."
+      },
+      {
+        "text": "Dans un projet collectif, comment doit être le cahier des charges rédigé avec le demandeur ?",
+        "choices": [
+          "Co-écrit, d'une page, en langage simple, avec des critères de réussite et ce qui n'est pas inclus",
+          "Rédigé par l'enseignant seul et remis au groupe",
+          "Oral, pour rester souple",
+          "De dix pages minimum pour tout prévoir"
+        ],
+        "answer": 0,
+        "e": "C'est le contrat entre le groupe et le demandeur, signé par les deux. Il précise l'objet, le résultat attendu, les contraintes (budget 150 €, livraison le 10 mai), les moyens et les critères qui diront si la commande est honorée."
+      },
+      {
+        "text": "Quels sont les trois modes de décision dans un groupe de projet ?",
+        "choices": [
+          "Tirage au sort, ancienneté, silence",
+          "Ordre du chef, ordre de l'enseignant, ordre du demandeur",
+          "Sondage, pétition, référendum",
+          "Vote à la majorité, consensus, délégation à la personne compétente"
+        ],
+        "answer": 3,
+        "e": "Le vote est rapide mais laisse une minorité insatisfaite ; le consensus est plus long mais plus solide ; la délégation confie une décision au responsable du lot. Ce qui compte, c'est que la règle soit fixée avant et que chacun ait pu parler."
+      }
+    ]
+  }
+}

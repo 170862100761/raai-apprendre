@@ -1,0 +1,236 @@
+{
+  "cle": "chrono-reglages-champ",
+  "slug": "chrono-reglages-champ",
+  "nom": "Chrono — Réglages au champ",
+  "titre": "Chrono — Réglages au champ",
+  "mecanique": "chrono",
+  "difficulte": "Moyen",
+  "capacites": [
+    "C8.2"
+  ],
+  "chrono": {
+    "titre": "Calculs express de réglage",
+    "consigne": "Les données s'affichent, calcule la grandeur demandée avant la fin du compte à rebours.",
+    "duree": 15
+  },
+  "donnees": {
+    "questions": [
+      {
+        "display": "Buse 1,2 L/min · 8 km/h · écartement 0,5 m",
+        "prompt": "Volume épandu à l'hectare ?",
+        "c": [
+          "180 L/ha",
+          "120 L/ha",
+          "150 L/ha",
+          "240 L/ha"
+        ],
+        "a": 0,
+        "e": "Volume = débit × 600 / (vitesse × écartement) = 1,2 × 600 / (8 × 0,5) = 180 L/ha. Le 600 vient de la conversion des minutes, des km/h et des mètres en hectares."
+      },
+      {
+        "display": "Buse 1,0 L/min · 8 km/h · écartement 0,5 m",
+        "prompt": "Volume épandu à l'hectare ?",
+        "c": [
+          "100 L/ha",
+          "150 L/ha",
+          "200 L/ha",
+          "300 L/ha"
+        ],
+        "a": 1,
+        "e": "1,0 × 600 / (8 × 0,5) = 150 L/ha. Passer d'une buse de 1,2 à 1,0 L/min à vitesse égale fait tomber le volume de 180 à 150 L/ha."
+      },
+      {
+        "display": "Buse 0,8 L/min · 12 km/h · écartement 0,5 m",
+        "prompt": "Volume épandu à l'hectare ?",
+        "c": [
+          "40 L/ha",
+          "120 L/ha",
+          "160 L/ha",
+          "80 L/ha"
+        ],
+        "a": 3,
+        "e": "0,8 × 600 / (12 × 0,5) = 480 / 6 = 80 L/ha. Plus on roule vite, moins on dépose de bouillie par hectare avec la même buse."
+      },
+      {
+        "display": "Buse 1,5 L/min · 9 km/h · écartement 0,5 m",
+        "prompt": "Volume épandu à l'hectare ?",
+        "c": [
+          "100 L/ha",
+          "135 L/ha",
+          "270 L/ha",
+          "200 L/ha"
+        ],
+        "a": 3,
+        "e": "1,5 × 600 / (9 × 0,5) = 900 / 4,5 = 200 L/ha. À 9 km/h, une buse de 1,5 L/min est un gros calibre, réservé aux volumes élevés."
+      },
+      {
+        "display": "Objectif 200 L/ha · 6 km/h · écartement 0,5 m",
+        "prompt": "Débit nécessaire par buse ?",
+        "c": [
+          "0,6 L/min",
+          "0,8 L/min",
+          "1,0 L/min",
+          "1,2 L/min"
+        ],
+        "a": 2,
+        "e": "On inverse la formule : débit = volume × vitesse × écartement / 600 = 200 × 6 × 0,5 / 600 = 1,0 L/min. On choisit ensuite le calibre et la pression qui donnent ce débit dans la plage du fabricant."
+      },
+      {
+        "display": "Essai semoir sur 1/40 ha · 3,2 kg recueillis",
+        "prompt": "Dose réelle à l'hectare ?",
+        "c": [
+          "128 kg/ha",
+          "80 kg/ha",
+          "112 kg/ha",
+          "160 kg/ha"
+        ],
+        "a": 0,
+        "e": "Une pesée sur 1/40 ha se multiplie par 40 : 3,2 × 40 = 128 kg/ha. Si la dose visée est 135 kg/ha, on ouvre légèrement la distribution et on recommence l'essai."
+      },
+      {
+        "display": "Essai semoir sur 1/100 ha · 1,45 kg recueillis",
+        "prompt": "Dose réelle à l'hectare ?",
+        "c": [
+          "14,5 kg/ha",
+          "58 kg/ha",
+          "145 kg/ha",
+          "290 kg/ha"
+        ],
+        "a": 2,
+        "e": "Sur 1/100 ha, on multiplie par 100 : 1,45 × 100 = 145 kg/ha. Le nombre de tours de manivelle correspondant à cette surface se lit dans la notice ou se calcule avec la circonférence de la roue et la largeur de travail."
+      },
+      {
+        "display": "Blé · 300 grains/m² · PMG 45 g",
+        "prompt": "Dose de semis en kg/ha ?",
+        "c": [
+          "67,5 kg/ha",
+          "135 kg/ha",
+          "150 kg/ha",
+          "270 kg/ha"
+        ],
+        "a": 1,
+        "e": "Dose (kg/ha) = densité × PMG / 100 = 300 × 45 / 100 = 135 kg/ha. Le PMG se lit sur l'étiquette du sac et change d'un lot à l'autre."
+      },
+      {
+        "display": "Orge · 250 grains/m² · PMG 40 g",
+        "prompt": "Dose de semis en kg/ha ?",
+        "c": [
+          "62,5 kg/ha",
+          "80 kg/ha",
+          "100 kg/ha",
+          "125 kg/ha"
+        ],
+        "a": 2,
+        "e": "250 × 40 / 100 = 100 kg/ha. On sème toujours un peu plus que la densité de plantes voulue, pour compenser la faculté germinative et les pertes à la levée."
+      },
+      {
+        "display": "Épandeur · 200 kg/ha · 12 km/h · 24 m",
+        "prompt": "Débit nécessaire en kg/min ?",
+        "c": [
+          "48 kg/min",
+          "72 kg/min",
+          "144 kg/min",
+          "96 kg/min"
+        ],
+        "a": 3,
+        "e": "Débit = dose × vitesse × largeur / 600 = 200 × 12 × 24 / 600 = 96 kg/min, soit 48 kg/min par trappe sur un épandeur à deux disques."
+      },
+      {
+        "display": "Épandeur · 150 kg/ha · 10 km/h · 18 m",
+        "prompt": "Débit nécessaire en kg/min ?",
+        "c": [
+          "27 kg/min",
+          "45 kg/min",
+          "54 kg/min",
+          "90 kg/min"
+        ],
+        "a": 1,
+        "e": "150 × 10 × 18 / 600 = 27 000 / 600 = 45 kg/min. On vérifie ensuite par un essai au bac de 30 s sous une trappe : on doit y peser 11,25 kg."
+      },
+      {
+        "display": "Coupe 6 m · 6 km/h · rendement 0,75",
+        "prompt": "Débit de chantier réel ?",
+        "c": [
+          "1,8 ha/h",
+          "3,6 ha/h",
+          "5,4 ha/h",
+          "2,7 ha/h"
+        ],
+        "a": 3,
+        "e": "Théorique : 6 × 6 / 10 = 3,6 ha/h ; réel : 3,6 × 0,75 = 2,7 ha/h. C'est ce débit réel qui sert à dimensionner la chaîne de bennes."
+      },
+      {
+        "display": "Déchaumeur 4 m · 10 km/h · efficience 0,8",
+        "prompt": "Débit de chantier réel ?",
+        "c": [
+          "3,2 ha/h",
+          "2,4 ha/h",
+          "4,0 ha/h",
+          "5,0 ha/h"
+        ],
+        "a": 0,
+        "e": "4 × 10 / 10 = 4 ha/h en théorie, × 0,8 = 3,2 ha/h en pratique, une fois comptés les demi-tours, réglages et déplacements."
+      },
+      {
+        "display": "Pulvérisateur 24 m · 12 km/h",
+        "prompt": "Débit de chantier théorique ?",
+        "c": [
+          "2,88 ha/h",
+          "14,4 ha/h",
+          "20 ha/h",
+          "28,8 ha/h"
+        ],
+        "a": 3,
+        "e": "24 × 12 / 10 = 28,8 ha/h : la pulvérisation est l'opération la plus rapide de l'exploitation, ce qui explique le poids du temps de remplissage dans le débit réel."
+      },
+      {
+        "display": "Semoir 3 m · 8 km/h · efficience 0,7",
+        "prompt": "Débit de chantier réel ?",
+        "c": [
+          "1,68 ha/h",
+          "2,4 ha/h",
+          "3,4 ha/h",
+          "16,8 ha/h"
+        ],
+        "a": 0,
+        "e": "3 × 8 / 10 = 2,4 ha/h en théorie, × 0,7 = 1,68 ha/h. Un semoir perd beaucoup en recharges de trémie et en demi-tours sur petites parcelles."
+      },
+      {
+        "display": "Ensileuse 80 t/h · remorque de 12 t",
+        "prompt": "Temps de remplissage d'une remorque ?",
+        "c": [
+          "6 min",
+          "9 min",
+          "12 min",
+          "15 min"
+        ],
+        "a": 1,
+        "e": "12 / 80 = 0,15 h = 9 min. C'est la première étape du calcul du nombre de remorques : le cycle complet se compare à ce temps de remplissage."
+      },
+      {
+        "display": "Silo à 4 km · vitesse moyenne 25 km/h",
+        "prompt": "Temps de trajet aller-retour ?",
+        "c": [
+          "19 min",
+          "10 min",
+          "13 min",
+          "24 min"
+        ],
+        "a": 0,
+        "e": "8 km à 25 km/h : 8 / 25 = 0,32 h ≈ 19 min. Ajouté au remplissage (9 min) et au déchargement (7 min), le cycle atteint 35 min."
+      },
+      {
+        "display": "Cycle complet 35 min · remplissage 9 min",
+        "prompt": "Nombre de remorques nécessaires ?",
+        "c": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "a": 2,
+        "e": "35 / 9 ≈ 3,9 : on arrondit toujours au-dessus, soit 4 remorques, et on en prévoit une cinquième si la route est encombrée ou le silo en montée."
+      }
+    ]
+  }
+}

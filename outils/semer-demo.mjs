@@ -692,7 +692,7 @@ function crc32(tampon) {
  * de prouver que la chaîne 3D fonctionne — et une forme ronde révèle tout de
  * suite un défaut de normales ou de cadrage, ce qu'un cube masquerait.
  */
-function engendrerStl(segments = 48) {
+export function engendrerStl(segments = 48) {
   const triangles = []
   const R = 20
   const r = 12

@@ -274,9 +274,13 @@ sert en `attachment` tout ce qui n'est pas image ou vidéo, et applique une CSP
 depuis un domaine distinct de l'application ; tant que ce n'est pas le cas, ces
 en-têtes sont la seule barrière.
 
-**Stockage disque transitoire** (`stockage-disque.ts`), comme la connexion
-adulte : Supabase Storage n'est pas ouvert. Sur Vercel le disque est éphémère et
-non partagé — cet adaptateur n'a rien à y faire. Seul ce fichier changera.
+**Stockage** : Supabase Storage en production (seau privé `medias`, créé le
+4 septembre 2026 dans le projet commun ; `stockage-supabase.ts`, choisi par
+`app/_stockage.ts` dès que les variables Supabase sont là), disque local
+(`stockage-disque.ts`, éphémère et non partagé sur Vercel) seulement en
+développement. Les fichiers de la démonstration sont déposés par
+`node outils/poser-medias-demo.mjs .env.vercel.local --png <schéma>` : le
+semis écrit sur disque, ce qui ne suffit pas en ligne.
 
 ## Visionneuse 3D
 

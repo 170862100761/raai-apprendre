@@ -16,7 +16,7 @@ export function VraiFaux({ cle, affirmations }: { cle: string; affirmations: Aff
   const a = affirmations[index]
 
   useEffect(() => {
-    if (fini) enregistrerScore(cle, score, `${score}/${total}`)
+    if (fini) enregistrerScore(cle, score, `${score}/${total}`, { score, scoreMax: total })
   }, [fini, cle, score, total])
 
   function repondre(valeur: boolean) {

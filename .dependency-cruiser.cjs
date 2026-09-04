@@ -16,6 +16,8 @@ const AUTORISE = {
   mediatheque: [],
   evaluation: ['catalogue'],
   progression: ['evaluation', 'referentiel'],
+  // Scores des jeux : supprimable d'un bloc, ne parle qu'a la progression.
+  jeux: ['progression', 'identite'],
   gamification: [],
   'assistance-ia': [],
   notification: [],

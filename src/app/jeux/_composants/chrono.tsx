@@ -72,7 +72,12 @@ export function JeuChrono({
   }, [retour, suivante])
 
   useEffect(() => {
-    if (phase === 'fini') enregistrerScore(cle, score, `${score}/${questions.length}`)
+    if (phase === 'fini') {
+      enregistrerScore(cle, score, `${score}/${questions.length}`, {
+        score,
+        scoreMax: questions.length,
+      })
+    }
   }, [phase, cle, score, questions.length])
 
   function demarrer() {

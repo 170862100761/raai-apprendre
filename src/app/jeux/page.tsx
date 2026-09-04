@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { peut } from '@/domaines/identite'
+import { depotScoresPrisma, type MeilleurScoreJeu } from '@/domaines/jeux'
+import { prisma } from '@/noyau/prisma'
 import type { IdentifiantApprenant } from '@/noyau/identifiants'
 import { exigerSession } from '../_session'
 import { listerJeux, ORDRE_MECANIQUES } from './_contenu'
@@ -9,9 +11,15 @@ import { MeilleurScore } from './_composants/meilleur-score'
 
 export const metadata = { title: 'Jeux — RAAI Apprendre' }
 
+/** « 8/10 » : la forme que tous les jeux savent lire, quel que soit leur barème. */
+function libelleMeilleur(m: MeilleurScoreJeu | undefined): string | null {
+  return m ? `${m.score}/${m.scoreMax}` : null
+}
+
 /**
- * La liste des jeux, groupés par mécanique. Le meilleur score est local au
- * navigateur (voir `_composants/scores.ts`) : il est donc rendu côté client.
+ * La liste des jeux, groupés par mécanique. Le meilleur score vient de la
+ * base quand l'élève y a déjà joué connecté ; sinon du navigateur, rendu
+ * côté client (voir `_composants/scores.ts`).
  */
 export default async function PageJeux() {
   const session = await exigerSession()
@@ -25,6 +33,13 @@ export default async function PageJeux() {
 
   const jeux = listerJeux()
 
+  // La RLS ne rend que les scores de l'élève ; on demande quand même par
+  // apprenant pour que l'intention se lise dans la requête.
+  const meilleurs = await depotScoresPrisma(prisma).meilleurs(
+    session.sujetId as IdentifiantApprenant,
+    jeux.map((j) => j.cle),
+  )
+
   return (
     <main id="contenu" tabIndex={-1} className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
       <nav>
@@ -37,7 +52,7 @@ export default async function PageJeux() {
         <h1 className="text-2xl font-semibold">Jeux</h1>
         <p className="text-mine-doux">
           De l’entraînement, pas une évaluation : rien n’est noté, rejoue autant que tu veux.
-          Ton meilleur score reste sur cet ordinateur.
+          Une partie réussie à 80 % compte pour tes compétences.
         </p>
       </header>
 
@@ -69,7 +84,7 @@ export default async function PageJeux() {
                           {j.capacites.length > 0 ? ` · ${j.capacites.join(', ')}` : ''}
                         </span>
                       </span>
-                      <MeilleurScore cle={j.cle} />
+                      <MeilleurScore cle={j.cle} enBase={libelleMeilleur(meilleurs.get(j.cle))} />
                     </Link>
                   </li>
                 ))}

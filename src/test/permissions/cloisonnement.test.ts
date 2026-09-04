@@ -60,6 +60,33 @@ describe('cloisonnement entre établissements', () => {
     expect(tentatives.map((t) => t.id)).not.toContain(jeu.b.tentativeId)
   })
 
+  it("un enseignant de A ne voit aucun score de jeu de B", async () => {
+    const scores = await bd.en<{ id: string }>(
+      { type: 'compte', compteId: jeu.a.enseignantId },
+      'SELECT id FROM raai_apprendre.score_jeu',
+    )
+    expect(scores.map((s) => s.id)).toContain(jeu.a.scoreJeuId)
+    expect(scores.map((s) => s.id)).not.toContain(jeu.b.scoreJeuId)
+  })
+
+  it("un élève ne voit que ses propres scores de jeu, et n'en écrit pas pour un autre", async () => {
+    const scores = await bd.en<{ id: string }>(
+      { type: 'apprenant', jeton: jeu.a.jetonApprenant },
+      'SELECT id FROM raai_apprendre.score_jeu',
+    )
+    expect(scores.map((s) => s.id)).toEqual([jeu.a.scoreJeuId])
+
+    // Écrire un score au nom d'un élève d'un autre établissement doit être refusé.
+    const refuse = await bd.refuse(
+      { type: 'apprenant', jeton: jeu.a.jetonApprenant },
+      `INSERT INTO raai_apprendre.score_jeu
+         (apprenant_id, etablissement_id, jeu, score, score_max, part)
+       VALUES ($1, $2, 'quiz-hydraulique-tracteur', 10, 10, 1)`,
+      [jeu.b.apprenantId, jeu.b.id],
+    )
+    expect(refuse).toBe(true)
+  })
+
   it("un enseignant de A ne peut pas écrire dans B, même en visant l'identifiant exact", async () => {
     // La tentative la plus directe : on connaît l'UUID cible et on l'écrit.
     const refuse = await bd.refuse(
@@ -127,6 +154,7 @@ describe('cloisonnement entre établissements', () => {
     for (const table of [
       'apprenant',
       'tentative',
+      'score_jeu',
       'acquis_competence',
       'classe',
       'inscription',

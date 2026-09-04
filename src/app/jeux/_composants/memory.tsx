@@ -42,8 +42,15 @@ export function Memory({ cle, paires }: { cle: string; paires: Paire[] }) {
 
   useEffect(() => {
     // Moins de coups = meilleur : on enregistre l'inverse pour garder « le plus grand gagne ».
-    if (gagne) enregistrerScore(cle, Math.max(0, 200 - coups), `${coups} coups`)
-  }, [gagne, cle, coups])
+    // Pour la progression : une partie parfaite fait autant de coups que de
+    // paires ; chaque coup de trop en retire un, jusqu'à zéro.
+    if (gagne) {
+      enregistrerScore(cle, Math.max(0, 200 - coups), `${coups} coups`, {
+        score: Math.max(0, 2 * paires.length - coups),
+        scoreMax: paires.length,
+      })
+    }
+  }, [gagne, cle, coups, paires.length])
 
   function retourner(i: number) {
     const carton = jeu[i]

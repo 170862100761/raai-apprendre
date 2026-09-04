@@ -298,6 +298,7 @@ model Apprenant {
   presences     PresenceJour[]
   lectures      LectureLecon[]
   consentements Consentement[]
+  scoresJeux    ScoreJeu[]
 
   @@index([etablissementId, actif])
   @@map("apprenant")
@@ -832,6 +833,28 @@ model Tentative {
   @@index([apprenantId, evaluationId, creeLe(sort: Desc)])
   @@index([etablissementId, creeLe])
   @@map("tentative")
+  @@schema("raai_apprendre")
+}
+
+/// Une partie terminée sur un jeu d'entraînement. `jeu` est la clé du fichier
+/// `contenu/jeux/*.json` — contenu national lu au build, sans table. Une ligne
+/// par partie : le meilleur score est une lecture, pas une colonne écrasée.
+model ScoreJeu {
+  id              String   @id @default(uuid()) @db.Uuid
+  apprenantId     String   @map("apprenant_id") @db.Uuid
+  etablissementId String   @map("etablissement_id") @db.Uuid
+  jeu             String
+  score           Int
+  scoreMax        Int      @map("score_max")
+  /// Entre 0 et 1. C'est elle que la progression compare à son seuil.
+  part            Decimal  @db.Decimal(5, 4)
+  joueLe          DateTime @default(now()) @map("joue_le") @db.Timestamptz(6)
+
+  apprenant Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+
+  @@index([apprenantId, jeu])
+  @@index([etablissementId, joueLe])
+  @@map("score_jeu")
   @@schema("raai_apprendre")
 }
 

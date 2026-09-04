@@ -1,15 +1,14 @@
 /**
- * Meilleur score par jeu, gardé dans le navigateur.
+ * Meilleur score par jeu : dans le navigateur d'abord, en base ensuite.
  *
- * Aucune écriture en base, aucune table : les jeux sont de l'entraînement
- * libre, pas de l'évaluation. Une table de scores devrait arriver avec sa
- * politique RLS et son cloisonnement par établissement — pour un chiffre que
- * seul l'élève regarde, ce serait payer le prix fort. Le jour où les scores
- * doivent alimenter la progression, ils passeront par le module
- * `gamification`, pas par ici.
- *
- * Conséquence assumée : le score ne suit pas l'élève d'un poste à l'autre.
+ * Le navigateur répond tout de suite et sans réseau : c'est lui qui affiche
+ * le « Meilleur » dès la fin de la partie. La base garde l'historique pour
+ * l'élève connecté et fait compter la partie dans sa progression — mais elle
+ * est appelée en arrière-plan, et un échec ne se voit pas : le module `jeux`
+ * doit rester supprimable, et un jeu ne doit jamais se bloquer sur un score.
  */
+
+import { enregistrerScoreJeu } from '../actions'
 
 const PREFIXE = 'raai-apprendre.jeux.'
 
@@ -18,6 +17,17 @@ export interface MeilleurScore {
   valeur: number
   /** Ce que l'élève lit : « 12/20 », « 14 coups »… */
   libelle: string
+}
+
+/**
+ * Ce que la partie vaut, rapporté à un maximum : c'est la seule forme que la
+ * progression sait lire. Les points de vitesse ou les coups du memory ne
+ * traversent pas — `valeur` reste le classement local, `score / scoreMax` la
+ * mesure de réussite.
+ */
+export interface PartieJouee {
+  score: number
+  scoreMax: number
 }
 
 function lireBrut(cle: string): MeilleurScore | null {
@@ -46,14 +56,33 @@ export function meilleurScore(cle: string): MeilleurScore | null {
   return lireBrut(cle)
 }
 
-/** Ne garde que le meilleur : rejouer moins bien n'efface rien. */
-export function enregistrerScore(cle: string, valeur: number, libelle: string): void {
+/**
+ * Garde la partie. Localement, seul le meilleur reste : rejouer moins bien
+ * n'efface rien. En base, chaque partie est envoyée — le « meilleur » y est
+ * une lecture, et une partie ratée compte aussi comme un signe pour l'élève.
+ */
+export function enregistrerScore(
+  cle: string,
+  valeur: number,
+  libelle: string,
+  partie: PartieJouee,
+): void {
   if (typeof window === 'undefined') return
+
   const actuel = lireBrut(cle)
-  if (actuel && actuel.valeur >= valeur) return
-  try {
-    window.localStorage.setItem(PREFIXE + cle, JSON.stringify({ valeur, libelle }))
-  } catch {
-    // Même raison qu'à la lecture : le stockage est un confort, pas une garantie.
+  if (!actuel || actuel.valeur < valeur) {
+    try {
+      window.localStorage.setItem(PREFIXE + cle, JSON.stringify({ valeur, libelle }))
+    } catch {
+      // Même raison qu'à la lecture : le stockage est un confort, pas une garantie.
+    }
   }
+
+  void enregistrerScoreJeu({
+    jeu: cle,
+    score: Math.max(0, Math.round(partie.score)),
+    scoreMax: Math.max(1, Math.round(partie.scoreMax)),
+  }).catch(() => {
+    // Hors ligne, session expirée, module retiré : le score local suffit.
+  })
 }

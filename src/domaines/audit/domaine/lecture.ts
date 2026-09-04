@@ -44,6 +44,7 @@ const LIBELLES: Record<ActionAuditee, string> = {
   'copie.rendue': 'Copie rendue',
   'note.modifiee': 'Note modifiée',
   'competence.declaree': 'Compétence déclarée',
+  'jeu.score': 'Partie de jeu enregistrée',
 
   'lecon.publiee': 'Leçon publiée',
   'lecon.depubliee': 'Leçon dépubliée',

@@ -44,6 +44,7 @@ export function Association({ cle, banque }: { cle: string; banque: Formule[] })
         erreurs === 0
           ? `${TAILLE_MANCHE}/${TAILLE_MANCHE} parfait`
           : `${TAILLE_MANCHE}/${TAILLE_MANCHE}, ${erreurs} erreur${erreurs > 1 ? 's' : ''}`,
+        { score: Math.max(0, TAILLE_MANCHE - erreurs), scoreMax: TAILLE_MANCHE },
       )
     }
   }, [gagne, cle, erreurs])

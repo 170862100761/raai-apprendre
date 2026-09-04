@@ -22,6 +22,7 @@ export type Etablissement = {
   questionId: string
   tentativeId: string
   acquisId: string
+  scoreJeuId: string
 }
 
 export type JeuDeDonnees = {
@@ -61,6 +62,7 @@ async function creerEtablissement(
     questionId: suivant(),
     tentativeId: suivant(),
     acquisId: suivant(),
+    scoreJeuId: suivant(),
   }
   const diplomeId = suivant()
   const niveauId = suivant()
@@ -203,6 +205,12 @@ async function creerEtablissement(
         niveau, origine)
      VALUES ($1, $2, $3, $4, $5, 'acquise', 'evaluation')`,
     [e.acquisId, e.apprenantId, competenceId, versionId, e.id],
+  )
+  await bd.prepare(
+    `INSERT INTO raai_apprendre.score_jeu
+       (id, apprenant_id, etablissement_id, jeu, score, score_max, part)
+     VALUES ($1, $2, $3, 'quiz-hydraulique-tracteur', 8, 10, 0.8)`,
+    [e.scoreJeuId, e.apprenantId, e.id],
   )
 
   return e

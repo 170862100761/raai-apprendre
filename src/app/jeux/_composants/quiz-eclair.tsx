@@ -61,8 +61,12 @@ export function QuizEclair({ cle, questions }: { cle: string; questions: Questio
   }, [flash, suivante])
 
   useEffect(() => {
-    if (phase === 'fini') enregistrerScore(cle, points, `${points} pts`)
-  }, [phase, cle, points])
+    // Les points de vitesse servent au classement local ; la progression ne
+    // lit que les bonnes réponses.
+    if (phase === 'fini') {
+      enregistrerScore(cle, points, `${points} pts`, { score: justes, scoreMax: questions.length })
+    }
+  }, [phase, cle, points, justes, questions.length])
 
   function demarrer() {
     setPhase('jeu')

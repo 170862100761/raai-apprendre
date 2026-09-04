@@ -30,6 +30,8 @@ export type ActionAuditee =
   | 'copie.rendue'
   | 'note.modifiee'
   | 'competence.declaree'
+  /** Une partie de jeu terminee, qui peut faire monter une competence. */
+  | 'jeu.score'
   // Contenu
   | 'lecon.publiee'
   | 'lecon.depubliee'

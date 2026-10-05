@@ -91,7 +91,7 @@
       {
         "s": "Un robot de désherbage exige toujours un conducteur à bord.",
         "v": false,
-        "e": "Il se guide par RTK et caméras, sans conducteur, et travaille 12 à 20 h par jour. La réglementation impose encore un opérateur responsable à proximité, avec géorepérage, capteurs d'obstacles et arrêt d'urgence."
+        "e": "Il se guide par RTK et caméras, sans conducteur, et travaille 12 à 20 h par jour. Sa sécurité tient au géorepérage, aux capteurs d'obstacles, à l'arrêt d'urgence et à une personne qui le surveille et peut l'arrêter, comme le demandent les constructeurs."
       },
       {
         "s": "La herse étrille ne travaille que l'inter-rang, comme la bineuse.",
